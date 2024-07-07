@@ -28,7 +28,7 @@ query = f"""
 # Ejecutar la consulta
 df = execute_query(query)
 # Artificio para quitar la columna que numera las filas
-df = df.set_index(df.columns[0])
+#df = df.set_index(df.columns[0])
 # Mostrar el número de registros
 st.write(f"Número de registros: {len(df)}")
 # Mostrar el resultado en formato de tabla
