@@ -12,11 +12,11 @@ df = pd.DataFrame(data)
 # Widget para introducir el valor de filtrado
 filtro_valor = st.number_input('Introduce el valor para filtrar en la columna "Edad":', min_value=0)
 
-# Filtrar la tabla en tiempo real basado en el valor del widget
-filtered_df = df[df['Edad'] > filtro_valor]
+# Botón para aplicar el filtro
+if st.button("Aplicar Filtro"):
+    # Filtrar la tabla en tiempo real basado en el valor del widget
+    filtered_df = df[df['Edad'] > filtro_valor]
 
-# Mostrar la tabla original y la tabla filtrada
-st.write(df)
-
-st.write("Tabla filtrada:")
-st.write(filtered_df)
+    # Mostrar la tabla filtrada después de aplicar el filtro
+    st.write("Tabla filtrada:")
+    st.write(filtered_df)
