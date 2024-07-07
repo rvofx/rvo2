@@ -21,8 +21,8 @@ st.title("Ejemplo básico")
 # Consulta SQL
 query = f"""
  select
- IdmaeAnexo_Cliente,
- NommaeAnexoCliente
+ IdmaeAnexo_Cliente AS ID,
+ NommaeAnexoCliente AS CLIENTE
  from maeAnexoCliente
  """
 # Ejecutar la consulta
