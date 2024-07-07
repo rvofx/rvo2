@@ -9,6 +9,10 @@ data = {
 
 df = pd.DataFrame(data)
 
+# Mostrar la tabla original al inicio
+st.write("Tabla original:")
+st.write(df)
+
 # Widget para introducir el valor de filtrado
 filtro_valor = st.number_input('Introduce el valor para filtrar en la columna "Edad":', min_value=0)
 
