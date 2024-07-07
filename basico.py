@@ -32,4 +32,4 @@ df = df.set_index(df.columns[0])
 # Mostrar el número de registros
 st.write(f"Número de registros: {len(df)}")
 # Mostrar el resultado en formato de tabla
-st.dataframe(df) 
+st.dataframe(df, hide_index=True) 
