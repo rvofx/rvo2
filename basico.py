@@ -17,7 +17,7 @@ def execute_query(query):
  return df
 
 # Título de la aplicación
-st.title("Título") 
+st.title("Ejemplo básico") 
 # Consulta SQL
 query = f"""
  select
