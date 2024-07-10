@@ -51,13 +51,11 @@ def main():
         # Convertir el DataFrame a formato CSV en memoria (como una cadena de texto)
         csv = new_data.to_csv(index=False)
 
-        # Dentro de la función main, reemplaza la llamada a st.download_button con st.write para mostrar el enlace de descarga
-        st.write("Descarga el archivo Excel actualizado:")
-        st.write(f'Descarga el archivo actualizado como CSV: [Descargar](data:text/csv;base64,{base64.b64encode(csv.encode()).decode()})')
-
-
-        
-        #st.download_button("Descargar", new_data.to_csv, file_name='excel_actualizado.csv')
+        # Generar el enlace de descarga del archivo CSV utilizando st.markdown
+        b64 = base64.b64encode(csv.encode()).decode()  # Codifica el CSV en base64
+        href = f'<a href="data:file/csv;base64,{b64}" download="excel_actualizado.csv">Descargar archivo CSV</a>'
+        st.markdown(href, unsafe_allow_html=True)
+       
 
 if __name__ == '__main__':
     main()
