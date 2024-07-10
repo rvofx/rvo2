@@ -27,7 +27,7 @@ def get_sql_data(conn, po):
 
 # Aplicación Streamlit
 def main():
-    st.title("Aplicación para consulta SQL y actualización de Excel")
+    st.title("Carga de archivo excel, agrega una columna con info de BD y descarga del excel actualizado")
 
     uploaded_file = st.file_uploader("Subir archivo Excel", type=["xlsx"])
 
