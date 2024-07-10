@@ -46,7 +46,7 @@ def main():
         st.write(new_data)
 
         st.write("Descarga el archivo Excel actualizado:")
-        st.dataframe(new_data)
+        #st.dataframe(new_data)
         st.download_button("Descargar", new_data.to_csv, file_name='excel_actualizado.csv')
 
 if __name__ == '__main__':
