@@ -35,8 +35,9 @@ def main():
         conn = connect_to_database()
 
         new_data = excel_data.copy()
-
-        for index, row in new_data.iterrows():
+        st.write(new_data)
+        
+        """for index, row in new_data.iterrows():
             po = row['po']
             sql_data = get_sql_data(conn, po)
             if not sql_data.empty:
