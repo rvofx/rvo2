@@ -46,7 +46,7 @@ def main():
         st.write(new_data)
 
         st.write("Descarga el archivo Excel actualizado:")
-        st.dataframe(new_data)
+        #st.dataframe(new_data)
 
         # Convertir el DataFrame a formato CSV en memoria (como una cadena de texto)
         csv = new_data.to_csv(index=False)
