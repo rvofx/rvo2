@@ -1,17 +1,21 @@
 import streamlit as st
 import pandas as pd
 import pyodbc
-import toml
 
-# Función para conectar a la base de datos con las credenciales del archivo de secrets
+# Función para conectar a la base de datos
 def connect_to_database():
-    secrets = toml.load("secrets.toml")
-    server = secrets["database"]["server"]
-    database = secrets["database"]["database"]
-    username = secrets["database"]["username"]
-    password = secrets["database"]["password"]
-    conn = pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
-    return conn
+    try:
+        conn = pyodbc.connect(
+            "DRIVER={ODBC Driver 17 for SQL Server};"
+            "SERVER=" + st.secrets["server"] + ";"
+            "DATABASE=" + st.secrets["database"] + ";"
+            "UID=" + st.secrets["username"] + ";"
+            "PWD=" + st.secrets["password"] + ";"
+        )
+        return conn
+    except Exception as e:
+        st.error(f"Error al conectar a la base de datos: {e}")
+        return None
 
 # Función para ejecutar la consulta SQL y obtener resultados
 def get_sql_data(conn, po):
