@@ -37,7 +37,7 @@ def main():
         new_data = excel_data.copy()
         st.write(new_data)
         
-        """for index, row in new_data.iterrows():
+        for index, row in new_data.iterrows():
             po = row['po']
             sql_data = get_sql_data(conn, po)
             if not sql_data.empty:
