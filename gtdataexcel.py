@@ -62,16 +62,13 @@ def main():
         with io.BytesIO() as buffer:
             excel_writer = pd.ExcelWriter(buffer, engine='xlsxwriter')
             new_data.to_excel(excel_writer, index=False)
-            excel_writer.save()
+            excel_writer.close()  # Cerrar el escritor de Excel
             excel_bytes = buffer.getvalue()
 
         # Generar el enlace de descarga del archivo Excel utilizando st.markdown
         b64 = base64.b64encode(excel_bytes).decode()
         href = f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download="excel_actualizado.xlsx">Descargar archivo Excel</a>'
         st.markdown(href, unsafe_allow_html=True)
-
-
-       
 
 if __name__ == '__main__':
     main()
