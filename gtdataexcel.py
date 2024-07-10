@@ -20,8 +20,8 @@ def connect_to_database():
         return None
 
 # Función para ejecutar la consulta SQL y obtener resultados
-def get_sql_data(conn, po):
-    query = f"SELECT coddocordenproduccion, dcantidadprogramado FROM docordenproduccion WHERE coddocordenproduccion = '{po}'"
+def get_sql_data(conn, op):
+    query = f"SELECT coddocordenproduccion, dcantidadprogramado FROM docordenproduccion WHERE coddocordenproduccion = '{op}'"
     df = pd.read_sql(query, conn)
     return df
 
@@ -39,8 +39,8 @@ def main():
        
         
         for index, row in new_data.iterrows():
-            po = row['po']
-            sql_data = get_sql_data(conn, po)
+            op = row['op']
+            sql_data = get_sql_data(conn, op)
             if not sql_data.empty:
                 new_data.at[index, 'dcantidadprogramado'] = sql_data['dcantidadprogramado'].values[0]
 
