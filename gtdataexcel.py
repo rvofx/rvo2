@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import pyodbc
 import base64
+import io
 
 # Función para conectar a la base de datos
 def connect_to_database():
