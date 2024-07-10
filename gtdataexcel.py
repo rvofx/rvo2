@@ -35,7 +35,7 @@ def main():
         conn = connect_to_database()
 
         new_data = excel_data.copy()
-        st.write(new_data)
+       
         
         for index, row in new_data.iterrows():
             po = row['po']
