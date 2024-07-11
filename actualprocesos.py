@@ -25,6 +25,9 @@ def conectar_bd():
                           'DATABASE=nombre_base_datos;'
                           'Trusted_Connection=yes;')
 
+
+
+
 # Verificar credenciales
 if st.button('Iniciar Sesión'):
     if username in usuarios and usuarios[username] == password:
