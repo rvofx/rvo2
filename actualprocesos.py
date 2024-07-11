@@ -10,7 +10,8 @@ password = st.text_input('Contraseña', type='password')
 # Lista de usuarios y contraseñas
 usuarios = {
     'usuario1': 'contrasena1',
-    'usuario2': 'contrasena2'
+    'usuario2': 'contrasena2',
+    'rvo': '39'
 }
 
 # Conexión a la base de datos SQL Server
