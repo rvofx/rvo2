@@ -14,7 +14,6 @@ conn = None
 # función de conexión a la base de datos
 def conectar_bd():
     conn = pyodbc.connect(
-        driver=st.secrets["db_driver"],
         server=st.secrets["db_server"],
         database=st.secrets["db_database"],
         uid=st.secrets["db_username"],
