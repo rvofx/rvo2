@@ -1,22 +1,26 @@
 import streamlit as st
 import pandas as pd
 import pyodbc
-import os
+
+# Definir usuarios y contraseñas
+usuarios = {
+    'rvo': '39',
+    'usuario2': 'contrasena2'
+}
 
 # conexión a la base de datos sql server
 conn = None
 
 # función de conexión a la base de datos
 def conectar_bd():
-    global conn
-    conn_str = (
-        "driver={ODBC Driver 17 for SQL Server};"
-        "server=" + st.secrets["server"] + ";"
-        "database=" + st.secrets["database"] + ";"
-        "uid=" + st.secrets["username"] + ";"
-        "pwd=" + st.secrets["password"] + ";"
+    conn = pyodbc.connect(
+        driver=st.secrets["db_driver"],
+        server=st.secrets["db_server"],
+        database=st.secrets["db_database"],
+        uid=st.secrets["db_username"],
+        pwd=st.secrets["db_password"]
     )
-    conn = pyodbc.connect(conn_str)
+    return conn
 
 # formulario de inicio de sesión
 st.title('inicio de sesión')
