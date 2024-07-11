@@ -10,7 +10,7 @@ password = st.text_input('Contraseña', type='password')
 
 # Lista de usuarios y contraseñas
 usuarios = {
-    'rvo': '39',
+    'rvo': '1234',
     'usuario2': 'contrasena2'
 }
 
