@@ -3,14 +3,6 @@ import pandas as pd
 import pyodbc
 import os
 
-conn = pyodbc.connect(
- "DRIVER={ODBC Driver 17 for SQL Server};"
- "SERVER=" + st.secrets["server"] + ";"
- "DATABASE=" + st.secrets["database"] + ";"
- "UID=" + st.secrets["username"] + ";"
- "PWD=" + st.secrets["password"] + ";"
- )
-
 # obtener las credenciales de la base de datos desde las variables de entorno
 #server = os.getenv('db_server')
 #database = os.getenv('db_database')
