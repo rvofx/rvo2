@@ -14,11 +14,13 @@ conn = None
 # función de conexión a la base de datos
 def conectar_bd():
     conn = pyodbc.connect(
-        server=st.secrets["db_server"],
-        database=st.secrets["db_database"],
-        uid=st.secrets["db_username"],
-        pwd=st.secrets["db_password"]
+        "DRIVER={ODBC Driver 17 for SQL Server};"
+        "SERVER=" + st.secrets["server"] + ";"
+        "DATABASE=" + st.secrets["database"] + ";"
+        "UID=" + st.secrets["username"] + ";"
+        "PWD=" + st.secrets["password"] + ";"
     )
+        
     return conn
 
 # formulario de inicio de sesión
