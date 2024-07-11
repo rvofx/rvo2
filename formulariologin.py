@@ -2,7 +2,7 @@ import streamlit as st
 
 # Lista de usuarios y contraseñas
 usuarios = {
-    'rvo': '1234',
+    'raul.ventocilla': '1234',
     'abc': '5678'
 }
 
