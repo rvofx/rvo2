@@ -3,6 +3,17 @@ import pandas as pd
 import pyodbc
 import os
 
+# Formulario de inicio de sesión
+st.title('Inicio de Sesión')
+username = st.text_input('Usuario')
+password = st.text_input('Contraseña', type='password')
+
+# Lista de usuarios y contraseñas
+usuarios = {
+    'rvo': '39',
+    'usuario2': 'contrasena2'
+}
+
 # Obtener las credenciales de la base de datos desde las variables de entorno
 server = os.getenv('DB_SERVER')
 database = os.getenv('DB_DATABASE')
