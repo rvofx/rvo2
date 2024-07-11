@@ -1,14 +1,13 @@
 import streamlit as st
 import pandas as pd
 import pyodbc
-from streamlit.secrets import Secrets
+import os
 
-# Obtener las credenciales de la base de datos desde los secretos
-secrets = Secrets()
-server = secrets["sql_server"]["server"]
-database = secrets["sql_server"]["database"]
-username = secrets["sql_server"]["username"]
-password = secrets["sql_server"]["password"]
+# Obtener las credenciales de la base de datos desde las variables de entorno
+server = os.getenv('DB_SERVER')
+database = os.getenv('DB_DATABASE')
+username = os.getenv('DB_USERNAME')
+password = os.getenv('DB_PASSWORD')
 
 # Conexión a la base de datos SQL Server
 conn = None
@@ -18,6 +17,8 @@ def conectar_bd():
     global conn
     conn_str = f'DRIVER=ODBC Driver 17 for SQL Server;SERVER={server};DATABASE={database};UID={username};PWD={password}'
     conn = pyodbc.connect(conn_str)
+
+# Resto del código sigue igual
 
 # Resto del código sigue igual
 
