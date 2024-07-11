@@ -87,5 +87,5 @@ if st.button('Iniciar sesión'):
 
                 st.success('Actualizaciones realizadas exitosamente')
 
-    else:
-        st.error('Usuario o contraseña incorrectos')
+else:
+    st.write('Por favor, introduce tus credenciales y presiona el botón "Iniciar sesión"')
