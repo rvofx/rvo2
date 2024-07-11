@@ -1,18 +1,14 @@
 import streamlit as st
 import pandas as pd
 import pyodbc
+from streamlit.secrets import Secrets
 
-# Formulario de inicio de sesión
-st.title('Inicio de Sesión')
-username = st.text_input('Usuario')
-password = st.text_input('Contraseña', type='password')
-
-# Lista de usuarios y contraseñas
-usuarios = {
-    'usuario1': 'contrasena1',
-    'usuario2': 'contrasena2',
-    'rvo': '39'
-}
+# Obtener las credenciales de la base de datos desde los secretos
+secrets = Secrets()
+server = secrets["sql_server"]["server"]
+database = secrets["sql_server"]["database"]
+username = secrets["sql_server"]["username"]
+password = secrets["sql_server"]["password"]
 
 # Conexión a la base de datos SQL Server
 conn = None
@@ -20,12 +16,10 @@ conn = None
 # Función de conexión a la base de datos
 def conectar_bd():
     global conn
-    conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'
-                          'SERVER=nombre_servidor;'
-                          'DATABASE=nombre_base_datos;'
-                          'Trusted_Connection=yes;')
+    conn_str = f'DRIVER=ODBC Driver 17 for SQL Server;SERVER={server};DATABASE={database};UID={username};PWD={password}'
+    conn = pyodbc.connect(conn_str)
 
-
+# Resto del código sigue igual
 
 
 # Verificar credenciales
