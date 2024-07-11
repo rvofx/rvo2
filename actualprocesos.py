@@ -3,97 +3,81 @@ import pandas as pd
 import pyodbc
 import os
 
-# obtener las credenciales de la base de datos desde las variables de entorno
-#server = os.getenv('db_server')
-#database = os.getenv('db_database')
-#username = os.getenv('db_username')
-#password = os.getenv('db_password')
-
 # conexión a la base de datos sql server
 conn = None
 
 # función de conexión a la base de datos
 def conectar_bd():
     global conn
-    #conn_str = f'driver=ODBC Driver 17 for SQL Server;server={server};database={database};uid={username};pwd={password}'
-    #conn = pyodbc.connect(conn_str)
-    conn = pyodbc.connect(
-    "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=" + st.secrets["server"] + ";"
-    "DATABASE=" + st.secrets["database"] + ";"
-    "UID=" + st.secrets["username"] + ";"
-    "PWD=" + st.secrets["password"] + ";"
+    conn_str = (
+        "driver={ODBC Driver 17 for SQL Server};"
+        "server=" + st.secrets["server"] + ";"
+        "database=" + st.secrets["database"] + ";"
+        "uid=" + st.secrets["username"] + ";"
+        "pwd=" + st.secrets["password"] + ";"
     )
-
+    conn = pyodbc.connect(conn_str)
 
 # formulario de inicio de sesión
-st.title('Inicio de sesión')
-username_input = st.text_input('Usuario')
-password_input = st.text_input('Contraseña', type='password')
-
-# lista de usuarios y contraseñas
-usuarios = {
-    'rvo': '39',
-    'usuario2': 'contrasena2'
-}
+st.title('inicio de sesión')
+username_input = st.text_input('usuario')
+password_input = st.text_input('contraseña', type='password')
 
 # verificar credenciales
-if st.button('Iniciar sesión'):
+if st.button('iniciar sesión'):
     if username_input in usuarios and usuarios[username_input] == password_input:
-        st.success('Inicio de sesión exitoso')
+        st.success('inicio de sesión exitoso')
         conectar_bd()
 
-        # resto de tu código...
-
-    else:
-        st.error('Usuario o contraseña incorrectos')
-
-        # Solicitar número de partida al usuario
-        partida = st.text_input('Ingresa el número de partida:')
+        # solicitar número de partida al usuario
+        partida = st.text_input('ingresa el número de partida:')
 
         if partida:
             cursor = conn.cursor()
 
-            # Consulta SQL para obtener los datos de partida
+            # consulta sql para obtener los datos de partida
             query = f'''
-            SELECT e.coddocordenproduccion AS partida, a.isecuencia AS orden, c.nommaeproceso AS proceso
-            FROM docordenproduccionruta a
-            INNER JOIN maeproceso c ON a.idmaeproceso = c.idmaeproceso
-            INNER JOIN docordenproduccion e ON a.iddocumento_ordenproduccion = e.iddocumento_ordenproduccion
-            WHERE e.coddocordenproduccion = '{partida}' AND a.bcerrado = 0 AND e.bcerrado = 0
+            select e.coddocordenproduccion as partida, a.isecuencia as orden, c.nommaeproceso as proceso
+            from docordenproduccionruta a
+            inner join maeproceso c on a.idmaeproceso = c.idmaeproceso
+            inner join docordenproduccion e on a.iddocumento_ordenproduccion = e.iddocumento_ordenproduccion
+            where e.coddocordenproduccion = '{partida}' and a.bcerrado = 0 and e.bcerrado = 0
             '''
 
             df = pd.read_sql(query, conn)
 
-            selected_row = st.selectbox('Selecciona una línea de la consulta:', df['partida'])
+            selected_row = st.selectbox('selecciona una línea de la consulta:', df['partida'])
 
-            if st.button('Confirmar selección'):
-                st.write(f"Has seleccionado la partida {selected_row}")
+            if st.button('confirmar selección'):
+                st.write(f"has seleccionado la partida {selected_row}")
 
-                # Actualizaciones SQL
+                # actualizaciones sql
                 update_query_1 = f'''
-                UPDATE docordenproduccionruta
-                SET bcerrado = 1, idsistemausuario_cerrado = 'password', fechacerrado = GETDATE(), 
-                dtfechahorainicio = GETDATE(), dtfechahorafin = GETDATE()
-                WHERE iddocumento_ordenproduccion = '{partida}' AND isecuencia = '{orden}'
+                update docordenproduccionruta
+                set bcerrado = 1, idsistemausuario_cerrado = 'password', fechacerrado = getdate(), 
+                dtfechahorainicio = getdate(), dtfechahorafin = getdate()
+                where iddocumento_ordenproduccion = '{partida}' and isecuencia = '{orden}'
                 '''
                 cursor.execute(update_query_1)
                 conn.commit()
 
                 update_query_2 = f'''
-                UPDATE docordenproduccion
-                SET idmaeproceso = {proceso}, ntestado = sc.ntestado
-                FROM (
-                    SELECT nommaeproceso + ' ' + 'finalizado' AS ntestado
-                    FROM maeproceso
-                    WHERE idmaeproceso = {proceso}
+                update docordenproduccion
+                set idmaeproceso = {proceso}, ntestado = sc.ntestado
+                from (
+                    select nommaeproceso + ' ' + 'finalizado' as ntestado
+                    from maeproceso
+                    where idmaeproceso = {proceso}
                 ) sc
-                WHERE iddocumento_ordenproduccion = {partida}
+                where iddocumento_ordenproduccion = {partida}
                 '''
                 cursor.execute(update_query_2)
                 conn.commit()
 
-                st.success('Actualizaciones realizadas exitosamente')
+                st.success('actualizaciones realizadas exitosamente')
+
+    else:
+        st.error('usuario o contraseña incorrectos')
 
 else:
-    st.write('Por favor, introduce tus credenciales y presiona el botón "Iniciar sesión"')
+    st.write('Por favor, introduce tus credenciales y presiona el botón "iniciar sesión"')
