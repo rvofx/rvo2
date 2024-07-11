@@ -3,11 +3,19 @@ import pandas as pd
 import pyodbc
 import os
 
+conn = pyodbc.connect(
+ "DRIVER={ODBC Driver 17 for SQL Server};"
+ "SERVER=" + st.secrets["server"] + ";"
+ "DATABASE=" + st.secrets["database"] + ";"
+ "UID=" + st.secrets["username"] + ";"
+ "PWD=" + st.secrets["password"] + ";"
+ )
+
 # obtener las credenciales de la base de datos desde las variables de entorno
-server = os.getenv('db_server')
-database = os.getenv('db_database')
-username = os.getenv('db_username')
-password = os.getenv('db_password')
+#server = os.getenv('db_server')
+#database = os.getenv('db_database')
+#username = os.getenv('db_username')
+#password = os.getenv('db_password')
 
 # conexión a la base de datos sql server
 conn = None
@@ -15,8 +23,16 @@ conn = None
 # función de conexión a la base de datos
 def conectar_bd():
     global conn
-    conn_str = f'driver=ODBC Driver 17 for SQL Server;server={server};database={database};uid={username};pwd={password}'
-    conn = pyodbc.connect(conn_str)
+    #conn_str = f'driver=ODBC Driver 17 for SQL Server;server={server};database={database};uid={username};pwd={password}'
+    #conn = pyodbc.connect(conn_str)
+    conn = pyodbc.connect(
+    "DRIVER={ODBC Driver 17 for SQL Server};"
+    "SERVER=" + st.secrets["server"] + ";"
+    "DATABASE=" + st.secrets["database"] + ";"
+    "UID=" + st.secrets["username"] + ";"
+    "PWD=" + st.secrets["password"] + ";"
+    )
+
 
 # formulario de inicio de sesión
 st.title('Inicio de sesión')
