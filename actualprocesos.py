@@ -3,41 +3,42 @@ import pandas as pd
 import pyodbc
 import os
 
+# obtener las credenciales de la base de datos desde las variables de entorno
+server = os.getenv('db_server')
+database = os.getenv('db_database')
+username = os.getenv('db_username')
+password = os.getenv('db_password')
 
-# Obtener las credenciales de la base de datos desde las variables de entorno
-server = os.getenv('DB_SERVER')
-database = os.getenv('DB_DATABASE')
-username = os.getenv('DB_USERNAME')
-password = os.getenv('DB_PASSWORD')
-
-# Conexión a la base de datos SQL Server
+# conexión a la base de datos sql server
 conn = None
 
-# Función de conexión a la base de datos
+# función de conexión a la base de datos
 def conectar_bd():
     global conn
-    conn_str = f'DRIVER=ODBC Driver 17 for SQL Server;SERVER={server};DATABASE={database};UID={username};PWD={password}'
+    conn_str = f'driver=ODBC Driver 17 for SQL Server;server={server};database={database};uid={username};pwd={password}'
     conn = pyodbc.connect(conn_str)
 
-# Resto del código sigue igual
+# formulario de inicio de sesión
+st.title('Inicio de sesión')
+username_input = st.text_input('Usuario')
+password_input = st.text_input('Contraseña', type='password')
 
-# Formulario de inicio de sesión
-st.title('Inicio de Sesión')
-username = st.text_input('Usuario')
-password = st.text_input('Contraseña', type='password')
-
-# Lista de usuarios y contraseñas
+# lista de usuarios y contraseñas
 usuarios = {
     'rvo': '39',
     'usuario2': 'contrasena2'
 }
 
-
-# Verificar credenciales
-if st.button('Iniciar Sesión'):
-    if username in usuarios and usuarios[username] == password:
+# verificar credenciales
+if st.button('Iniciar sesión'):
+    if username_input in usuarios and usuarios[username_input] == password_input:
         st.success('Inicio de sesión exitoso')
         conectar_bd()
+
+        # resto de tu código...
+
+    else:
+        st.error('Usuario o contraseña incorrectos')
 
         # Solicitar número de partida al usuario
         partida = st.text_input('Ingresa el número de partida:')
