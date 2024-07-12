@@ -13,15 +13,17 @@ data = {
 
 df = pd.DataFrame(data)
 
-# Campo de entrada de texto para introducir los valores de los pedidos
+# Campos de entrada de texto para introducir los valores de los pedidos y valores específicos de la columna
 pedido_input = st.text_input("Introduzca los valores de los pedidos separados por comas:")
+columna_input = st.text_input("Introduzca los valores específicos de la columna separados por comas:")
 
 # Parsear los valores ingresados por el usuario
 pedidos_seleccionados = [int(p.strip()) for p in pedido_input.split(',') if p.strip()]
+valores_columna = [val.strip() for val in columna_input.split(',') if val.strip()]
 
-# Filtrar el DataFrame por los pedidos seleccionados
-if pedidos_seleccionados:
-    df_filtrado = df[df['pedido'].isin(pedidos_seleccionados)]
+# Filtrar el DataFrame por los pedidos seleccionados y los valores específicos de la columna
+if pedidos_seleccionados or valores_columna:
+    df_filtrado = df[(df['pedido'].isin(pedidos_seleccionados)) & (df['po'].isin(valores_columna))]
     st.write(df_filtrado)
 else:
     st.write(df)
