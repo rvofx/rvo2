@@ -15,7 +15,7 @@ df = pd.DataFrame(data)
 
 # Campos de entrada de texto para introducir los valores de los pedidos y valores específicos de la columna
 pedido_input = st.text_input("Introduzca los valores de los pedidos separados por comas:")
-columna_input = st.text_input("Introduzca los valores específicos de la columna separados por comas:")
+columna_input = st.text_input("Introduce los valores específicos de la columna separados por comas:")
 
 # Parsear los valores ingresados por el usuario
 pedidos_seleccionados = [int(p.strip()) for p in pedido_input.split(',') if p.strip()]
