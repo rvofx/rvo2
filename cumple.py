@@ -58,5 +58,5 @@ filtered_data = data[data['area'].isin(selected_area)]
 #st.write(filtered_data)
 
 columns_to_show = ['nombre','area', 'cargo','cumple']
-st.write(f"Registros: {len(filtered_data)-1}")
+st.write(f"Registros: {len(filtered_data)}")
 st.dataframe(filtered_data[columns_to_show], hide_index=True)
