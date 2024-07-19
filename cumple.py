@@ -50,11 +50,14 @@ data = pd.read_sql(query, connection)
 # Obtener las opciones únicas para el campo 'area'
 areas = data['AREA'].unique()
 
-# Crear un multiselect box para seleccionar el área
-selected_area = st.sidebar.multiselect("Seleccionar Área", areas)
 
-# Filtrar los datos por el área seleccionada
-filtered_data = data[data['AREA'].isin(selected_area)]
+# crear un multiselect box con todas las áreas seleccionadas por defecto
+selected_area = st.sidebar.multiselect("Seleccionar área", areas, default=areas)
+
+# filtrar los datos por el área seleccionada
+filtered_data = data[data['area'].isin(selected_area)]
+
+
 
 # Mostrar los datos filtrados
 #st.write(filtered_data)
