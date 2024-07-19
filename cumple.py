@@ -5,7 +5,7 @@ import pandas as pd
 # Conexión a la base de datos SQL Server
 #connection = pyodbc.connect('DRIVER={SQL Server};SERVER=your_server;DATABASE=your_db;UID=your_user;PWD=your_password')
 
- connection = pyodbc.connect(
+connection = pyodbc.connect(
         "driver={ODBC Driver 17 for SQL Server};"
         "server=" + st.secrets["server"] + ";"
         "database=" + st.secrets["database"] + ";"
