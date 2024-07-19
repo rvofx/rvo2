@@ -26,7 +26,7 @@ SELECT *,
 FROM (
     SELECT a.nommaeanexotrabajador AS NOMBRE,
            b.nommaecentrocosto AS AREA,
-           c.nommaecargo AS CARGO,
+           c.nommaecargo AS CARGO,a.IdmaeCentroCosto,
            DAY(a.dtfechanacimiento) AS dia,
            '2024' AS año,
            MONTH(a.dtfechanacimiento) AS mes,
@@ -37,7 +37,7 @@ FROM (
     WHERE a.bcesado = 0
       AND a.dtfechanacimiento IS NOT NULL
 ) sc
-WHERE sc.bdesactivado = 0
+WHERE sc.bdesactivado = 0  and sc.IdmaeCentroCosto in (109, 104)
   AND CAST(CONCAT(año, '-', RIGHT('00' + CAST(mes AS VARCHAR(2)), 2), '-', RIGHT('00' + CAST(dia AS VARCHAR(2)), 2)) AS DATE) BETWEEN '{start_date}' AND '{end_date}'
 ORDER BY CAST(CONCAT(año, '-', RIGHT('00' + CAST(mes AS VARCHAR(2)), 2), '-', RIGHT('00' + CAST(dia AS VARCHAR(2)), 2)) AS DATE);
 """
