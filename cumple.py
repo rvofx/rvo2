@@ -22,11 +22,11 @@ query = f"""
 SELECT *,
        CONCAT(RIGHT('00' + CAST(dia AS VARCHAR(2)), 2), '-',
               RIGHT('00' + CAST(mes AS VARCHAR(2)), 2), '-',
-              año) AS cumple
+              año) AS CUMPLEAÑOS
 FROM (
-    SELECT a.nommaeanexotrabajador AS nombre,
-           b.nommaecentrocosto AS area,
-           c.nommaecargo AS cargo,
+    SELECT a.nommaeanexotrabajador AS NOMBRE,
+           b.nommaecentrocosto AS AREA,
+           c.nommaecargo AS CARGO,
            DAY(a.dtfechanacimiento) AS dia,
            '2024' AS año,
            MONTH(a.dtfechanacimiento) AS mes,
@@ -57,6 +57,6 @@ filtered_data = data[data['area'].isin(selected_area)]
 # Mostrar los datos filtrados
 #st.write(filtered_data)
 
-columns_to_show = ['nombre','area', 'cargo','cumple']
+columns_to_show = ['NOMBRE','AREA', 'CARGO','CUMPLEAÑOS']
 st.write(f"Registros: {len(filtered_data)}")
 st.dataframe(filtered_data[columns_to_show], hide_index=True)
