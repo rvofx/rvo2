@@ -2,6 +2,8 @@ import streamlit as st
 import pyodbc
 import pandas as pd
 
+st.set_page_config(layout="wide")
+
 # Conexión a la base de datos SQL Server
 #connection = pyodbc.connect('DRIVER={SQL Server};SERVER=your_server;DATABASE=your_db;UID=your_user;PWD=your_password')
 
