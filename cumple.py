@@ -46,7 +46,7 @@ ORDER BY CAST(CONCAT(año, '-', RIGHT('00' + CAST(mes AS VARCHAR(2)), 2), '-', R
 data = pd.read_sql(query, connection)
 
 # Obtener las opciones únicas para el campo 'area'
-areas = data['area'].unique()
+areas = data['AREA'].unique()
 
 # Crear un multiselect box para seleccionar el área
 selected_area = st.sidebar.multiselect("Seleccionar Área", areas)
