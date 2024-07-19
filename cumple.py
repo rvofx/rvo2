@@ -1,6 +1,7 @@
 import streamlit as st
 import pyodbc
 import pandas as pd
+from datetime import datetime
 
 st.set_page_config(layout="wide")
 
@@ -15,9 +16,16 @@ connection = pyodbc.connect(
         "pwd=" + st.secrets["password"] + ";"
     )
 
+# Obtener la fecha de hoy
+today = datetime.today().date()
+
 # Sidebar para la selección de fechas y área
-start_date = st.sidebar.date_input("Fecha de inicio", value=pd.to_datetime('2024-01-01'))
-end_date = st.sidebar.date_input("Fecha de fin", value=pd.to_datetime('2024-12-31'))
+start_date = st.sidebar.date_input("fecha de inicio", value=today)
+end_date = st.sidebar.date_input("fecha de fin", value=pd.to_datetime('2024-12-31'))
+
+# Sidebar para la selección de fechas y área
+#start_date = st.sidebar.date_input("Fecha de inicio", value=pd.to_datetime('2024-01-01'))
+#end_date = st.sidebar.date_input("Fecha de fin", value=pd.to_datetime('2024-12-31'))
 
 # Consulta SQL para obtener datos filtrados
 query = f"""
