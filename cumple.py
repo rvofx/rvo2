@@ -52,7 +52,7 @@ areas = data['AREA'].unique()
 selected_area = st.sidebar.multiselect("Seleccionar Área", areas)
 
 # Filtrar los datos por el área seleccionada
-filtered_data = data[data['area'].isin(selected_area)]
+filtered_data = data[data['AREA'].isin(selected_area)]
 
 # Mostrar los datos filtrados
 #st.write(filtered_data)
