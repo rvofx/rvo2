@@ -3,7 +3,15 @@ import pyodbc
 import pandas as pd
 
 # Conexión a la base de datos SQL Server
-connection = pyodbc.connect('DRIVER={SQL Server};SERVER=your_server;DATABASE=your_db;UID=your_user;PWD=your_password')
+#connection = pyodbc.connect('DRIVER={SQL Server};SERVER=your_server;DATABASE=your_db;UID=your_user;PWD=your_password')
+
+ connection = pyodbc.connect(
+        "driver={ODBC Driver 17 for SQL Server};"
+        "server=" + st.secrets["server"] + ";"
+        "database=" + st.secrets["database"] + ";"
+        "uid=" + st.secrets["username"] + ";"
+        "pwd=" + st.secrets["password"] + ";"
+    )
 
 # Sidebar para la selección de fechas y área
 start_date = st.sidebar.date_input("Fecha de inicio", value=pd.to_datetime('2024-01-01'))
