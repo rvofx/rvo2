@@ -55,4 +55,8 @@ selected_area = st.sidebar.multiselect("Seleccionar Área", areas)
 filtered_data = data[data['area'].isin(selected_area)]
 
 # Mostrar los datos filtrados
-st.write(filtered_data)
+#st.write(filtered_data)
+
+columns_to_show = ['nombre','area', 'cargo','cumple']
+st.write(f"Registros: {len(filtered_data)-1}")
+st.dataframe(filtered_data[columns_to_show], hide_index=True)
