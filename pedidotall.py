@@ -55,7 +55,10 @@ def load_data(pedido, estilos):
 # Sidebar para ingresar el pedido
 pedido_input = st.sidebar.text_input("Ingresa el pedido (ejemplo: 413979)", "")
 
+# Inicializa la lista de estilos
 estilos_seleccionados = []
+estilos = []  # Asegúrate de que `estilos` esté inicializada
+
 if pedido_input:
     # Obtener estilos disponibles para el pedido
     with get_connection() as conn:
@@ -68,8 +71,9 @@ if pedido_input:
         """
         estilos = pd.read_sql(estilos_query, conn, params=[pedido_input])['nommaeestilo'].tolist()
 
-    # Sidebar para seleccionar estilos
-    estilos_seleccionados = st.sidebar.multiselect("Selecciona estilos", opciones=estilos)
+    # Sidebar para seleccionar estilos solo si hay estilos disponibles
+    if estilos:
+        estilos_seleccionados = st.sidebar.multiselect("Selecciona estilos", options=estilos)
 
 # Cargar los datos
 if st.sidebar.button("Actualizar"):
@@ -89,4 +93,5 @@ if st.sidebar.button("Actualizar"):
         else:
             st.write("No hay resultados para la consulta.")
     else:
+        st.warning("Por favor, ingresa un número de pedido.")
         st.warning("Por favor, ingresa un número de pedido.")
