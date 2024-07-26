@@ -86,12 +86,13 @@ if st.sidebar.button("Consultar"):
             # Crear la tabla dinámica con totales
             pivot_table = pd.pivot_table(
                 df,
-                values='cant',
-                index=['estilo', 'combo'],      # eje vertical
-                columns=['talla'],        # eje horizontal
-                fill_value=0,
-                margins=True,  # Agrega totales
-                margins_name='Total'  # Nombre para la fila/columna de totales
+            values='cant',
+            index=['estilo', 'combo'],      # eje vertical
+            columns=['talla'],        # eje horizontal
+            fill_value=0,
+            margins=True,  # Agrega totales
+            margins_name='Total',  # Nombre para la fila/columna de totales
+            aggfunc='sum'  # Especificar que queremos sumar
             )
             st.write(pivot_table)
         else:
