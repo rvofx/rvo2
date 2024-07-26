@@ -80,6 +80,10 @@ if st.sidebar.button("Consultar"):
     if pedido_input:
         df = load_data(pedido_input, estilos_seleccionados)
 
+        # Mostrar el cliente en la parte superior
+        if cliente_nombre:
+            st.header(f"Cliente: {cliente_nombre}")
+
         # Creación de tabla dinámica
         if not df.empty:
             pivot_table = pd.pivot_table(
