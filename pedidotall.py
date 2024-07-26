@@ -53,7 +53,7 @@ def load_data(pedido, estilos):
     return df
 
 # Sidebar para ingresar el pedido
-pedido_input = st.sidebar.text_input("Ingresa el pedido (ejemplo: 413979)", "")
+pedido_input = st.sidebar.text_input("Ingresa el pedido", "")
 
 # Inicializa la lista de estilos
 estilos_seleccionados = []
@@ -76,7 +76,7 @@ if pedido_input:
         estilos_seleccionados = st.sidebar.multiselect("Selecciona estilos", options=estilos)
 
 # Cargar los datos
-if st.sidebar.button("Actualizar"):
+if st.sidebar.button("Consultar"):
     if pedido_input:
         df = load_data(pedido_input, estilos_seleccionados)
 
@@ -85,8 +85,8 @@ if st.sidebar.button("Actualizar"):
             pivot_table = pd.pivot_table(
                 df,
                 values='cant',
-                index=['estilo', 'cliente'],      # Eje vertical
-                columns=['combo', 'talla'],        # Eje horizontal
+                index=['estilo', 'combo'],      # Eje vertical
+                columns=['talla'],        # Eje horizontal
                 fill_value=0
             )
             st.write(pivot_table)
