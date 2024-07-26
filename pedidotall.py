@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import pyodbc
 
+st.set_page_config(layout="wide")
+
 # conexión a la base de datos usando credenciales del archivo secrets
 def get_connection():
     conn = pyodbc.connect(
