@@ -70,6 +70,7 @@ if pedido_input:
         WHERE b.coddocordenventa = ?
         """
         estilos = pd.read_sql(estilos_query, conn, params=[pedido_input])['nommaeestilo'].tolist()
+        cliente_nombre = estilos_df['nommaeanexocliente'].iloc[0]  # Suponiendo que hay un solo cliente por pedido
 
     # Sidebar para seleccionar estilos solo si hay estilos disponibles
     if estilos:
