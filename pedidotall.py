@@ -3,13 +3,16 @@ import pandas as pd
 import pyodbc
 
 # Conexión a la base de datos usando credenciales del archivo secrets
+
+
+
 def get_connection():
     conn = pyodbc.connect(
-        'DRIVER={ODBC Driver 17 for SQL Server};'
-        f'SERVER={st.secrets["db"]["server"]};'
-        f'DATABASE={st.secrets["db"]["database"]};'
-        f'UID={st.secrets["db"]["user"]};'
-        f'PWD={st.secrets["db"]["password"]}'
+        "driver={ODBC Driver 17 for SQL Server};"
+        "server=" + st.secrets["server"] + ";"
+        "database=" + st.secrets["database"] + ";"
+        "uid=" + st.secrets["username"] + ";"
+        "pwd=" + st.secrets["password"] + ";"
     )
     return conn
 
