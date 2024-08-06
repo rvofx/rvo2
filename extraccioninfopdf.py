@@ -1,5 +1,5 @@
 import os
-import fitz  # PyMuPDF
+import pdfplumber
 import pandas as pd
 import streamlit as st
 from zipfile import ZipFile
@@ -7,15 +7,10 @@ from io import BytesIO
 
 def extract_pdf_info(file):
     try:
-        document = fitz.open(stream=file.read(), filetype="pdf")
-        num_pages = document.page_count
-        text = ""
-        
-        # Extrae el texto de cada página en orden
-        for page_num in range(num_pages):
-            page = document.load_page(page_num)
-            text += page.get_text("text")  # Usar "text" para preservar el orden
-            
+        with pdfplumber.open(file) as pdf:
+            text = ""
+            for page in pdf.pages:
+                text += page.extract_text() + "\n"
         return text
     except Exception as e:
         st.error(f'Error al procesar el archivo: {e}')
