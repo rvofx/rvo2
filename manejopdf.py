@@ -31,7 +31,7 @@ def extract_pdf_info(file, num_columns=3):
         return None
 
 # Título de la aplicación
-st.title("Extracción de información de PDFs")
+st.title("Extracción de info de PDFs")
 
 # Subida de un archivo ZIP con PDFs
 uploaded_file = st.file_uploader("Sube un archivo ZIP con PDFs", type="zip")
