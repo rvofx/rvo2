@@ -1,20 +1,29 @@
 import os
-import fitz  # PyMuPDF
+import pdfplumber
 import pandas as pd
 import streamlit as st
 from zipfile import ZipFile
 from io import BytesIO
 
-def extract_pdf_info(file):
+def extract_pdf_info(file, num_columns=3):
     try:
-        document = fitz.open(stream=file.read(), filetype="pdf")
-        num_pages = document.page_count
         text = ""
-        
-        # Extrae el texto de cada página
-        for page_num in range(num_pages):
-            page = document.load_page(page_num)
-            text += page.get_text()
+        with pdfplumber.open(file) as pdf:
+            for page in pdf.pages:
+                page_width = page.width
+                column_width = page_width / num_columns
+                columns_text = []
+
+                for col in range(num_columns):
+                    left = col * column_width
+                    right = (col + 1) * column_width
+                    crop_box = (left, 0, right, page.height)
+                    column_text = page.within_bbox(crop_box).extract_text()
+                    if column_text:
+                        columns_text.append(column_text.strip())
+
+                # Concatenar el texto de las columnas en orden vertical
+                text += "\n".join(columns_text) + "\n"
         
         return text
     except Exception as e:
