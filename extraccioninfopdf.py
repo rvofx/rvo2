@@ -5,6 +5,8 @@ import streamlit as st
 from zipfile import ZipFile
 from io import BytesIO
 
+st.set_page_config(layout="wide")
+
 def extract_pdf_info(file, num_columns=3):
     try:
         text = ""
