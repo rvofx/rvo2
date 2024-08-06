@@ -7,10 +7,19 @@ from io import BytesIO
 
 def extract_pdf_info(file):
     try:
+        text = ""
         with pdfplumber.open(file) as pdf:
-            text = ""
             for page in pdf.pages:
-                text += page.extract_text() + "\n"
+                # Extrae el texto de las columnas usando tablas
+                table = page.extract_table()
+                if table:
+                    # Convierte la tabla en un DataFrame de pandas
+                    df = pd.DataFrame(table[1:], columns=table[0])
+                    # Concatena las filas como texto con formato
+                    text += df.to_string(index=False) + "\n"
+                else:
+                    # Si no se detecta tabla, extrae el texto normalmente
+                    text += page.extract_text() + "\n"
         return text
     except Exception as e:
         st.error(f'Error al procesar el archivo: {e}')
@@ -47,3 +56,5 @@ if uploaded_file is not None:
         # Botón para descargar el archivo CSV
         csv = df.to_csv(index=False).encode('utf-8')
         st.download_button(label="Descargar CSV", data=csv, file_name='informacion_pdfs.csv', mime='text/csv')
+
+ 
