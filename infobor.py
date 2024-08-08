@@ -12,6 +12,7 @@ def transform_table(df):
     for _, row in df.iterrows():
         grafico = row['GRAFICO']
         qty = row['QTY']
+        qty_x = row['QTY']  # Suponiendo que QTY es equivalente a TX en la Tabla 2
         
         # Para cada columna de color, dividir las celdas por ' / ' y contar las ocurrencias
         for color_column in color_columns:
@@ -19,13 +20,8 @@ def transform_table(df):
             for color in color_values:
                 if color:  # Verificar que el valor no esté vacío
                     count = color_values.count(color)
-                    
-                    # Determinar el valor de TX basado en el valor de X
-                    if color_column == 'ROJO':  # Este es un ejemplo; ajusta según la lógica de tus colores
-                        tx_value = row['TDX']
-                    else:
-                        tx_value = row['TMX']
-                    
+                    # Determinar TX basado en la columna actual
+                    tx_value = row['TDX'] if color_column in ['ROJO'] else row['TMX']
                     transformed_data.append([grafico, qty, color, tx_value, count, color_column])
 
     # Crear un DataFrame a partir de la lista de datos transformados
@@ -42,7 +38,7 @@ def transform_table(df):
 
 # Crear la aplicación Streamlit
 def main():
-    st.title('Transfor de Datos de Excel')
+    st.title('Transformación de Datos de Excel')
 
     # Subir archivo Excel
     uploaded_file = st.file_uploader("Elige un archivo Excel", type=["xlsx"])
