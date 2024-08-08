@@ -42,7 +42,7 @@ def transform_table(df):
 
 # Crear la aplicación Streamlit
 def main():
-    st.title('Transformación de Datos de Excel')
+    st.title('Transfor de Datos de Excel')
 
     # Subir archivo Excel
     uploaded_file = st.file_uploader("Elige un archivo Excel", type=["xlsx"])
