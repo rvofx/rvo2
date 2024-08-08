@@ -19,8 +19,13 @@ def transform_table(df):
             for color in color_values:
                 if color:  # Verificar que el valor no esté vacío
                     count = color_values.count(color)
-                    # Determinar TX basado en el valor de X
-                    tx_value = row['TDX'] if color_column == 'ROJO' else row['TMX']
+                    
+                    # Determinar el valor de TX basado en el valor de X
+                    if color_column == 'ROJO':  # Este es un ejemplo; ajusta según la lógica de tus colores
+                        tx_value = row['TDX']
+                    else:
+                        tx_value = row['TMX']
+                    
                     transformed_data.append([grafico, qty, color, tx_value, count, color_column])
 
     # Crear un DataFrame a partir de la lista de datos transformados
