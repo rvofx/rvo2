@@ -27,8 +27,12 @@ def transform_table(df):
     # Crear un DataFrame a partir de la lista de datos transformados
     transformed_df = pd.DataFrame(transformed_data, columns=['GRAFICO', 'QTY', 'X', 'TX', 'Q', 'COLOR'])
     
-    # Filtrar el DataFrame para mostrar solo filas donde 'X' sea 'TD' o 'TM'
-    filtered_df = transformed_df[transformed_df['X'].isin(['TD', 'TM'])]
+    # Filtrar el DataFrame para mostrar solo filas donde 'X' sea 'TD' o 'TM' y 'TX' no sea vacío
+    filtered_df = transformed_df[
+        transformed_df['X'].isin(['TD', 'TM']) & 
+        transformed_df['TX'].notna() &
+        (transformed_df['TX'] != '')
+    ]
     
     return filtered_df
 
