@@ -20,11 +20,17 @@ def transform_table(df):
             for color in color_values:
                 if color:  # Verificar que el valor no esté vacío
                     count = color_values.count(color)
-                    transformed_data.append([grafico, qty, color, row['TDX'] if color_column in ['ROJO'] else row['TMX'], count, color_column])
+                    # Determinar TX basado en la columna actual
+                    tx_value = row['TDX'] if color_column in ['ROJO'] else row['TMX']
+                    transformed_data.append([grafico, qty, color, tx_value, count, color_column])
 
     # Crear un DataFrame a partir de la lista de datos transformados
     transformed_df = pd.DataFrame(transformed_data, columns=['GRAFICO', 'QTY', 'X', 'TX', 'Q', 'COLOR'])
-    return transformed_df
+    
+    # Filtrar el DataFrame para mostrar solo filas donde 'X' sea 'TD' o 'TM'
+    filtered_df = transformed_df[transformed_df['X'].isin(['TD', 'TM'])]
+    
+    return filtered_df
 
 # Crear la aplicación Streamlit
 def main():
@@ -34,19 +40,22 @@ def main():
     uploaded_file = st.file_uploader("Elige un archivo Excel", type=["xlsx"])
     
     if uploaded_file:
-        # Leer el archivo Excel
-        df = pd.read_excel(uploaded_file)
+        try:
+            # Leer el archivo Excel
+            df = pd.read_excel(uploaded_file)
 
-        # Asegurarse de que la estructura del DataFrame sea la esperada
-        required_columns = ['GRAFICO', 'QTY', 'TDX', 'TMX']
-        if all(col in df.columns for col in required_columns):
-            # Transformar la tabla
-            transformed_df = transform_table(df)
+            # Asegurarse de que la estructura del DataFrame sea la esperada
+            required_columns = ['GRAFICO', 'QTY', 'TDX', 'TMX']
+            if all(col in df.columns for col in required_columns):
+                # Transformar la tabla
+                transformed_df = transform_table(df)
 
-            # Mostrar la tabla transformada
-            st.write("Tabla transformada:", transformed_df)
-        else:
-            st.error(f"El archivo debe contener al menos las columnas: {', '.join(required_columns)}")
+                # Mostrar la tabla transformada
+                st.write("Tabla transformada:", transformed_df)
+            else:
+                st.error(f"El archivo debe contener al menos las columnas: {', '.join(required_columns)}")
+        except Exception as e:
+            st.error(f"Error al procesar el archivo: {e}")
 
 if __name__ == "__main__":
     main()
