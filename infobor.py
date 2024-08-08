@@ -21,25 +21,21 @@ def transform_table(df):
                     count = color_values.count(color)
                     
                     # Determinar el valor de TX basado en el valor de X
-                    if color_column == 'ROJO':  # Ejemplo de lógica; ajusta según el color real
+                    if color == 'TD':
                         tx_value = row['TDX']
-                    else:
+                    elif color == 'TM':
                         tx_value = row['TMX']
+                    else:
+                        tx_value = None
                     
-                    transformed_data.append([grafico, qty, color, tx_value, count, color_column])
+                    if tx_value is not None:  # Solo agregar si hay un valor válido para TX
+                        transformed_data.append([grafico, qty, color, tx_value, count, color_column])
 
     # Crear un DataFrame a partir de la lista de datos transformados
     transformed_df = pd.DataFrame(transformed_data, columns=['GRAFICO', 'QTY', 'X', 'TX', 'Q', 'COLOR'])
     
-    # Filtrar el DataFrame para mostrar solo filas donde 'X' sea 'TD' o 'TM' y 'TX' no sea vacío
-    filtered_df = transformed_df[
-        transformed_df['X'].isin(['TD', 'TM']) & 
-        transformed_df['TX'].notna() &
-        (transformed_df['TX'] != '')
-    ]
-    
     # Eliminar filas duplicadas
-    unique_df = filtered_df.drop_duplicates()
+    unique_df = transformed_df.drop_duplicates()
     
     return unique_df
 
