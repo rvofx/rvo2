@@ -21,7 +21,7 @@ def transform_table(df):
                     count = color_values.count(color)
                     
                     # Determinar el valor de TX basado en el valor de X
-                    if color == 'TD':
+                    if color == 'TD' or color == 'TP':
                         tx_value = row['TDX']
                     elif color == 'TM':
                         tx_value = row['TMX']
