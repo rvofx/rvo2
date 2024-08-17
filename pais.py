@@ -1,8 +1,11 @@
 import streamlit as st
 import pandas as pd
 
-# Título de la aplicación
-st.title("Selector de Ciudades por País")
+# Título de la aplicación con estilo personalizado
+st.markdown(
+    "<h1 style='color: red; font-family: Tahoma; font-size: 40px;'>Selector de Ciudades por País</h1>", 
+    unsafe_allow_html=True
+)
 
 # Subir el archivo Excel
 file = st.file_uploader("Carga el archivo Excel con los datos de países y ciudades", type=["xlsx"])
