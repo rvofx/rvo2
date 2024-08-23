@@ -12,8 +12,10 @@ def transformar_excel(df):
     # Recorremos cada fila del dataframe original
     for i, row in df.iterrows():
         for talla in tallas:
-            # Agregamos una nueva fila para cada talla
-            data.append([row[col] for col in columnas_relevantes] + [talla, row[talla]])
+            cantidad = row[talla]
+            # Agregamos una nueva fila solo si la cantidad existe y es mayor a 0
+            if pd.notna(cantidad) and cantidad > 0:
+                data.append([row[col] for col in columnas_relevantes] + [talla, cantidad])
     
     # Convertimos la lista en un DataFrame
     df_transformado = pd.DataFrame(data, columns=list(columnas_relevantes) + ['Talla', 'Cantidad'])
