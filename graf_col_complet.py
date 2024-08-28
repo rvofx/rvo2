@@ -16,11 +16,15 @@ if uploaded_file_graficos is not None and uploaded_file_colores is not None:
     # Obtener lista de colores disponibles
     colores_disponibles = df_colores['COLOR'].tolist()
 
-    # Filtrar gráficos con colores completos
-    graficos_validos = df_graficos[
-        (df_graficos['COLOR_CUERPO'].isin(colores_disponibles)) & 
-        (df_graficos['COLOR_APLICACION'].isin(colores_disponibles))
-    ]['GRAFICO'].unique()
+    # Agrupar por gráfico y verificar si todos los colores están en la lista
+    graficos_validos = []
+    
+    for grafico, group in df_graficos.groupby('GRAFICO'):
+        colores_cuerpo_validos = group['COLOR_CUERPO'].isin(colores_disponibles).all()
+        colores_aplicacion_validos = group['COLOR_APLICACION'].isin(colores_disponibles).all()
+        
+        if colores_cuerpo_validos and colores_aplicacion_validos:
+            graficos_validos.append(grafico)
 
     # Mostrar los resultados
     num_graficos_validos = len(graficos_validos)
