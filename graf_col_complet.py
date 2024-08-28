@@ -23,8 +23,9 @@ if uploaded_file_graficos is not None and uploaded_file_colores is not None:
     ]['GRAFICO'].unique()
 
     # Mostrar los resultados
-    if len(graficos_validos) > 0:
-        st.success("Gráficos con colores completos:")
+    num_graficos_validos = len(graficos_validos)
+    if num_graficos_validos > 0:
+        st.success(f"Se encontraron {num_graficos_validos} gráficos con colores completos:")
         st.write(graficos_validos)
     else:
         st.warning("No se encontraron gráficos con colores completos.")
