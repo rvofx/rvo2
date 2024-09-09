@@ -167,7 +167,7 @@ def run_query():
     """
 
 
-         st.write(query)  # Imprime la consulta para depuración
+        st.write(query)  # Imprime la consulta para depuración
     
         try:
             df = pd.read_sql(query, conn)
