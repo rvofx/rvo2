@@ -7,9 +7,13 @@ from datetime import datetime
 # Conexión a la base de datos SQL Server
 def get_data(pedido):
     conn = pyodbc.connect(
-        f'DRIVER={{SQL Server}};SERVER={st.secrets["server"]};'
-        f'DATABASE={st.secrets["database"]};UID={st.secrets["username"]};PWD={st.secrets["password"]}'
-    )
+    'DRIVER={ODBC Driver 17 for SQL Server};'
+    'SERVER=' + st.secrets["server"] + ';'
+    'DATABASE=' + st.secrets["database"] + ';'
+    'UID=' + st.secrets["username"] + ';'
+    'PWD=' + st.secrets["password"]
+)
+
     query = f"""
         select * from (
             -- Aquí va la consulta SQL proporcionada por ti
