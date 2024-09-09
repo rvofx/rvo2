@@ -2,24 +2,25 @@ import streamlit as st
 import pandas as pd
 import pyodbc
 
-# Configuración de la conexión a la base de datos
-
-
-def get_connection():
+# Function to create a database connection
+def create_connection():
     conn = pyodbc.connect(
-        "driver={odbc driver 17 for sql server};"
-        "server=" + st.secrets["server"] + ";"
-        "database=" + st.secrets["database"] + ";"
-        "uid=" + st.secrets["username"] + ";"
-        "pwd=" + st.secrets["password"] + ";"
+        f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+        f"SERVER={st.secrets['server']};"
+        f"DATABASE={st.secrets['database']};"
+        f"UID={st.secrets['username']};"
+        f"PWD={st.secrets['password']}"
     )
     return conn
 
-# Consulta SQL
-sql_query = """
-    select *
-	FROM
-	(SELECT
+# Function to execute the query and return results as a DataFrame
+def execute_query(conn):
+    query = """
+    SELECT gg.PEDIDO, gg.IdDocumento_OrdenVenta, gg.F_EMISION, gg.F_ENTREGA, gg.DIAS, gg.CLIENTE, gg.PO, gg.KG_REQ, 
+       gg.KG_ARMP, gg.KG_TENIDP, gg.KG_TELAPROBP, gg.UNID, gg.PROGP, gg.CORTADOP, gg.COSIDOP, 
+       ff.FMINARM, ff.FMAXARM, ff.FMINTENID, ff.FMAXTENID, ff.FMINTELAPROB, ff.FMAXTELAPROB, ff.FMINCORTE, ff.FMAXCORTE, ff.FMINCOSIDO, ff.FMAXCOSIDO
+FROM 
+    (SELECT
     a.CoddocOrdenVenta AS PEDIDO, 
     a.IdDocumento_OrdenVenta,
     CASE WHEN ISDATE(a.dtFechaEmision) = 1 THEN CONVERT(DATE, a.dtFechaEmision) ELSE NULL END AS F_EMISION,
@@ -130,9 +131,10 @@ WHERE
     a.IdtdDocumentoForm = 10
     AND a.IdtdTipoVenta = 4
     AND a.bAnulado = 0
-    AND (CASE WHEN ISDATE(a.dtFechaEntrega) = 1 THEN CONVERT(DATE, a.dtFechaEntrega) ELSE NULL END) BETWEEN '2024-08-01' AND '2024-12-31' ) AS gg
-
-INNER JOIN (SELECT 
+    AND (CASE WHEN ISDATE(a.dtFechaEntrega) = 1 THEN CONVERT(DATE, a.dtFechaEntrega) ELSE NULL END) BETWEEN '2024-08-01' AND '2024-12-31' 
+    ) gg
+INNER JOIN 
+    (SELECT 
     x.IdDocumento_OrdenVenta,
     --x.CoddocOrdenVenta,
 	q0.FMINARM,
@@ -244,29 +246,32 @@ WHERE x.CoddocOrdenVenta IS NOT NULL
 		and x.IdtdTipoVenta=4
 		and x.bAnulado=0
 		--and c.IdDocumento_OrdenVenta=441563
---ORDER BY x.IdDocumento_OrdenVenta; 
-) as ff  
+--ORDER BY x.IdDocumento_OrdenVenta;
+    ) ff
 ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
-"""
 
-# Función para obtener datos
-def fetch_data():
-    conn = get_connection()
-    df = pd.read_sql_query(sql_query, conn)
-    conn.close()
-    return df
+    """
+    return pd.read_sql(query, conn)
 
-# Interfaz de usuario
-st.title("Resultados de la Consulta SQL")
+# Streamlit app
+def main():
+    st.title("SQL Query Results")
 
-# Botón para ejecutar la consulta
-if st.button("Obtener Datos"):
-    with st.spinner("Cargando los datos..."):
-        try:
-            data = fetch_data()
-            if not data.empty:
-                st.write(data)
-            else:
-                st.error("No se encontraron resultados.")
-        except Exception as e:
-            st.error(f"Error al obtener los datos: {e}")
+    try:
+        # Create connection
+        conn = create_connection()
+
+        # Execute query and get results
+        df = execute_query(conn)
+
+        # Display results
+        st.dataframe(df)
+
+        # Close connection
+        conn.close()
+
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    main()
