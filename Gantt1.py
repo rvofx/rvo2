@@ -170,7 +170,7 @@ def run_query():
 # Interfaz de usuario de Streamlit
 def main():
     st.title("Consulta de Producción")
-    st.write("Esta aplicación muestra el avance de producción.")
+    st.write("Esta aplicación muestra el progreso de producción.")
     
     # Ejecutar la consulta SQL
     df = run_query()
