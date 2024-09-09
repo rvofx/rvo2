@@ -16,7 +16,7 @@ def connect_db():
     return connection
 
 # Función para ejecutar la consulta SQL
-def run_query():
+def run_query(pedido):
     conn = connect_db()
     query = """SELECT gg.PEDIDO, gg.IdDocumento_OrdenVenta, gg.F_EMISION, gg.F_ENTREGA, gg.DIAS, gg.CLIENTE, gg.PO, gg.KG_REQ, 
        gg.KG_ARMP, gg.KG_TENIDP, gg.KG_TELAPROBP, gg.UNID, gg.PROGP, gg.CORTADOP, gg.COSIDOP, 
