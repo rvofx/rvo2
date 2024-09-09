@@ -260,7 +260,7 @@ ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
 st.title("Consulta de Pedidos")
 
 if st.button("Ejecutar Consulta"):
-    st.write("Ejecutando consulta...")
+    
     # Ejecutar la consulta y mostrar el resultado
     result = run_query()
     st.dataframe(result)  # Mostrar los resultados en una tabla
