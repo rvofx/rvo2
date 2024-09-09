@@ -1,22 +1,23 @@
 import streamlit as st
-import pyodbc
 import pandas as pd
+import pyodbc
 
-# Conexión a la base de datos
-def get_connection():
+# Function to create a database connection
+def create_connection():
     conn = pyodbc.connect(
-        "driver={odbc driver 17 for sql server};"
-        "server=" + st.secrets["server"] + ";"
-        "database=" + st.secrets["database"] + ";"
-        "uid=" + st.secrets["username"] + ";"
-        "pwd=" + st.secrets["password"] + ";"
+        f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+        f"SERVER={st.secrets['server']};"
+        f"DATABASE={st.secrets['database']};"
+        f"UID={st.secrets['username']};"
+        f"PWD={st.secrets['password']}"
     )
     return conn
 
-# Consulta SQL según el pedido seleccionado
-def get_order_data(order):
-    query = f"""
-    SELECT * FROM 
+# Function to execute the query and return results as a DataFrame
+def execute_query(conn):
+    query = """
+    select *
+	FROM
 	(SELECT
     a.CoddocOrdenVenta AS PEDIDO, 
     a.IdDocumento_OrdenVenta,
@@ -245,26 +246,28 @@ WHERE x.CoddocOrdenVenta IS NOT NULL
 --ORDER BY x.IdDocumento_OrdenVenta; 
 ) ff  
 ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
-     WHERE PEDIDO = '{order}'
     """
-    conn = get_connection()
-    df = pd.read_sql(query, conn)
-    conn.close()
-    return df
+    return pd.read_sql(query, conn)
 
-# Interfaz de la aplicación
-st.title("Consulta de Pedidos")
+# Streamlit app
+def main():
+    st.title("SQL Query Results")
 
-# Selector de pedidos
-pedido = st.text_input("Ingrese el número de pedido:")
+    try:
+        # Create connection
+        conn = create_connection()
 
-if pedido:
-    st.write(f"Mostrando resultados para el pedido: {pedido}")
-    # Obtener datos de la consulta
-    df = get_order_data(pedido)
-    # Mostrar la tabla de resultados
-	
-    st.write(df.head())
-    st.dataframe(df)
+        # Execute query and get results
+        df = execute_query(conn)
 
-	
+        # Display results
+        st.dataframe(df)
+
+        # Close connection
+        conn.close()
+
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    main()
