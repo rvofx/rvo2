@@ -16,7 +16,7 @@ def get_data(pedido):
 
 
 
-    query = f"""
+    	query = f"""
         
             select *
 	FROM
