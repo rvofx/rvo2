@@ -6,13 +6,17 @@ from datetime import datetime
 
 # Conexión a la base de datos SQL Server
 def get_data(pedido):
+  try:
     conn = pyodbc.connect(
-    'DRIVER={ODBC Driver 17 for SQL Server};'
-    'SERVER=' + st.secrets["server"] + ';'
-    'DATABASE=' + st.secrets["database"] + ';'
-    'UID=' + st.secrets["username"] + ';'
-    'PWD=' + st.secrets["password"]
-)
+        'DRIVER={ODBC Driver 17 for SQL Server};'
+        'SERVER=' + st.secrets["server"] + ';'
+        'DATABASE=' + st.secrets["database"] + ';'
+        'UID=' + st.secrets["username"] + ';'
+        'PWD=' + st.secrets["password"]
+    )
+    st.success("Conexión exitosa a la base de datos")
+except Exception as e:
+    st.error(f"Error en la conexión: {e}")
 
     query = f"""
         select * from (
