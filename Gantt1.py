@@ -1,27 +1,21 @@
 import streamlit as st
-import pyodbc
 import pandas as pd
+import pyodbc
 
-# Configurar la conexión a la base de datos utilizando las credenciales almacenadas en secrets
-def connect_db():
-    try:
-        connection = pyodbc.connect(
-            "DRIVER={ODBC Driver 17 for SQL Server};"
-            "SERVER=" + st.secrets["server"] + ";"
-            "DATABASE=" + st.secrets["database"] + ";"
-            "UID=" + st.secrets["username"] + ";"
-            "PWD=" + st.secrets["password"] + ";"
-        )
-        st.success("Conexión a la base de datos exitosa")
-        return connection
-    except Exception as e:
-        st.error(f"Error al conectar a la base de datos: {e}")
-        return None
+# Configuración de la conexión a la base de datos
+def get_connection():
+    # Reemplaza estos parámetros con tus credenciales de base de datos
+    server = st.secrets["db_credentials"]["server"]
+    database = st.secrets["db_credentials"]["database"]
+    username = st.secrets["db_credentials"]["username"]
+    password = st.secrets["db_credentials"]["password"]
 
-# Función para ejecutar la consulta SQL
-def run_query():
-    conn = connect_db()
-    query = """
+    conn = pyodbc.connect(
+        f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}')
+    return conn
+
+# Consulta SQL
+sql_query = """
     select *
 	FROM
 	(SELECT
@@ -250,37 +244,28 @@ WHERE x.CoddocOrdenVenta IS NOT NULL
 		and x.bAnulado=0
 		--and c.IdDocumento_OrdenVenta=441563
 --ORDER BY x.IdDocumento_OrdenVenta; 
-) AS ff  
+) as ff  
 ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
-    """
+"""
 
-
-    st.write(query)  # Imprime la consulta para depuración
-    
-    try:
-        df = pd.read_sql(query, conn)
-        return df
-    except Exception as e:
-        st.error(f"Error al ejecutar la consulta SQL: {e}")
-        return None
-
-
-    df = pd.read_sql(query, conn)
+# Función para obtener datos
+def fetch_data():
+    conn = get_connection()
+    df = pd.read_sql_query(sql_query, conn)
+    conn.close()
     return df
 
-# Interfaz de usuario de Streamlit
-def main():
-    st.title("Consulta de Producción")
-    st.write("Esta aplicación muestra el progreso de producción.")
-    
-    # Ejecutar la consulta SQL
-    df = run_query()
-    
-    # Mostrar los resultados
-    if df is not None:
-        st.dataframe(df)
+# Interfaz de usuario
+st.title("Resultados de la Consulta SQL")
 
-if __name__ == "__main__":
-    main()
-
-
+# Botón para ejecutar la consulta
+if st.button("Obtener Datos"):
+    with st.spinner("Cargando los datos..."):
+        try:
+            data = fetch_data()
+            if not data.empty:
+                st.write(data)
+            else:
+                st.error("No se encontraron resultados.")
+        except Exception as e:
+            st.error(f"Error al obtener los datos: {e}")
