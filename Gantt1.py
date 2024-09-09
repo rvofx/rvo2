@@ -1,24 +1,22 @@
 import streamlit as st
-import pandas as pd
 import pyodbc
+import pandas as pd
 
-# Function to create a database connection
-
-
-def get_connection():
-    conn = pyodbc.connect(
-        "driver={odbc driver 17 for sql server};"
-        "server=" + st.secrets["server"] + ";"
-        "database=" + st.secrets["database"] + ";"
-        "uid=" + st.secrets["username"] + ";"
-        "pwd=" + st.secrets["password"] + ";"
+# Configurar la conexión a la base de datos utilizando las credenciales almacenadas en secrets
+def connect_db():
+    connection = pyodbc.connect(
+        f"DRIVER={{SQL Server}};"
+        f"SERVER={st.secrets['sql']['server']};"
+        f"DATABASE={st.secrets['sql']['database']};"
+        f"UID={st.secrets['sql']['username']};"
+        f"PWD={st.secrets['sql']['password']};"
     )
-    return conn
+    return connection
 
-# Function to execute the query and return results as a DataFrame
-def execute_query(conn):
-    query = """
-    SELECT gg.PEDIDO, gg.IdDocumento_OrdenVenta, gg.F_EMISION, gg.F_ENTREGA, gg.DIAS, gg.CLIENTE, gg.PO, gg.KG_REQ, 
+# Función para ejecutar la consulta SQL
+def run_query():
+    conn = connect_db()
+    query = """SELECT gg.PEDIDO, gg.IdDocumento_OrdenVenta, gg.F_EMISION, gg.F_ENTREGA, gg.DIAS, gg.CLIENTE, gg.PO, gg.KG_REQ, 
        gg.KG_ARMP, gg.KG_TENIDP, gg.KG_TELAPROBP, gg.UNID, gg.PROGP, gg.CORTADOP, gg.COSIDOP, 
        ff.FMINARM, ff.FMAXARM, ff.FMINTENID, ff.FMAXTENID, ff.FMINTELAPROB, ff.FMAXTELAPROB, ff.FMINCORTE, ff.FMAXCORTE, ff.FMINCOSIDO, ff.FMAXCOSIDO
 FROM 
@@ -251,29 +249,16 @@ WHERE x.CoddocOrdenVenta IS NOT NULL
 --ORDER BY x.IdDocumento_OrdenVenta;
     ) ff
 ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
+"""
+    df = pd.read_sql(query, conn)
+    conn.close()
+    return df
 
-    """
-    return pd.read_sql(query, conn)
+# Interfaz de usuario de Streamlit
+st.title("Consulta de Pedidos")
 
-# Streamlit app
-def main():
-    st.title("SQL Query Results")
-
-    try:
-        # Create connection
-        conn = create_connection()
-
-        # Execute query and get results
-        df = execute_query(conn)
-
-        # Display results
-        st.dataframe(df)
-
-        # Close connection
-        conn.close()
-
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
-
-if __name__ == "__main__":
-    main()
+if st.button("Ejecutar Consulta"):
+    st.write("Ejecutando consulta...")
+    # Ejecutar la consulta y mostrar el resultado
+    result = run_query()
+    st.dataframe(result)  # Mostrar los resultados en una tabla
