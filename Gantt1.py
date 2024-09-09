@@ -167,14 +167,14 @@ def run_query():
     """
 
 
-     st.write(query)  # Imprime la consulta para depuración
+         st.write(query)  # Imprime la consulta para depuración
     
-    try:
-        df = pd.read_sql(query, conn)
-        return df
-    except Exception as e:
-        st.error(f"Error al ejecutar la consulta SQL: {e}")
-        return None
+        try:
+            df = pd.read_sql(query, conn)
+            return df
+        except Exception as e:
+            st.error(f"Error al ejecutar la consulta SQL: {e}")
+            return None
 
 
     df = pd.read_sql(query, conn)
