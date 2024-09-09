@@ -263,4 +263,8 @@ if pedido:
     # Obtener datos de la consulta
     df = get_order_data(pedido)
     # Mostrar la tabla de resultados
+	
+    st.write(df.head())
     st.dataframe(df)
+
+	
