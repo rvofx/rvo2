@@ -259,8 +259,14 @@ ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
 # Interfaz de usuario de Streamlit
 st.title("Consulta de Pedidos")
 
+# Campo de entrada para ingresar el número de pedido
+pedido = st.text_input("Ingresa el número de pedido")
+
+# Si el botón se presiona y hay un número de pedido ingresado, se ejecuta la consulta
 if st.button("Ejecutar Consulta"):
-    
-    # Ejecutar la consulta y mostrar el resultado
-    result = run_query()
-    st.dataframe(result)  # Mostrar los resultados en una tabla
+    if pedido:
+        # Ejecutar la consulta y mostrar el resultado filtrado por pedido
+        result = run_query(pedido)
+        st.dataframe(result)  # Mostrar los resultados en una tabla
+    else:
+        st.warning("Por favor ingresa un número de pedido.")
