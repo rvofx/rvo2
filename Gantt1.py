@@ -12,6 +12,7 @@ def connect_db():
             "UID=" + st.secrets["username"] + ";"
             "PWD=" + st.secrets["password"] + ";"
         )
+        st.success("Conexión a la base de datos exitosa")
         return connection
     except Exception as e:
         st.error(f"Error al conectar a la base de datos: {e}")
