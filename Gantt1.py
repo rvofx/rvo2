@@ -1,22 +1,25 @@
 import streamlit as st
 import pyodbc
 import pandas as pd
-import plotly.express as px
-from datetime import datetime
 
-# Conexión a la base de datos SQL Server
-def get_data(pedido):
+# Conexión a la base de datos
+def get_connection():
     conn = pyodbc.connect(
-    'DRIVER={ODBC Driver 17 for SQL Server};'
-    'SERVER=' + st.secrets["server"] + ';'
-    'DATABASE=' + st.secrets["database"] + ';'
-    'UID=' + st.secrets["username"] + ';'
-    'PWD=' + st.secrets["password"]
-)
+        'DRIVER={ODBC Driver 17 for SQL Server};'
+        f'SERVER={st.secrets["sqlserver"]["host"]};'
+        f'DATABASE={st.secrets["sqlserver"]["database"]};'
+        f'UID={st.secrets["sqlserver"]["user"]};'
+        f'PWD={st.secrets["sqlserver"]["password"]}'
+    )
+    return conn
 
+# Consulta SQL según el pedido seleccionado
+def get_order_data(order):
     query = f"""
-        select * from (
-            (SELECT
+    SELECT * FROM (
+        select *
+	FROM
+	(SELECT
     a.CoddocOrdenVenta AS PEDIDO, 
     a.IdDocumento_OrdenVenta,
     CASE WHEN ISDATE(a.dtFechaEmision) = 1 THEN CONVERT(DATE, a.dtFechaEmision) ELSE NULL END AS F_EMISION,
@@ -244,48 +247,22 @@ WHERE x.CoddocOrdenVenta IS NOT NULL
 --ORDER BY x.IdDocumento_OrdenVenta; 
 ) ff  
 ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
-            ) WHERE PEDIDO = '{pedido}'
-        """
-    data = pd.read_sql(query, conn)
+    ) WHERE PEDIDO = '{order}'
+    """
+    conn = get_connection()
+    df = pd.read_sql(query, conn)
     conn.close()
-    return data
+    return df
 
-# Función para generar el gráfico de Gantt
-def create_gantt(df):
-    fig = px.timeline(df, x_start='start_date', x_end='end_date', y='process',
-                      color='process', hover_data=['percentage'])
-    
-    # Añadir las líneas verticales
-    emision = df['F_EMISION'].iloc[0]
-    entrega = df['F_ENTREGA'].iloc[0]
-    today = datetime.now().date()
-    
-    fig.add_vline(x=emision, line_width=2, line_dash="dash", line_color="green", annotation_text="F. Emisión")
-    fig.add_vline(x=entrega, line_width=2, line_dash="dash", line_color="red", annotation_text="F. Entrega")
-    fig.add_vline(x=today, line_width=2, line_dash="dash", line_color="blue", annotation_text="Hoy")
-    
-    fig.update_layout(title="Diagrama de Gantt - Avance de Procesos", xaxis_title="Días", yaxis_title="Procesos")
-    return fig
+# Interfaz de la aplicación
+st.title("Consulta de Pedidos")
 
-# Streamlit App
-st.title("Diagrama de Gantt de Avance de Procesos")
+# Selector de pedidos
 pedido = st.text_input("Ingrese el número de pedido:")
 
 if pedido:
-    data = get_data(pedido)
-    
-    if not data.empty:
-        # Procesar los datos para el gráfico de Gantt
-        gantt_data = pd.DataFrame({
-            'process': ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO'],
-            'start_date': [data['FMINARM'].iloc[0], data['FMINTENID'].iloc[0], data['FMINTELAPROB'].iloc[0], data['FMINCORTE'].iloc[0], data['FMINCOSIDO'].iloc[0]],
-            'end_date': [data['FMAXARM'].iloc[0], data['FMAXTENID'].iloc[0], data['FMAXTELAPROB'].iloc[0], data['FMAXCORTE'].iloc[0], data['FMAXCOSIDO'].iloc[0]],
-            'percentage': [data['KG_ARMP'].iloc[0], data['KG_TENIDP'].iloc[0], data['KG_TELAPROBP'].iloc[0], data['CORTADOP'].iloc[0], data['COSIDOP'].iloc[0]]
-        })
-
-        fig = create_gantt(gantt_data)
-        st.plotly_chart(fig)
-    else:
-        st.error("No se encontraron datos para el pedido ingresado.")
-
-
+    st.write(f"Mostrando resultados para el pedido: {pedido}")
+    # Obtener datos de la consulta
+    df = get_order_data(pedido)
+    # Mostrar la tabla de resultados
+    st.dataframe(df)
