@@ -16,9 +16,7 @@ def get_connection():
 # Consulta SQL según el pedido seleccionado
 def get_order_data(order):
     query = f"""
-    SELECT * FROM (
-        select *
-	FROM
+    SELECT * FROM 
 	(SELECT
     a.CoddocOrdenVenta AS PEDIDO, 
     a.IdDocumento_OrdenVenta,
@@ -247,7 +245,7 @@ WHERE x.CoddocOrdenVenta IS NOT NULL
 --ORDER BY x.IdDocumento_OrdenVenta; 
 ) ff  
 ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
-    ) WHERE PEDIDO = '{order}'
+     WHERE PEDIDO = '{order}'
     """
     conn = get_connection()
     df = pd.read_sql(query, conn)
