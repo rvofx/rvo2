@@ -3,13 +3,15 @@ import pandas as pd
 import pyodbc
 
 # Function to create a database connection
-def create_connection():
+
+
+def get_connection():
     conn = pyodbc.connect(
-        f"DRIVER={{ODBC Driver 17 for SQL Server}};"
-        f"SERVER={st.secrets['server']};"
-        f"DATABASE={st.secrets['database']};"
-        f"UID={st.secrets['username']};"
-        f"PWD={st.secrets['password']}"
+        "driver={odbc driver 17 for sql server};"
+        "server=" + st.secrets["server"] + ";"
+        "database=" + st.secrets["database"] + ";"
+        "uid=" + st.secrets["username"] + ";"
+        "pwd=" + st.secrets["password"] + ";"
     )
     return conn
 
