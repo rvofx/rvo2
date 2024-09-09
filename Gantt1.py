@@ -18,7 +18,8 @@ def get_data(pedido):
     st.success("Conexión exitosa a la base de datos")
     
     # Aquí puedes ejecutar la consulta SQL
-    query = "select *
+    query = f"""
+	  select *
 	FROM
 	(SELECT
     a.CoddocOrdenVenta AS PEDIDO, 
@@ -246,8 +247,10 @@ WHERE x.CoddocOrdenVenta IS NOT NULL
 		and x.bAnulado=0
 		--and c.IdDocumento_OrdenVenta=441563
 --ORDER BY x.IdDocumento_OrdenVenta; 
+
 ) ff  
-ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta"
+ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
+"""
     pedido = "1198"  # Reemplaza con el valor adecuado
     data = pd.read_sql(query, conn, params=[pedido])
     st.write(data)  # Mostrar los resultados de la consulta
@@ -258,7 +261,7 @@ except Exception as e:
 
 
     query = f"""
-        select * from (
+        
             select *
 	FROM
 	(SELECT
