@@ -5,11 +5,11 @@ import pandas as pd
 # Conexión a la base de datos
 def get_connection():
     conn = pyodbc.connect(
-        'DRIVER={ODBC Driver 17 for SQL Server};'
-        f'SERVER={st.secrets["sqlserver"]["host"]};'
-        f'DATABASE={st.secrets["sqlserver"]["database"]};'
-        f'UID={st.secrets["sqlserver"]["user"]};'
-        f'PWD={st.secrets["sqlserver"]["password"]}'
+        "driver={odbc driver 17 for sql server};"
+        "server=" + st.secrets["server"] + ";"
+        "database=" + st.secrets["database"] + ";"
+        "uid=" + st.secrets["username"] + ";"
+        "pwd=" + st.secrets["password"] + ";"
     )
     return conn
 
