@@ -257,7 +257,7 @@ ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
     return df
 
 # Interfaz de usuario de Streamlit
-st.title("Consulta de Pedidos")
+st.title("Data Pedido")
 
 # Campo de entrada para ingresar el número de pedido
 pedido = st.text_input("Ingresa el número de pedido")
