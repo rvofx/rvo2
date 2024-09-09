@@ -251,7 +251,7 @@ ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
 
 # Streamlit app
 def main():
-    st.title("SQL Query Results")
+    st.title("SQL Resultados")
 
     try:
         # Create connection
