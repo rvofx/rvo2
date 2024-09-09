@@ -15,8 +15,15 @@ def get_data(pedido):
         'PWD=' + st.secrets["password"]
     )
     st.success("Conexión exitosa a la base de datos")
+    
+    # Aquí puedes ejecutar la consulta SQL
+    query = "SELECT * FROM tu_tabla WHERE numero_pedido = ?"
+    pedido = "12345"  # Reemplaza con el valor que estés utilizando
+    data = pd.read_sql(query, conn, params=[pedido])
+    st.write(data)  # Mostrar los resultados de la consulta
+
 except Exception as e:
-    st.error(f"Error en la conexión: {e}")
+    st.error(f"Error: {e}")
 
     query = f"""
         select * from (
