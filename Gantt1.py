@@ -135,7 +135,7 @@ WHERE
     a.IdtdDocumentoForm = 10
     AND a.IdtdTipoVenta = 4
     AND a.bAnulado = 0
-    AND (CASE WHEN ISDATE(a.dtFechaEntrega) = 1 THEN CONVERT(DATE, a.dtFechaEntrega) ELSE NULL END) BETWEEN '2024-08-01' AND '2024-12-31' ) gg
+    AND (CASE WHEN ISDATE(a.dtFechaEntrega) = 1 THEN CONVERT(DATE, a.dtFechaEntrega) ELSE NULL END) BETWEEN '2024-08-01' AND '2024-12-31' ) AS gg
 
 INNER JOIN (SELECT 
     x.IdDocumento_OrdenVenta,
@@ -250,7 +250,7 @@ WHERE x.CoddocOrdenVenta IS NOT NULL
 		and x.bAnulado=0
 		--and c.IdDocumento_OrdenVenta=441563
 --ORDER BY x.IdDocumento_OrdenVenta; 
-) ff  
+) AS ff  
 ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
     """
 
