@@ -1,8 +1,8 @@
 import streamlit as st
 import pyodbc
 import pandas as pd
-import plotly.express as px
-from datetime import datetime
+import plotly.figure_factory as ff
+from datetime import datetime, timedelta
 
 # Configurar la conexión a la base de datos utilizando las credenciales almacenadas en secrets
 def connect_db():
@@ -27,23 +27,16 @@ FROM
     a.IdDocumento_OrdenVenta,
     CASE WHEN ISDATE(a.dtFechaEmision) = 1 THEN CONVERT(DATE, a.dtFechaEmision) ELSE NULL END AS F_EMISION,
     CASE WHEN ISDATE(a.dtFechaEntrega) = 1 THEN CONVERT(DATE, a.dtFechaEntrega) ELSE NULL END AS F_ENTREGA,
-    DATEDIFF(DAY, a.dtFechaEmision, a.dtFechaEntrega) AS DIAS,
-   
+    CONVERT(INT, a.dtFechaEntrega - a.dtFechaEmision) AS DIAS,
     SUBSTRING(b.NommaeAnexoCliente, 1, 15) AS CLIENTE,
     a.nvDocumentoReferencia AS PO,
     CONVERT(INT, COALESCE(d.KG, 0)) AS KG_REQ,
-    --CONVERT(INT, COALESCE(t.KG_ARM, 0)) AS KG_ARM,
     FORMAT(CASE WHEN d.KG = 0 THEN 0 ELSE (COALESCE(t.KG_ARM, 0) / d.KG) END, '0%') AS KG_ARMP,
-    --CONVERT(INT, COALESCE(t.KG_TEÑIDOS, 0)) AS KG_TEÑIDOS,
     FORMAT(CASE WHEN d.KG = 0 THEN 0 ELSE (COALESCE(t.KG_TEÑIDOS, 0) / d.KG) END, '0%') AS KG_TENIDP,
-    --CONVERT(INT, COALESCE(t.KG_PRODUC, 0)) AS KG_DESPACH,
     FORMAT(CASE WHEN d.KG = 0 THEN 0 ELSE (COALESCE(t.KG_PRODUC, 0) / d.KG) END, '0%') AS KG_TELAPROBP,
     CONVERT(INT, a.dCantidad) AS UNID,
-    --CONVERT(INT, COALESCE(programado.PROG, 0)) AS PROG,
     FORMAT(CASE WHEN a.dCantidad = 0 THEN 0 ELSE (COALESCE(programado.PROG, 0) / a.dCantidad) END, '0%') AS PROGP,
-    --CONVERT(INT, COALESCE(cortado.CORTADO, 0)) AS CORTADO,
     FORMAT(CASE WHEN a.dCantidad = 0 THEN 0 ELSE (COALESCE(cortado.CORTADO, 0) / a.dCantidad) END, '0%') AS CORTADOP,
-    --CONVERT(INT, COALESCE(cosido.COSIDO, 0)) AS COSIDO,
     FORMAT(CASE WHEN a.dCantidad = 0 THEN 0 ELSE (COALESCE(cosido.COSIDO, 0) / a.dCantidad) END, '0%') AS COSIDOP
 FROM docOrdenVenta a
 INNER JOIN maeAnexoCliente b ON a.IdmaeAnexo_Cliente = b.IdmaeAnexo_Cliente
@@ -139,7 +132,6 @@ WHERE
 INNER JOIN 
     (SELECT 
     x.IdDocumento_OrdenVenta,
-    --x.CoddocOrdenVenta,
 	q0.FMINARM,
 	q0.FMAXARM,
     q1.FMINTENID,
@@ -207,10 +199,9 @@ LEFT JOIN (
     INNER JOIN dbo.maeCentroCosto a1 WITH (NOLOCK) ON a.IdmaeCentroCosto = a1.IdmaeCentroCosto AND a1.bConOrdenProduccion = 1
     INNER JOIN dbo.docNotaInventarioItem b WITH (NOLOCK) ON a.IdDocumento_NotaInventario = b.IdDocumento_NotaInventario AND b.dCantidadIng <> 0
     INNER JOIN dbo.docOrdenProduccion c WITH (NOLOCK) ON a.IdDocumento_OrdenProduccion = c.IdDocumento_OrdenProduccion 
-	--AND c.bCerrado = 0 
 	AND c.bAnulado = 0 AND c.IdtdDocumentoForm = 127
     INNER JOIN dbo.docOrdenVenta g WITH (NOLOCK) ON c.IdDocumento_Referencia = g.IdDocumento_OrdenVenta
-    INNER JOIN dbo.docOrdenProduccionRuta d WITH (NOLOCK) ON a.IddocOrdenProduccionRuta = d.IddocOrdenProduccionRuta
+    INNER JOIN dbo.docOrdenProduccionRuta d WITH (NO LOCK) ON a.IddocOrdenProduccionRuta = d.IddocOrdenProduccionRuta
     INNER JOIN dbo.docOrdenProduccionItem e WITH (NOLOCK) ON c.IdDocumento_OrdenProduccion = e.IdDocumento_OrdenProduccion AND b.IdmaeItem_Inventario = e.IdmaeItem
     INNER JOIN dbo.maeItemInventario f WITH (NOLOCK) ON b.IdmaeItem_Inventario = f.IdmaeItem_Inventario AND f.IdtdItemForm = 10
     WHERE a.IdtdDocumentoForm = 131
@@ -230,7 +221,6 @@ LEFT JOIN (
     INNER JOIN dbo.maeCentroCosto a1 WITH (NOLOCK) ON a.IdmaeCentroCosto = a1.IdmaeCentroCosto AND a1.bConOrdenProduccion = 1
     INNER JOIN dbo.docNotaInventarioItem b WITH (NOLOCK) ON a.IdDocumento_NotaInventario = b.IdDocumento_NotaInventario AND b.dCantidadIng <> 0
     INNER JOIN dbo.docOrdenProduccion c WITH (NOLOCK) ON a.IdDocumento_OrdenProduccion = c.IdDocumento_OrdenProduccion 
-	--AND c.bCerrado = 0 
 	AND c.bAnulado = 0 AND c.IdtdDocumentoForm = 127
     INNER JOIN dbo.docOrdenVenta g WITH (NOLOCK) ON c.IdDocumento_Referencia = g.IdDocumento_OrdenVenta
     INNER JOIN dbo.docOrdenProduccionRuta d WITH (NOLOCK) ON a.IddocOrdenProduccionRuta = d.IddocOrdenProduccionRuta
@@ -248,67 +238,55 @@ WHERE x.CoddocOrdenVenta IS NOT NULL
 		and x.IdtdDocumentoForm=10 
 		and x.IdtdTipoVenta=4
 		and x.bAnulado=0
-		--and c.IdDocumento_OrdenVenta=441563
---ORDER BY x.IdDocumento_OrdenVenta;
     ) ff
 ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
-WHERE gg.PEDIDO = ?"""  # El código SQL que ya tienes va aquí
-    df = pd.read_sql(query, conn, params=(pedido,))
+WHERE gg.PEDIDO = ?"""  # Usamos un parámetro para evitar problemas con el pedido
+
+    df = pd.read_sql(query, conn, params=(pedido,))  # Pasamos el pedido como parámetro
     conn.close()
     return df
 
-# Función para generar el gráfico de Gantt
+# Función para crear el gráfico de Gantt
 def create_gantt_chart(df):
-    # Definir los procesos y las fechas asociadas
-    procesos = ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO']
-    fmin = ['FMINARM', 'FMINTENID', 'FMINTELAPROB', 'FMINCORTE', 'FMINCOSIDO']
-    fmax = ['FMAXARM', 'FMAXTENID', 'FMAXTELAPROB', 'FMAXCORTE', 'FMAXCOSIDO']
-    porcentaje = ['KG_ARMP', 'KG_TENIDP', 'KG_TELAPROBP', 'CORTADOP', 'COSIDOP']
+    tasks = [
+        dict(Task="ARM", Start=df['FMINARM'].iloc[0], Finish=df['FMAXARM'].iloc[0], Description=f"Avance: {df['KG_ARMP'].iloc[0]}"),
+        dict(Task="TENID", Start=df['FMINTENID'].iloc[0], Finish=df['FMAXTENID'].iloc[0], Description=f"Avance: {df['KG_TENIDP'].iloc[0]}"),
+        dict(Task="TELAPROB", Start=df['FMINTELAPROB'].iloc[0], Finish=df['FMAXTELAPROB'].iloc[0], Description=f"Avance: {df['KG_TELAPROBP'].iloc[0]}"),
+        dict(Task="CORTADO", Start=df['FMINCORTE'].iloc[0], Finish=df['FMAXCORTE'].iloc[0], Description=f"Avance: {df['CORTADOP'].iloc[0]}"),
+        dict(Task="COSIDO", Start=df['FMINCOSIDO'].iloc[0], Finish=df['FMAXCOSIDO'].iloc[0], Description=f"Avance: {df['COSIDOP'].iloc[0]}")
+    ]
 
-    # Crear el dataframe para el gráfico de Gantt
-    gantt_data = []
-    for i in range(len(procesos)):
-        gantt_data.append({
-            'Proceso': procesos[i],
-            'Fecha Inicio': df[fmin[i]].values[0],
-            'Fecha Fin': df[fmax[i]].values[0],
-            'Porcentaje': df[porcentaje[i]].values[0]
-        })
+    fig = ff.create_gantt(tasks, index_col='Task', show_colorbar=True, group_tasks=True)
 
-    gantt_df = pd.DataFrame(gantt_data)
+    # Agregar líneas verticales para F_EMISION, F_ENTREGA y fecha actual
+    f_emision = df['F_EMISION'].iloc[0]
+    f_entrega = df['F_ENTREGA'].iloc[0]
+    fecha_actual = datetime.now().date()
 
-    # Crear el gráfico de Gantt con Plotly Express
-    fig = px.timeline(
-        gantt_df,
-        x_start='Fecha Inicio',
-        x_end='Fecha Fin',
-        y='Proceso',
-        color='Porcentaje',
-        hover_name='Proceso',
-        title='Diagrama de Gantt del Pedido'
+    fig.add_vline(x=f_emision, line_width=2, line_color="green", annotation_text="F_EMISION")
+    fig.add_vline(x=f_entrega, line_width=2, line_color="red", annotation_text="F_ENTREGA")
+    fig.add_vline(x=fecha_actual, line_width=2, line_color="blue", annotation_text="Fecha Actual")
+
+    # Agregar líneas verticales tenues cada dos días
+    min_date = min(task['Start'] for task in tasks if task['Start'] is not None)
+    max_date = max(task['Finish'] for task in tasks if task['Finish'] is not None)
+    current_date = min_date
+    while current_date <= max_date:
+        fig.add_vline(x=current_date, line_width=1, line_color="gray", line_dash="dot", opacity=0.5)
+        current_date += timedelta(days=2)
+
+    fig.update_layout(
+        title=f"Gráfico de Gantt para el Pedido {df['PEDIDO'].iloc[0]}",
+        xaxis_title="Fecha",
+        yaxis_title="Proceso",
+        height=600,
+        width=1000
     )
 
-    # Añadir las líneas verticales para F_EMISION, F_ENTREGA y la fecha actual
-    f_emision = df['F_EMISION'].values[0]
-    f_entrega = df['F_ENTREGA'].values[0]
-    fecha_actual = datetime.today()
-
-    fig.add_vline(x=f_emision, line_width=2, line_dash="dash", line_color="blue", annotation_text="F_EMISION", annotation_position="top")
-    fig.add_vline(x=f_entrega, line_width=2, line_dash="dash", line_color="green", annotation_text="F_ENTREGA", annotation_position="top")
-    fig.add_vline(x=fecha_actual, line_width=2, line_dash="dash", line_color="red", annotation_text="Hoy", annotation_position="top")
-
-    # Añadir líneas verticales tenues cada dos días
-    fig.update_xaxes(
-        tickformat="%d-%m-%Y",
-        dtick="2D",
-        ticklabelmode="period"
-    )
-
-    fig.update_layout(xaxis_title="Fecha", yaxis_title="Procesos")
     return fig
 
 # Interfaz de usuario de Streamlit
-st.title("Data Pedido")
+st.title("Data Pedido y Gráfico de Gantt")
 
 # Campo de entrada para ingresar el número de pedido
 pedido = st.text_input("Ingresa el número de pedido")
@@ -322,10 +300,10 @@ if st.button("Ejecutar Consulta"):
             st.dataframe(result)  # Mostrar los resultados en una tabla
 
             # Crear y mostrar el gráfico de Gantt
-            fig = create_gantt_chart(result)
-            st.plotly_chart(fig)
+            gantt_chart = create_gantt_chart(result)
+            st.plotly_chart(gantt_chart)
 
         except Exception as e:
-            st.error(f"Error al ejecutar la consulta: {e}")
+            st.error(f"Error al ejecutar la consulta o crear el gráfico: {e}")
     else:
         st.warning("Por favor ingresa un número de pedido.")
