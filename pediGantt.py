@@ -308,7 +308,7 @@ def create_gantt_chart(df):
     return fig
 
 # Interfaz de usuario de Streamlit
-st.title("Pedido")
+st.title("Data Pedido")
 
 # Campo de entrada para ingresar el número de pedido
 pedido = st.text_input("Ingresa el número de pedido")
