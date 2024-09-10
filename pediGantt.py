@@ -18,7 +18,7 @@ def connect_db():
 # Función para ejecutar la consulta SQL
 def run_query(pedido):
     conn = connect_db()
-    query = """SELECT gg.PEDIDO, gg.IdDocumento_OrdenVenta, gg.F_EMISION, gg.F_ENTREGA, DATEDIFF(DAY, a.dtFechaEmision, a.dtFechaEntrega) AS DIAS, gg.CLIENTE, gg.PO, gg.KG_REQ, 
+    query = """SELECT gg.PEDIDO, gg.IdDocumento_OrdenVenta, gg.F_EMISION, gg.F_ENTREGA, gg.DIAS, gg.CLIENTE, gg.PO, gg.KG_REQ, 
        gg.KG_ARMP, gg.KG_TENIDP, gg.KG_TELAPROBP, gg.UNID, gg.PROGP, gg.CORTADOP, gg.COSIDOP, 
        ff.FMINARM, ff.FMAXARM, ff.FMINTENID, ff.FMAXTENID, ff.FMINTELAPROB, ff.FMAXTELAPROB, ff.FMINCORTE, ff.FMAXCORTE, ff.FMINCOSIDO, ff.FMAXCOSIDO
 FROM 
@@ -27,7 +27,8 @@ FROM
     a.IdDocumento_OrdenVenta,
     CASE WHEN ISDATE(a.dtFechaEmision) = 1 THEN CONVERT(DATE, a.dtFechaEmision) ELSE NULL END AS F_EMISION,
     CASE WHEN ISDATE(a.dtFechaEntrega) = 1 THEN CONVERT(DATE, a.dtFechaEntrega) ELSE NULL END AS F_ENTREGA,
-    CONVERT(INT, a.dtFechaEntrega - a.dtFechaEmision) AS DIAS,
+    DATEDIFF(DAY, a.dtFechaEmision, a.dtFechaEntrega) AS DIAS
+    --CONVERT(INT, a.dtFechaEntrega - a.dtFechaEmision) AS DIAS,
     SUBSTRING(b.NommaeAnexoCliente, 1, 15) AS CLIENTE,
     a.nvDocumentoReferencia AS PO,
     CONVERT(INT, COALESCE(d.KG, 0)) AS KG_REQ,
