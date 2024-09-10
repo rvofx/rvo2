@@ -251,7 +251,7 @@ WHERE x.CoddocOrdenVenta IS NOT NULL
 --ORDER BY x.IdDocumento_OrdenVenta;
     ) ff
 ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
-WHERE gg.PEDIDO = ?
+WHERE gg.PEDIDO = '{pedido}'  -- Filtro por el pedido ingresado por el usuario
 """
     df = pd.read_sql(query, conn)
     conn.close()
