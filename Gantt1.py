@@ -251,9 +251,9 @@ WHERE x.CoddocOrdenVenta IS NOT NULL
 --ORDER BY x.IdDocumento_OrdenVenta;
     ) ff
 ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
---WHERE gg.PEDIDO = '{pedido}'  -- Filtro por el pedido ingresado por el usuario
-"""
-    df = pd.read_sql(query, conn)
+WHERE gg.PEDIDO = ?"""  # Usamos un parámetro para evitar problemas con el pedido
+
+    df = pd.read_sql(query, conn, params=(pedido,))  # Pasamos el pedido como parámetro
     conn.close()
     return df
 
@@ -266,8 +266,11 @@ pedido = st.text_input("Ingresa el número de pedido")
 # Si el botón se presiona y hay un número de pedido ingresado, se ejecuta la consulta
 if st.button("Ejecutar Consulta"):
     if pedido:
-        # Ejecutar la consulta y mostrar el resultado filtrado por pedido
-        result = run_query(pedido)
-        st.dataframe(result)  # Mostrar los resultados en una tabla
+        try:
+            # Ejecutar la consulta y mostrar el resultado filtrado por pedido
+            result = run_query(pedido)
+            st.dataframe(result)  # Mostrar los resultados en una tabla
+        except Exception as e:
+            st.error(f"Error al ejecutar la consulta: {e}")
     else:
         st.warning("Por favor ingresa un número de pedido.")
