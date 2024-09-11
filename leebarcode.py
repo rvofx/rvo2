@@ -1,6 +1,6 @@
 import streamlit as st
 from PyPDF2 import PdfReader
-from pyzbar.pyzbar import decode
+import pytesseract
 from PIL import Image
 import io
 
@@ -19,44 +19,18 @@ def extract_images_from_pdf(pdf_file):
                     images.append(image)
     return images
 
-# Función para leer códigos de barra
+# Función para leer códigos de barra usando Tesseract OCR
 def read_barcodes(images):
     barcodes = []
     for image in images:
-        decoded = decode(image)
-        for barcode in decoded:
-            barcodes.append(barcode.data.decode('utf-8'))
+        text = pytesseract.image_to_string(image)
+        if text:
+            barcodes.append(text.strip())
     return barcodes
 
-st.title("Lector de Códigos de Barras en PDF")
+# Aplicación en Streamlit
+st.title("Lector de Códigos de Barras en PDF con Tesseract OCR")
 
 # Subir el archivo PDF
-uploaded_file = st.file_uploader("Sube un archivo PDF", type="pdf")
+uploaded_file = st.file
 
-if uploaded_file is not None:
-    st.write("Procesando el archivo...")
-
-    # Extraer las imágenes del PDF
-    images = extract_images_from_pdf(uploaded_file)
-
-    if images:
-        # Leer los códigos de barras
-        barcodes = read_barcodes(images)
-
-        if barcodes:
-            # Buscar códigos de barra repetidos
-            unique_barcodes = set(barcodes)
-            repeated_barcodes = [code for code in unique_barcodes if barcodes.count(code) > 1]
-
-            st.write(f"Se encontraron {len(barcodes)} códigos de barras.")
-
-            if repeated_barcodes:
-                st.write("Códigos de barras repetidos:")
-                for code in repeated_barcodes:
-                    st.write(code)
-            else:
-                st.write("No hay códigos de barras repetidos.")
-        else:
-            st.write("No se encontraron códigos de barras en el PDF.")
-    else:
-        st.write("No se encontraron imágenes en el PDF.")
