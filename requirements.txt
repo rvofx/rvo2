@@ -13,3 +13,4 @@ PyPDF2
 pyzbar
 Pillow
 zbar
+pytesseract
