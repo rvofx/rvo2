@@ -1,36 +1,47 @@
 import streamlit as st
-from PyPDF2 import PdfReader
-import pytesseract
+import pdfplumber
+from pyzbar.pyzbar import decode
 from PIL import Image
-import io
+from collections import Counter
 
-# Función para extraer imágenes del PDF
-def extract_images_from_pdf(pdf_file):
-    reader = PdfReader(pdf_file)
-    images = []
-    for page_num in range(len(reader.pages)):
-        page = reader.pages[page_num]
-        if '/XObject' in page['/Resources']:
-            xobject = page['/Resources']['/XObject'].get_object()
-            for obj in xobject:
-                if xobject[obj]['/Subtype'] == '/Image':
-                    data = xobject[obj]._data
-                    image = Image.open(io.BytesIO(data))
-                    images.append(image)
-    return images
+# Función para leer códigos de barras en una imagen
+def extract_barcodes_from_image(image):
+    barcodes = decode(image)
+    return [barcode.data.decode('utf-8') for barcode in barcodes]
 
-# Función para leer códigos de barra usando Tesseract OCR
-def read_barcodes(images):
-    barcodes = []
-    for image in images:
-        text = pytesseract.image_to_string(image)
-        if text:
-            barcodes.append(text.strip())
-    return barcodes
+# Función para procesar el PDF
+def process_pdf(file):
+    with pdfplumber.open(file) as pdf:
+        barcodes = []
+        for page in pdf.pages:
+            # Convertir la página en una imagen para decodificar los códigos de barras
+            image = page.to_image(resolution=300)
+            pil_image = Image.frombytes('RGB', image.original.size, image.original.tobytes())
+            barcodes += extract_barcodes_from_image(pil_image)
+        return barcodes
 
-# Aplicación en Streamlit
-st.title("Lector de Códigos de Barras en PDF con Tesseract OCR")
+# Aplicación de Streamlit
+st.title("Lectura de Códigos de Barras en PDF")
 
-# Subir el archivo PDF
-uploaded_file = st.file
+# Subir archivo PDF
+uploaded_file = st.file_uploader("Sube un archivo PDF con códigos de barras", type="pdf")
+
+if uploaded_file is not None:
+    st.write("Procesando el archivo...")
+    
+    # Procesar el PDF y extraer códigos de barras
+    barcodes = process_pdf(uploaded_file)
+    
+    # Contar los códigos de barra repetidos
+    barcode_counts = Counter(barcodes)
+    repeated_barcodes = {barcode: count for barcode, count in barcode_counts.items() if count > 1}
+    
+    st.write(f"Total de códigos de barra encontrados: {len(barcodes)}")
+    
+    if repeated_barcodes:
+        st.write("Códigos de barra repetidos:")
+        for barcode, count in repeated_barcodes.items():
+            st.write(f"{barcode}: {count} veces")
+    else:
+        st.write("No se encontraron códigos de barra repetidos.")
 
