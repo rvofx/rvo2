@@ -294,7 +294,7 @@ def create_gantt(df):
         'F_ENTREGA': df['F_ENTREGA'][0],
         'Hoy': current_date
     }
-
+"""
     for label, date in important_dates.items():
         fig.add_vline(
             x=date,
@@ -312,7 +312,7 @@ def create_gantt(df):
         yaxis=dict(categoryorder="array", categoryarray=processes),
         bargap=0.3
     )
-
+"""
     st.plotly_chart(fig)
 
 # Interfaz de Streamlit
