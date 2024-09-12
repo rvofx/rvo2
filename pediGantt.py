@@ -313,7 +313,7 @@ def create_gantt(df):
         bargap=0.3
     )
 """
-    st.plotly_chart(fig)
+st.plotly_chart(fig)
 
 # Interfaz de Streamlit
 st.title("Gráfico de Gantt - Proceso por Pedido")
