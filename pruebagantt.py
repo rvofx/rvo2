@@ -39,7 +39,9 @@ if uploaded_file:
 
     # Añadir líneas verticales para F_EMISION, F_ENTREGA, y fecha actual
     for date, label in zip([f_emision, f_entrega, fecha_actual], ['F. Emisión', 'F. Entrega', 'Fecha Actual']):
-        fig.add_vline(x=date, line=dict(color="red"), annotation_text=label, annotation_position="top")
+        --fig.add_vline(x=date, line=dict(color="red"), annotation_text=label, annotation_position="top")
+        fig.add_vline(x=date.strftime('%Y-%m-%d'), line_color="red", annotation_text=label, annotation_position="top")
+
 
     # Líneas verticales cada dos días
     days_range = pd.date_range(f_emision, f_entrega, freq='2D')
