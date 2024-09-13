@@ -30,10 +30,16 @@ fecha_actual = datetime.now()
 fig = px.timeline(df, x_start="Fecha Inicio Programada", x_end="Fecha Final Real", y="Proceso",
                   color="Proceso", title="Gráfico Gantt con Fechas Programadas y Reales")
 
+# Asegurarse de que las fechas estén en el formato adecuado para plotly
+fecha_emision_str = fecha_emision.strftime('%Y-%m-%d')
+fecha_final_str = fecha_final.strftime('%Y-%m-%d')
+fecha_actual_str = fecha_actual.strftime('%Y-%m-%d')
+
 # Añadir las líneas verticales
-fig.add_vline(x=fecha_emision, line_dash="dash", line_color="blue", annotation_text="Fecha Emisión")
-fig.add_vline(x=fecha_final, line_dash="dash", line_color="red", annotation_text="Fecha Final")
-fig.add_vline(x=fecha_actual, line_dash="dash", line_color="green", annotation_text="Fecha Actual")
+fig.add_vline(x=fecha_emision_str, line_dash="dash", line_color="blue", annotation_text="Fecha Emisión")
+fig.add_vline(x=fecha_final_str, line_dash="dash", line_color="red", annotation_text="Fecha Final")
+fig.add_vline(x=fecha_actual_str, line_dash="dash", line_color="green", annotation_text="Fecha Actual")
 
 # Mostrar el gráfico
 st.plotly_chart(fig)
+
