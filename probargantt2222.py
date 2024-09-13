@@ -10,7 +10,7 @@ def create_gantt():
     processes = ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO']
     date_min_cols = ['2024-07-10', '2024-07-19', '2024-08-15', '2024-08-20', '2024-09-02']
     date_max_cols = ['2024-07-12', '2024-07-24', '2024-08-21', '2024-08-23', '2024-09-12']
-    progress-cols = ['116', '116', '101', '105', '103']
+    progress_cols = ['116', '116', '101', '105', '103']
     
     for i, process in enumerate(processes):
         # Asegúrate de que las fechas sean objetos datetime
