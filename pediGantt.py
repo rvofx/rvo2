@@ -266,35 +266,43 @@ WHERE gg.PEDIDO = ? """
     return df
 
 # Función para crear el gráfico de Gantt
+import plotly.graph_objs as go
+from datetime import datetime
+import pandas as pd
+import streamlit as st
+
 def create_gantt(df):
     # Crear el gráfico de Gantt
     fig = go.Figure()
-
     processes = ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO']
     date_min_cols = ['FMINARM', 'FMINTENID', 'FMINTELAPROB', 'FMINCORTE', 'FMINCOSIDO']
     date_max_cols = ['FMAXARM', 'FMAXTENID', 'FMAXTELAPROB', 'FMAXCORTE', 'FMAXCOSIDO']
     progress_cols = ['KG_ARMP', 'KG_TENIDP', 'KG_TELAPROBP', 'CORTADOP', 'COSIDOP']
-
+    
     for i, process in enumerate(processes):
+        # Asegúrate de que las fechas sean objetos datetime
+        date_min = pd.to_datetime(df[date_min_cols[i]][0])
+        date_max = pd.to_datetime(df[date_max_cols[i]][0])
+        
         fig.add_trace(go.Bar(
-            x=[(df[date_max_cols[i]][0] - df[date_min_cols[i]][0]).days],
+            x=[(date_max - date_min).days],
             y=[process],
-            base=[df[date_min_cols[i]][0]],
+            base=[date_min],
             orientation='h',
             text=f"Progreso: {df[progress_cols[i]][0]}",
             hoverinfo='text',
             marker=dict(color='skyblue'),
             showlegend=False
         ))
-
+    
     # Agregar las líneas verticales para F_EMISION, F_ENTREGA y fecha actual
     current_date = datetime.now().date()
     important_dates = {
-        'F_EMISION': df['F_EMISION'][0],
-        'F_ENTREGA': df['F_ENTREGA'][0],
+        'F_EMISION': pd.to_datetime(df['F_EMISION'][0]).date(),
+        'F_ENTREGA': pd.to_datetime(df['F_ENTREGA'][0]).date(),
         'Hoy': current_date
     }
-
+    
     for label, date in important_dates.items():
         fig.add_vline(
             x=date,
@@ -302,7 +310,7 @@ def create_gantt(df):
             annotation_text=label,
             annotation_position="top"
         )
-
+    
     # Configuración del eje X (días) y eje Y (procesos)
     fig.update_layout(
         title="Gráfico de Gantt - Procesos de Producción",
@@ -312,7 +320,7 @@ def create_gantt(df):
         yaxis=dict(categoryorder="array", categoryarray=processes),
         bargap=0.3
     )
-
+    
     st.plotly_chart(fig)
 
 # Interfaz de Streamlit
