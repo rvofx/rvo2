@@ -4,7 +4,7 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 
-def create_gantt(df):
+def create_gantt():
     # Crear el gráfico de Gantt
     fig = go.Figure()
     processes = ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO']
@@ -66,3 +66,7 @@ def create_gantt(df):
     )
     
     st.plotly_chart(fig)
+
+st.title("Gráfico de Gantt - Proceso por Pedido")
+create_gantt()
+
