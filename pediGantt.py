@@ -275,16 +275,16 @@ def create_gantt(df):
     # Crear el gráfico de Gantt
     fig = go.Figure()
     processes = ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO']
-	st.write("Processes:", processes)
+
     date_min_cols = ['FMINARM', 'FMINTENID', 'FMINTELAPROB', 'FMINCORTE', 'FMINCOSIDO']
     date_max_cols = ['FMAXARM', 'FMAXTENID', 'FMAXTELAPROB', 'FMAXCORTE', 'FMAXCOSIDO']
     progress_cols = ['KG_ARMP', 'KG_TENIDP', 'KG_TELAPROBP', 'CORTADOP', 'COSIDOP']
-	st.write("Processes:", processes)
-	st.write("Date Min Columns:", date_min_cols)
-	st.write("Date Min Columns:", date_min_cols)
-	st.write("Date Max Columns:", date_max_cols)
-	st.write("Progress Columns:", progress_cols)
-	
+st.write("Processes:", processes)
+st.write("Date Min Columns:", date_min_cols)
+st.write("Date Min Columns:", date_min_cols)
+st.write("Date Max Columns:", date_max_cols)
+st.write("Progress Columns:", progress_cols)
+
 	
 	
 
