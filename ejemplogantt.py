@@ -31,9 +31,22 @@ fecha_emision = df['Fecha Emisión'].iloc[0]  # Independiente pero dentro del se
 fecha_final = df['Fecha Final'].iloc[0]  # Independiente pero dentro del set
 fecha_actual = datetime.now()
 
-# Crear el gráfico Gantt
-fig = px.timeline(df, x_start="Fecha Inicio Programada", x_end="Fecha Final Real", y="Proceso",
-                  color="Proceso", title="Gráfico Gantt con Fechas Programadas y Reales")
+# Crear el gráfico Gantt basado en las fechas programadas
+fig = px.timeline(df, x_start="Fecha Inicio Programada", x_end="Fecha Final Programada", y="Proceso",
+                  color="Proceso", title="Gráfico Gantt con Fechas Programadas")
+
+# Añadir las fechas reales de inicio y fin como marcas
+fig.add_trace(go.Scatter(
+    x=df['Fecha Inicio Real'], y=df['Proceso'], mode='markers',
+    marker=dict(color='blue', size=10),
+    name="Fecha Inicio Real"
+))
+
+fig.add_trace(go.Scatter(
+    x=df['Fecha Final Real'], y=df['Proceso'], mode='markers',
+    marker=dict(color='red', size=10),
+    name="Fecha Final Real"
+))
 
 # Añadir las líneas verticales para las fechas de emisión, final y actual
 fig.add_shape(
