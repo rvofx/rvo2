@@ -337,7 +337,7 @@ import plotly.graph_objs as go
 import pandas as pd
 from datetime import datetime
 import streamlit as st
-
+"""
 def create_gantt(df):
     # Crear el gráfico de Gantt
     fig = go.Figure()
@@ -409,7 +409,7 @@ def create_gantt(df):
     )
     
     st.plotly_chart(fig)
-"""
+
 # Interfaz de Streamlit
 st.title("Gráfico de Gantt - Proceso por Pedido")
 
