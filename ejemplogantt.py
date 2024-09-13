@@ -8,9 +8,9 @@ from datetime import datetime
 data = {
     'Proceso': ['Proceso 1', 'Proceso 2', 'Proceso 3', 'Proceso 4'],
     'Fecha Inicio Programada': ['2023-09-01', '2023-09-05', '2023-09-10', '2023-09-15'],
-    'Fecha Final Programada': ['2023-09-10', '2023-09-15', '2023-09-20', '2023-09-25'],
+    'Fecha Final Programada': ['2023-10-10', '2023-10-15', '2023-10-20', '2023-10-25'],
     'Fecha Inicio Real': ['2023-09-02', '2023-09-06', '2023-09-11', '2023-09-16'],
-    'Fecha Final Real': ['2023-09-11', '2023-09-16', '2023-09-21', '2023-09-26']
+    'Fecha Final Real': ['2023-10-11', '2023-10-16', '2023-10-21', '2023-10-26']
 }
 
 # Convertir datos a DataFrame
