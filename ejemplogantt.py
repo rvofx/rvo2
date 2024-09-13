@@ -7,10 +7,10 @@ from datetime import datetime
 # Datos de ejemplo
 data = {
     'Proceso': ['Proceso 1', 'Proceso 2', 'Proceso 3', 'Proceso 4'],
-    'Fecha Inicio Programada': ['2023-09-01', '2023-09-05', '2023-09-10', '2023-09-15'],
-    'Fecha Final Programada': ['2023-10-10', '2023-10-15', '2023-10-20', '2023-10-25'],
-    'Fecha Inicio Real': ['2023-09-02', '2023-09-06', '2023-09-11', '2023-09-16'],
-    'Fecha Final Real': ['2023-10-11', '2023-10-16', '2023-10-21', '2023-10-26']
+    'Fecha Inicio Programada': ['2024-09-01', '2024-09-05', '2024-09-10', '2024-09-15'],
+    'Fecha Final Programada': ['2024-10-10', '2024-10-15', '2024-10-20', '2024-10-25'],
+    'Fecha Inicio Real': ['2024-09-02', '2024-09-06', '2024-09-11', '2024-09-16'],
+    'Fecha Final Real': ['2024-10-11', '2024-10-16', '2024-10-21', '2024-10-26']
 }
 
 # Convertir datos a DataFrame
