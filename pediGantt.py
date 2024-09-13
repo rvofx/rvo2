@@ -302,7 +302,7 @@ def create_gantt(df):
         'F_ENTREGA': pd.to_datetime(df['F_ENTREGA'][0]).date(),
         'Hoy': current_date
     }
-    
+    """
     for label, date in important_dates.items():
         fig.add_vline(
             x=date,
@@ -310,7 +310,7 @@ def create_gantt(df):
             annotation_text=label,
             annotation_position="top"
         )
-    
+    """
     # Configuración del eje X (días) y eje Y (procesos)
     fig.update_layout(
         title="Gráfico de Gantt - Procesos de Producción",
