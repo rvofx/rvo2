@@ -283,6 +283,7 @@ def create_gantt(df):
 	st.write("Date Min Columns:", date_min_cols)
 	st.write("Date Max Columns:", date_max_cols)
 	st.write("Progress Columns:", progress_cols)
+
 	
     
     for i, process in enumerate(processes):
