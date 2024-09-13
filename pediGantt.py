@@ -284,21 +284,21 @@ def create_gantt(df):
         date_min = pd.to_datetime(df[date_min_cols[i]][0])
         date_max = pd.to_datetime(df[date_max_cols[i]][0])
 
-		fig.add_trace(go.Bar(
-		    x=[date_max - date_min],
-		    y=[process],
-		    base=[date_min],
-		    orientation='h',
-		    hovertemplate=
-		    "<b>%{y}</b><br>" +
-		    "Inicio: %{base|%Y-%m-%d}<br>" +
-		    "Fin: %{x|%Y-%m-%d}<br>" +
-		    "Duración: %{x} días<br>" +
-		    "Progreso: %{text}<extra></extra>",
-		    text=[f"{df[progress_cols[i]].iloc[0]:.1f}%"],
-		    marker=dict(color='skyblue'),
-		    showlegend=False
-		))
+	fig.add_trace(go.Bar(
+	    x=[date_max - date_min],
+	    y=[process],
+	    base=[date_min],
+	    orientation='h',
+	    hovertemplate=
+	    "<b>%{y}</b><br>" +
+	    "Inicio: %{base|%Y-%m-%d}<br>" +
+	    "Fin: %{x|%Y-%m-%d}<br>" +
+	    "Duración: %{x} días<br>" +
+	    "Progreso: %{text}<extra></extra>",
+	    text=[f"{df[progress_cols[i]].iloc[0]:.1f}%"],
+	    marker=dict(color='skyblue'),
+	    showlegend=False
+	))
 
 	    
         #fig.add_trace(go.Bar(
