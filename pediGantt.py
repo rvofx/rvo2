@@ -278,12 +278,18 @@ def create_gantt(df):
     date_min_cols = ['FMINARM', 'FMINTENID', 'FMINTELAPROB', 'FMINCORTE', 'FMINCOSIDO']
     date_max_cols = ['FMAXARM', 'FMAXTENID', 'FMAXTELAPROB', 'FMAXCORTE', 'FMAXCOSIDO']
     progress_cols = ['KG_ARMP', 'KG_TENIDP', 'KG_TELAPROBP', 'CORTADOP', 'COSIDOP']
+
+	st.write("Processes:", processes)
+	st.write("Date Min Columns:", date_min_cols)
+	st.write("Date Max Columns:", date_max_cols)
+	st.write("Progress Columns:", progress_cols)
+	
     
     for i, process in enumerate(processes):
         # Asegúrate de que las fechas sean objetos datetime
         #date_min = pd.to_datetime(df[date_min_cols[i]][0])
         #date_max = pd.to_datetime(df[date_max_cols[i]][0])
-	date_min = [date_min_cols[i]][0]
+		date_min = [date_min_cols[i]][0]
         date_max = [date_max_cols[i]][0]
 
 	
