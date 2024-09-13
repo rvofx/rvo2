@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from datetime import datetime
 
 # Datos de ejemplo
@@ -30,10 +31,30 @@ fecha_actual = datetime.now()
 fig = px.timeline(df, x_start="Fecha Inicio Programada", x_end="Fecha Final Real", y="Proceso",
                   color="Proceso", title="Gráfico Gantt con Fechas Programadas y Reales")
 
-# Añadir las líneas verticales con fechas en formato datetime
-fig.add_vline(x=fecha_emision, line_dash="dash", line_color="blue", annotation_text="Fecha Emisión")
-fig.add_vline(x=fecha_final, line_dash="dash", line_color="red", annotation_text="Fecha Final")
-fig.add_vline(x=fecha_actual, line_dash="dash", line_color="green", annotation_text="Fecha Actual")
+# Añadir las líneas verticales utilizando add_shape para mayor flexibilidad
+fig.add_shape(
+    type="line",
+    x0=fecha_emision, y0=0, x1=fecha_emision, y1=1,
+    line=dict(color="blue", width=2, dash="dash"),
+    xref='x', yref='paper',  # 'paper' hace referencia al área del gráfico, no a los datos
+    name="Fecha Emisión"
+)
+
+fig.add_shape(
+    type="line",
+    x0=fecha_final, y0=0, x1=fecha_final, y1=1,
+    line=dict(color="red", width=2, dash="dash"),
+    xref='x', yref='paper',
+    name="Fecha Final"
+)
+
+fig.add_shape(
+    type="line",
+    x0=fecha_actual, y0=0, x1=fecha_actual, y1=1,
+    line=dict(color="green", width=2, dash="dash"),
+    xref='x', yref='paper',
+    name="Fecha Actual"
+)
 
 # Mostrar el gráfico
 st.plotly_chart(fig)
