@@ -4,15 +4,15 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 
-# Datos de ejemplo
+# Datos de ejemplo con fechas entre agosto 2024 y noviembre 2024
 data = {
     'Proceso': ['Proceso 1', 'Proceso 2', 'Proceso 3', 'Proceso 4'],
-    'Fecha Inicio Programada': ['2023-09-01', '2023-09-05', '2023-09-10', '2023-09-15'],
-    'Fecha Final Programada': ['2023-09-10', '2023-09-15', '2023-09-20', '2023-09-25'],
-    'Fecha Inicio Real': ['2023-09-02', '2023-09-06', '2023-09-11', '2023-09-16'],
-    'Fecha Final Real': ['2023-09-11', '2023-09-16', '2023-09-21', '2023-09-26'],
-    'Fecha Emisión': ['2023-08-30', '2023-08-30', '2023-08-30', '2023-08-30'],  # Fecha de emisión independiente
-    'Fecha Final': ['2023-09-27', '2023-09-27', '2023-09-27', '2023-09-27']     # Fecha final independiente
+    'Fecha Inicio Programada': ['2024-08-10', '2024-08-20', '2024-09-01', '2024-09-15'],
+    'Fecha Final Programada': ['2024-08-20', '2024-09-05', '2024-09-20', '2024-10-05'],
+    'Fecha Inicio Real': ['2024-08-12', '2024-08-22', '2024-09-02', '2024-09-16'],
+    'Fecha Final Real': ['2024-08-21', '2024-09-06', '2024-09-21', '2024-10-06'],
+    'Fecha Emisión': ['2024-08-05', '2024-08-05', '2024-08-05', '2024-08-05'],  # Fecha de emisión independiente
+    'Fecha Final': ['2024-10-10', '2024-10-10', '2024-10-10', '2024-10-10']     # Fecha final independiente
 }
 
 # Convertir datos a DataFrame
