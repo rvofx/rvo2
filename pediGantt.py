@@ -266,10 +266,10 @@ WHERE gg.PEDIDO = ? """
     return df
 
 # Función para crear el gráfico de Gantt
-import plotly.graph_objs as go
-from datetime import datetime
-import pandas as pd
-import streamlit as st
+#import plotly.graph_objs as go
+#from datetime import datetime
+#import pandas as pd
+#import streamlit as st
 
 def create_gantt(df):
     # Crear el gráfico de Gantt
