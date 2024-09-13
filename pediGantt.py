@@ -281,8 +281,8 @@ def create_gantt(df):
     
     for i, process in enumerate(processes):
         # Asegúrate de que las fechas sean objetos datetime
-        date_min = pd.to_datetime(df[date_min_cols[i]][0])
-        date_max = pd.to_datetime(df[date_max_cols[i]][0])
+        #date_min = pd.to_datetime(df[date_min_cols[i]][0])
+        #date_max = pd.to_datetime(df[date_max_cols[i]][0])
         
         fig.add_trace(go.Bar(
             x=[(date_max - date_min).days],
