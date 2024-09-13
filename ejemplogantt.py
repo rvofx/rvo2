@@ -19,12 +19,12 @@ data = {
 df = pd.DataFrame(data)
 """
 # Convertir las fechas a formato datetime
-df['Fecha Inicio Programada'] = pd.to_datetime(df['Fecha Inicio Programada'])
-df['Fecha Final Programada'] = pd.to_datetime(df['Fecha Final Programada'])
-df['Fecha Inicio Real'] = pd.to_datetime(df['Fecha Inicio Real'])
-df['Fecha Final Real'] = pd.to_datetime(df['Fecha Final Real'])
-df['Fecha Emisión'] = pd.to_datetime(df['Fecha Emisión'])
-df['Fecha Final'] = pd.to_datetime(df['Fecha Final'])
+#df['Fecha Inicio Programada'] = pd.to_datetime(df['Fecha Inicio Programada'])
+#df['Fecha Final Programada'] = pd.to_datetime(df['Fecha Final Programada'])
+#df['Fecha Inicio Real'] = pd.to_datetime(df['Fecha Inicio Real'])
+#df['Fecha Final Real'] = pd.to_datetime(df['Fecha Final Real'])
+#df['Fecha Emisión'] = pd.to_datetime(df['Fecha Emisión'])
+#df['Fecha Final'] = pd.to_datetime(df['Fecha Final'])
 """
 # Extraer una fecha de emisión y una fecha final independientes del set de datos
 fecha_emision = df['Fecha Emisión'].iloc[0]  # Independiente pero dentro del set
