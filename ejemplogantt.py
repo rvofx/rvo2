@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Datos de ejemplo con fechas entre agosto 2024 y noviembre 2024
 data = {
@@ -73,6 +73,15 @@ fig.add_shape(
     name="Fecha Actual"
 )
 
-# Mostrar el gráfico
-st.plotly_chart(fig)
+# Añadir marcas verticales cada dos días
+fecha_min = df['Fecha Inicio Programada'].min()
+fecha_max = df['Fecha Final Programada'].max()
 
+for dia in pd.date_range(start=fecha_min, end=fecha_max, freq='2D'):
+    fig.add_vline(x=dia, line_dash="dot", line_color="lightgray", opacity=0.5)
+
+# Ajustar el gráfico para que ocupe todo el ancho de la página
+fig.update_layout(width=1500, height=600)
+
+# Mostrar el gráfico
+st.plotly_chart(fig, use_container_width=True)
