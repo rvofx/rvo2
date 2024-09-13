@@ -304,23 +304,23 @@ def create_gantt(df):
     }
     
     for label, date in important_dates.items():
-    fig.add_shape(
-        type="line",
-        x0=date,
-        x1=date,
-        y0=0,
-        y1=1,
-        yref="paper",
-        line=dict(color='red' if label == 'Hoy' else 'green', width=2),
-    )
-    fig.add_annotation(
-        x=date,
-        y=1,
-        yref="paper",
-        text=label,
-        showarrow=False,
-        yshift=10
-    )
+	fig.add_shape(
+	    type="line",
+	    x0=date,
+	    x1=date,
+	    y0=0,
+	    y1=1,
+	    yref="paper",
+	    line=dict(color='red' if label == 'Hoy' else 'green', width=2),
+	)
+	fig.add_annotation(
+	    x=date,
+	    y=1,
+	    yref="paper",
+	    text=label,
+	    showarrow=False,
+	    yshift=10
+	)
     # Configuración del eje X (días) y eje Y (procesos)
     fig.update_layout(
         title="Gráfico de Gantt - Procesos de Producción",
