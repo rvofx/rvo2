@@ -335,7 +335,7 @@ def create_gantt(df):
     st.plotly_chart(fig)
 
 # Interfaz de Streamli
-st.title("Gráfico de Gantt- Proceso por Pedido")
+st.title("Gráfico de Gantt - Proceso por Pedido")
 
 pedido = st.text_input("Ingrese el número de pedido:")
 
