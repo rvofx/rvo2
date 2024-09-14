@@ -7,19 +7,16 @@ import streamlit as st
 def create_gantt(df):
     # Crear el gráfico de Gantt
     fig = go.Figure()
-    
+
     # Iterar sobre los procesos y agregar trazas al gráfico
     for i, row in df.iterrows():
         # Obtener las fechas de inicio y fin
         date_min = row['Fecha inicio']
         date_max = row['Fecha fin']
-        
-        # Calcular la duración del proceso
-        duration = (date_max - date_min).days
-        
+
         # Agregar la barra de Gantt para cada proceso
         fig.add_trace(go.Bar(
-            x=[date_max],  # Fin del proceso
+            x=[date_max, date_min],  # Rango entre la fecha de inicio y la fecha fin
             y=[row['Proceso']],  # Proceso
             base=[date_min],  # Fecha de inicio
             orientation='h',  # Horizontal
@@ -28,15 +25,15 @@ def create_gantt(df):
             marker=dict(color='skyblue'),
             showlegend=False
         ))
-    
-    # Agregar las líneas verticales para F_EMISION, F_ENTREGA y fecha actual
+
+    # Agregar las líneas verticales para F_EMISION, F_ENTREGA y la fecha actual
     current_date = datetime.now().date()
     important_dates = {
         'F_EMISION': pd.to_datetime('2024-07-01').date(),
         'F_ENTREGA': pd.to_datetime('2024-09-15').date(),
         'Hoy': current_date
     }
-    
+
     for label, date in important_dates.items():
         fig.add_shape(
             type="line",
@@ -55,17 +52,18 @@ def create_gantt(df):
             showarrow=False,
             yshift=10
         )
-    
+
     # Configuración del eje X (fechas) y eje Y (procesos)
     fig.update_layout(
         title="Gráfico de Gantt - Procesos de Producción",
         xaxis_title="Fecha",
         yaxis_title="Proceso",
-        xaxis=dict(type='date', tickformat='%d-%m-%Y', dtick="D2"),
+        xaxis=dict(type='date', tickformat='%d-%m-%Y'),
         yaxis=dict(categoryorder="array", categoryarray=df['Proceso']),
         bargap=0.3
     )
-    
+
+    # Mostrar el gráfico en Streamlit
     st.plotly_chart(fig)
 
 # Ejemplo de datos ficticios
