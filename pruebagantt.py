@@ -14,12 +14,9 @@ def create_gantt(df):
         date_min = row['Fecha inicio']
         date_max = row['Fecha fin']
 
-        # Calcular la duración del proceso
-        duration = (date_max - date_min).days
-
         # Agregar la barra de Gantt para cada proceso
         fig.add_trace(go.Bar(
-            x=[duration],  # Duración del proceso en días
+            x=[date_max - date_min],  # Duración del proceso en días
             y=[row['Proceso']],  # Proceso
             base=[date_min],  # Fecha de inicio
             orientation='h',  # Horizontal
@@ -61,7 +58,7 @@ def create_gantt(df):
         title="Gráfico de Gantt - Procesos de Producción",
         xaxis_title="Fecha",
         yaxis_title="Proceso",
-        xaxis=dict(type='date', tickformat='%d-%m-%Y'),
+        xaxis=dict(type='date', tickformat='%d-%m-%Y', dtick="D1"),
         yaxis=dict(categoryorder="array", categoryarray=df['Proceso']),
         bargap=0.3
     )
