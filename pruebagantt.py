@@ -11,44 +11,43 @@ def create_gantt(df):
     # Iterar sobre los procesos y agregar trazas al gráfico
     for i, row in df.iterrows():
         # Obtener las fechas de inicio y fin
-        date_min = row['Fecha inicio']
-        date_max = row['Fecha fin']
+        fecha_inicio = row['fecha_inicio']
+        fecha_fin = row['fecha_fin']
 
         # Agregar la barra de Gantt para cada proceso
         fig.add_trace(go.Bar(
-            x=[date_max - date_min],  # Duración del proceso en días
-            y=[row['Proceso']],  # Proceso
-            base=[date_min],  # Fecha de inicio
+            x=[fecha_inicio, fecha_fin],  # Fecha de inicio y fin
+            y=[row['proceso'], row['proceso']],  # Proceso
             orientation='h',  # Horizontal
-            text=f"Progreso: {row['Progreso']}%",  # Mostrar el progreso en el tooltip
+            text=f"Progreso: {row['progreso']}%",  # Mostrar el progreso en el tooltip
             hoverinfo='text',
             marker=dict(color='skyblue'),
             showlegend=False
         ))
 
     # Agregar las líneas verticales para F_EMISION, F_ENTREGA y la fecha actual
-    current_date = datetime.now().date()
-    important_dates = {
+    fecha_actual = datetime.now().date()
+    fechas_importantes = {
         'F_EMISION': pd.to_datetime('2024-07-01').date(),
         'F_ENTREGA': pd.to_datetime('2024-09-15').date(),
-        'Hoy': current_date
+        'Hoy': fecha_actual
     }
 
-    for label, date in important_dates.items():
+    for etiqueta, fecha in fechas_importantes.items():
         fig.add_shape(
             type="line",
-            x0=date,
-            x1=date,
+            x0=fecha,
+            x1=fecha,
             y0=0,
             y1=1,
             yref="paper",
-            line=dict(color='red' if label == 'Hoy' else 'green', width=2),
+            line=dict(color='red' if etiqueta == 'Hoy' else 'green', width=2),
         )
         fig.add_annotation(
-            x=date,
+            x=fecha,
             y=1,
             yref="paper",
-            text=label,
+            text=etiqueta,
             showarrow=False,
             yshift=10
         )
@@ -59,7 +58,7 @@ def create_gantt(df):
         xaxis_title="Fecha",
         yaxis_title="Proceso",
         xaxis=dict(type='date', tickformat='%d-%m-%Y', dtick="D1"),
-        yaxis=dict(categoryorder="array", categoryarray=df['Proceso']),
+        yaxis=dict(categoryorder="array", categoryarray=df['proceso']),
         bargap=0.3
     )
 
@@ -68,15 +67,15 @@ def create_gantt(df):
 
 # Ejemplo de datos ficticios
 df = pd.DataFrame({
-    'Proceso': ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO'],
-    'Fecha inicio': ['2024-07-10', '2024-07-19', '2024-08-15', '2024-08-20', '2024-09-02'],
-    'Fecha fin': ['2024-07-12', '2024-07-24', '2024-08-21', '2024-08-23', '2024-09-12'],
-    'Progreso': [116, 116, 101, 105, 103]
+    'proceso': ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO'],
+    'fecha_inicio': ['2024-07-10', '2024-07-19', '2024-08-15', '2024-08-20', '2024-09-02'],
+    'fecha_fin': ['2024-07-12', '2024-07-24', '2024-08-21', '2024-08-23', '2024-09-12'],
+    'progreso': [116, 116, 101, 105, 103]
 })
 
 # Convertir las fechas a datetime en el DataFrame
-df['Fecha inicio'] = pd.to_datetime(df['Fecha inicio'])
-df['Fecha fin'] = pd.to_datetime(df['Fecha fin'])
+df['fecha_inicio'] = pd.to_datetime(df['fecha_inicio'])
+df['fecha_fin'] = pd.to_datetime(df['fecha_fin'])
 
 # Título de la aplicación
 st.title("Gráfico de Gantt - Proceso por Pedido")
