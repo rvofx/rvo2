@@ -14,13 +14,17 @@ def create_gantt(df):
         fecha_inicio = row['fecha_inicio']
         fecha_fin = row['fecha_fin']
 
+        # Calcular la duración del proceso
+        duracion = (fecha_fin - fecha_inicio).days
+
         # Agregar la barra de Gantt para cada proceso
         fig.add_trace(go.Bar(
-            x=[fecha_inicio, fecha_fin],  # Fecha de inicio y fin
+            x=[fecha_inicio, fecha_fin],  # Fecha de inicio y fin (rango en eje x)
             y=[row['proceso'], row['proceso']],  # Proceso
             orientation='h',  # Horizontal
             text=f"Progreso: {row['progreso']}%",  # Mostrar el progreso en el tooltip
             hoverinfo='text',
+            width=0.4,  # Anchura de la barra
             marker=dict(color='skyblue'),
             showlegend=False
         ))
@@ -29,7 +33,7 @@ def create_gantt(df):
     fecha_actual = datetime.now().date()
     fechas_importantes = {
         'F_EMISION': pd.to_datetime('2024-07-01').date(),
-        'F_ENTREGA': pd.to_datetime('2026-09-15').date(),
+        'F_ENTREGA': pd.to_datetime('2024-09-15').date(),
         'Hoy': fecha_actual
     }
 
@@ -57,7 +61,7 @@ def create_gantt(df):
         title="Gráfico de Gantt - Procesos de Producción",
         xaxis_title="Fecha",
         yaxis_title="Proceso",
-        xaxis=dict(type='date', tickformat='%d-%m-%Y', dtick="D1"),
+        xaxis=dict(type='date', tickformat='%d-%m-%Y', dtick="D2"),  # Ajuste para que muestre un tick cada dos días
         yaxis=dict(categoryorder="array", categoryarray=df['proceso']),
         bargap=0.3
     )
