@@ -282,19 +282,19 @@ def create_gantt(df):
 	
     for i, process in enumerate(processes):
 	# Asegúrate de que las fechas sean objetos datetime
-		date_min = pd.to_datetime(df[date_min_cols[i]][0])
-		date_max = pd.to_datetime(df[date_max_cols[i]][0])
-		
-		fig.add_trace(go.Bar(
-		    x=[date_max - date_min],
-		    y=[process],
-		    base=[date_min],
-		    orientation='h',
-		    text=f"Progreso: {df[progress_cols[i]].iloc[0]}%",
-		    hoverinfo='text',
-		    marker=dict(color='skyblue'),
-		    showlegend=False
-		))
+	date_min = pd.to_datetime(df[date_min_cols[i]][0])
+	date_max = pd.to_datetime(df[date_max_cols[i]][0])
+	
+	fig.add_trace(go.Bar(
+	    x=[date_max - date_min],
+	    y=[process],
+	    base=[date_min],
+	    orientation='h',
+	    text=f"Progreso: {df[progress_cols[i]].iloc[0]}%",
+	    hoverinfo='text',
+	    marker=dict(color='skyblue'),
+	    showlegend=False
+	))
     
     # Agregar las líneas verticales para F_EMISION, F_ENTREGA y fecha actual
     current_date = datetime.now().date()
