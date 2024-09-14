@@ -8,22 +8,28 @@ def create_gantt(df):
     # Crear el gráfico de Gantt
     fig = go.Figure()
     
+    # Definir los procesos y fechas
+    processes = ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO']
+    date_min_cols = ['2024-07-10', '2024-07-19', '2024-08-15', '2024-08-20', '2024-09-02']
+    date_max_cols = ['2024-07-12', '2024-07-24', '2024-08-21', '2024-08-23', '2024-09-12']
+    progress_cols = [116, 116, 101, 105, 103]  # Progresos ficticios para el ejemplo
+
     # Iterar sobre los procesos y agregar trazas al gráfico
-    for i, row in df.iterrows():
-        # Obtener las fechas de inicio y fin
-        date_min = row['Fecha inicio']
-        date_max = row['Fecha fin']
+    for i, process in enumerate(processes):
+        # Convertir las fechas en objetos datetime
+        date_min = pd.to_datetime(date_min_cols[i])
+        date_max = pd.to_datetime(date_max_cols[i])
         
         # Calcular la duración del proceso
         duration = (date_max - date_min).days
         
         # Agregar la barra de Gantt para cada proceso
         fig.add_trace(go.Bar(
-            x=[date_max],  # Fin del proceso
-            y=[row['Proceso']],  # Proceso
+            x=[duration],  # Duración en días
+            y=[process],   # Proceso
             base=[date_min],  # Fecha de inicio
             orientation='h',  # Horizontal
-            text=f"Progreso: {row['Progreso']}%",  # Mostrar el progreso en el tooltip
+            text=f"Progreso: {progress_cols[i]}%",  # Mostrar el progreso en el tooltip
             hoverinfo='text',
             marker=dict(color='skyblue'),
             showlegend=False
@@ -62,7 +68,7 @@ def create_gantt(df):
         xaxis_title="Fecha",
         yaxis_title="Proceso",
         xaxis=dict(type='date', tickformat='%d-%m-%Y', dtick="D2"),
-        yaxis=dict(categoryorder="array", categoryarray=df['Proceso']),
+        yaxis=dict(categoryorder="array", categoryarray=processes),
         bargap=0.3
     )
     
@@ -85,4 +91,3 @@ st.title("Gráfico de Gantt - Proceso por Pedido")
 
 # Llamar a la función para crear el gráfico
 create_gantt(df)
-
