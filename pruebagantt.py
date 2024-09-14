@@ -67,7 +67,7 @@ def create_gantt(df):
         title="Gráfico de Gantt - Procesos de Producción",
         xaxis_title="Fecha",
         yaxis_title="Proceso",
-        xaxis=dict(type='date', tickformat='%d-%m-%Y', dtick="D2"),
+        xaxis=dict(type='date', tickformat='%d', dtick="D2"),
         yaxis=dict(categoryorder="array", categoryarray=processes),
         bargap=0.3
     )
