@@ -336,8 +336,8 @@ def create_gantt(df):
 
 
 
-# Interfaz de Streamlit
-st.title("Gráfico de Gantt - Proceso por Pedido")
+# Interfaz de Streamli
+st.title("Gráfico de Gantt- Proceso por Pedido")
 
 pedido = st.text_input("Ingrese el número de pedido:")
 
