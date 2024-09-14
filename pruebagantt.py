@@ -1,59 +1,93 @@
-import streamlit as st
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
+# Función para crear el gráfico de Gantt
+import plotly.graph_objs as go
 from datetime import datetime
+import pandas as pd
+import streamlit as st
 
-# Subida del archivo Excel
-uploaded_file = st.file_uploader("Carga el archivo Excel del pedido", type="xlsx")
-
-if uploaded_file:
-    # Lectura del Excel
-    df = pd.read_excel(uploaded_file)
-
-    # Extracción de columnas importantes
-    f_emision = pd.to_datetime(df['F_EMISION'][0])
-    f_entrega = pd.to_datetime(df['F_ENTREGA'][0])
-    fecha_actual = datetime.now()
-
-    # Procesos y sus fechas mínimas y máximas
-    procesos = ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO']
-    fechas_min = [df['FMINARM'][0], df['FMINTENID'][0], df['FMINTELAPROB'][0], df['FMINCORTE'][0], df['FMINCOSIDO'][0]]
-    fechas_max = [df['FMAXARM'][0], df['FMAXTENID'][0], df['FMAXTELAPROB'][0], df['FMAXCORTE'][0], df['FMAXCOSIDO'][0]]
-    
-    # Porcentajes de avance
-    porcentajes = [df['KG_ARMP'][0], df['KG_TENIDP'][0], df['KG_TELAPROBP'][0], df['CORTADOP'][0], df['COSIDOP'][0]]
-
-    # Crear figura de Gantt
+def create_gantt(df):
+    # Crear el gráfico de Gantt
     fig = go.Figure()
+    
+    # Definir los procesos y fechas
+    processes = ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO']
+    date_min_cols = ['2024-07-10', '2024-07-19', '2024-08-15', '2024-08-20', '2024-09-02']
+    date_max_cols = ['2024-07-12', '2024-07-24', '2024-08-21', '2024-08-23', '2024-09-12']
+    progress_cols = [116, 116, 101, 105, 103]  # Progresos ficticios para el ejemplo
 
-    for i, proceso in enumerate(procesos):
+    # Iterar sobre los procesos y agregar trazas al gráfico
+    for i, process in enumerate(processes):
+        # Convertir las fechas en objetos datetime
+        date_min = pd.to_datetime(date_min_cols[i])
+        date_max = pd.to_datetime(date_max_cols[i])
+        
+        # Calcular la duración del proceso
+        duration = (date_max - date_min).days
+        
+        # Agregar la barra de Gantt para cada proceso
         fig.add_trace(go.Bar(
-            x=[(pd.to_datetime(fechas_max[i]) - pd.to_datetime(fechas_min[i])).days],
-            y=[proceso],
-            base=pd.to_datetime(fechas_min[i]),
-            orientation='h',
-            text=f"{porcentajes[i]} de avance",
-            marker=dict(color='skyblue')
+            x=[duration],  # Duración en días
+            y=[process],   # Proceso
+            base=[date_min],  # Fecha de inicio
+            orientation='h',  # Horizontal
+            text=f"Progreso: {progress_cols[i]}%",  # Mostrar el progreso en el tooltip
+            hoverinfo='text',
+            marker=dict(color='skyblue'),
+            showlegend=False
         ))
-
-    # Añadir líneas verticales para F_EMISION, F_ENTREGA, y fecha actual
-    for date, label in zip([f_emision, f_entrega, fecha_actual], ['F. Emisión', 'F. Entrega', 'Fecha Actual']):
-        --fig.add_vline(x=date, line=dict(color="red"), annotation_text=label, annotation_position="top")
-        fig.add_vline(x=date.strftime('%Y-%m-%d'), line_color="red", annotation_text=label, annotation_position="top")
-
-
-    # Líneas verticales cada dos días
-    days_range = pd.date_range(f_emision, f_entrega, freq='2D')
-    for day in days_range:
-        fig.add_vline(x=day, line=dict(color="gray", dash='dash'))
-
-    # Configurar eje X para mostrar los días
+    
+    # Agregar las líneas verticales para F_EMISION, F_ENTREGA y fecha actual
+    current_date = datetime.now().date()
+    important_dates = {
+        'F_EMISION': pd.to_datetime('2024-07-01').date(),
+        'F_ENTREGA': pd.to_datetime('2024-09-15').date(),
+        'Hoy': current_date
+    }
+    
+    for label, date in important_dates.items():
+        fig.add_shape(
+            type="line",
+            x0=date,
+            x1=date,
+            y0=0,
+            y1=1,
+            yref="paper",
+            line=dict(color='red' if label == 'Hoy' else 'green', width=2),
+        )
+        fig.add_annotation(
+            x=date,
+            y=1,
+            yref="paper",
+            text=label,
+            showarrow=False,
+            yshift=10
+        )
+    
+    # Configuración del eje X (fechas) y eje Y (procesos)
     fig.update_layout(
-        title="Diagrama de Gantt de Procesos",
+        title="Gráfico de Gantt - Procesos de Producción",
         xaxis_title="Fecha",
         yaxis_title="Proceso",
-        xaxis=dict(type='date')
+        xaxis=dict(type='date', tickformat='%d-%m-%Y', dtick="D2"),
+        yaxis=dict(categoryorder="array", categoryarray=processes),
+        bargap=0.3
     )
-
+    
     st.plotly_chart(fig)
+
+# Ejemplo de datos ficticios
+df = pd.DataFrame({
+    'Proceso': ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO'],
+    'Fecha inicio': ['2024-07-10', '2024-07-19', '2024-08-15', '2024-08-20', '2024-09-02'],
+    'Fecha fin': ['2024-07-12', '2024-07-24', '2024-08-21', '2024-08-23', '2024-09-12'],
+    'Progreso': [116, 116, 101, 105, 103]
+})
+
+# Convertir las fechas a datetime en el DataFrame
+df['Fecha inicio'] = pd.to_datetime(df['Fecha inicio'])
+df['Fecha fin'] = pd.to_datetime(df['Fecha fin'])
+
+# Título de la aplicación
+st.title("Gráfico de Gantt - Proceso por Pedido")
+
+# Llamar a la función para crear el gráfico
+create_gantt(df)
