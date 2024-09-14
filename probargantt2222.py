@@ -68,5 +68,5 @@ def create_gantt():
     st.plotly_chart(fig)
 
 st.title("Gráfico de Gantt - Proceso por Pedido")
-create_gantt()
+create_gantt(df)
 
