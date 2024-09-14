@@ -39,7 +39,7 @@ def create_gantt(df):
     current_date = datetime.now().date()
     important_dates = {
         'F_EMISION': pd.to_datetime('2024-07-01').date(),
-        'F_ENTREGA': pd.to_datetime('2024-09-15').date(),
+        'F_ENTREGA': pd.to_datetime('2024-09-30').date(),
         'Hoy': current_date
     }
     
