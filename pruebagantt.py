@@ -11,8 +11,8 @@ def create_gantt(df):
     # Iterar sobre los procesos y agregar trazas al gráfico
     for i, row in df.iterrows():
         # Obtener las fechas de inicio y fin, asegurando que solo se considere la fecha (sin tiempo)
-        fecha_inicio = row['fecha_inicio'].date()  # Convertir a solo fecha
-        fecha_fin = row['fecha_fin'].date()  # Convertir a solo fecha
+        #fecha_inicio = row['fecha_inicio'].date()  # Convertir a solo fecha
+        #fecha_fin = row['fecha_fin'].date()  # Convertir a solo fecha
 
         # Asegurarnos de que la fecha de inicio sea menor a la de fin
         if fecha_inicio >= fecha_fin:
