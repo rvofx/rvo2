@@ -24,6 +24,7 @@ def create_gantt(df, f_emision, f_entrega):
         st.write(f"Proceso: {row['proceso']}, Fecha Inicio: {fecha_inicio}, Fecha Fin: {fecha_fin}, Duración: {duracion} días")
         
         # Agregar la barra de Gantt para cada proceso
+        
         fig.add_trace(go.Bar(
             x=[fecha_inicio, fecha_fin],
             y=[row['proceso'], row['proceso']],
@@ -32,7 +33,8 @@ def create_gantt(df, f_emision, f_entrega):
             hoverinfo='text',
             marker=dict(color='skyblue'),
             showlegend=False,
-            name=row['proceso']
+            name=row['proceso'],
+            base=fecha_inicio
         ))
 
     # Trazar la fecha de emisión y la fecha de entrega usando add_shape()
