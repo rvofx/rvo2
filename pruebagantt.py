@@ -10,9 +10,9 @@ def create_gantt(df):
 
     # Iterar sobre los procesos y agregar trazas al gráfico
     for i, row in df.iterrows():
-        # Obtener las fechas de inicio y fin
-        fecha_inicio = row['fecha_inicio']
-        fecha_fin = row['fecha_fin']
+        # Obtener las fechas de inicio y fin, asegurando que solo se considere la fecha (sin tiempo)
+        fecha_inicio = row['fecha_inicio'].date()  # Convertir a solo fecha
+        fecha_fin = row['fecha_fin'].date()  # Convertir a solo fecha
 
         # Asegurarnos de que la fecha de inicio sea menor a la de fin
         if fecha_inicio >= fecha_fin:
@@ -28,8 +28,9 @@ def create_gantt(df):
 
         # Agregar la barra de Gantt para cada proceso
         fig.add_trace(go.Bar(
-            x=[fecha_inicio, fecha_fin],  # Fecha de inicio y fin (rango en eje x)
-            y=[row['proceso'], row['proceso']],  # Proceso
+            x=[duracion],  # Usar la duración como la longitud de la barra en el eje X
+            y=[row['proceso']],  # Proceso
+            base=[fecha_inicio],  # La barra empieza en la fecha de inicio
             orientation='h',  # Horizontal
             text=f"Progreso: {row['progreso']}%",  # Mostrar el progreso en el tooltip
             hoverinfo='text',
@@ -51,7 +52,7 @@ def create_gantt(df):
     # Mostrar el gráfico en Streamlit
     st.plotly_chart(fig)
 
-# Datos de prueba simplificados
+# Datos de prueba ajustados
 df = pd.DataFrame({
     'proceso': ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO'],
     'fecha_inicio': ['2024-07-01', '2024-07-10', '2024-07-20', '2024-08-01', '2024-08-15'],
@@ -60,11 +61,12 @@ df = pd.DataFrame({
 })
 
 # Convertir las fechas a datetime en el DataFrame
-df['fecha_inicio'] = pd.to_datetime(df['fecha_inicio'])
-df['fecha_fin'] = pd.to_datetime(df['fecha_fin'])
+df['fecha_inicio'] = pd.to_datetime(df['fecha_inicio']).dt.date
+df['fecha_fin'] = pd.to_datetime(df['fecha_fin']).dt.date
 
 # Título de la aplicación
 st.title("Gráfico de Gantt - Proceso por Pedido")
 
 # Llamar a la función para crear el gráfico
 create_gantt(df)
+
