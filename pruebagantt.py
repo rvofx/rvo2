@@ -32,13 +32,31 @@ def create_gantt(df, f_emision, f_entrega):
             showlegend=False
         ))
 
-    # Trazar la fecha de emisión y la fecha de entrega
-    fig.add_vline(x=f_emision, line_width=2, line_dash="dash", line_color="green", annotation_text="F. Emisión", annotation_position="top right")
-    fig.add_vline(x=f_entrega, line_width=2, line_dash="dash", line_color="red", annotation_text="F. Entrega", annotation_position="top right")
+    # Trazar la fecha de emisión y la fecha de entrega usando add_shape()
+    fig.add_shape(
+        type="line",
+        x0=f_emision, x1=f_emision,  # Usar la fecha de emisión para las posiciones x0 y x1
+        y0=-0.5, y1=len(df)-0.5,  # Ajustar el rango vertical de la línea
+        line=dict(color="green", width=2, dash="dash"),
+        name="F. Emisión"
+    )
+    fig.add_shape(
+        type="line",
+        x0=f_entrega, x1=f_entrega,  # Usar la fecha de entrega para las posiciones x0 y x1
+        y0=-0.5, y1=len(df)-0.5,  # Ajustar el rango vertical de la línea
+        line=dict(color="red", width=2, dash="dash"),
+        name="F. Entrega"
+    )
 
     # Trazar el día actual
     dia_actual = datetime.today().date()
-    fig.add_vline(x=dia_actual, line_width=2, line_dash="dash", line_color="blue", annotation_text="Hoy", annotation_position="top left")
+    fig.add_shape(
+        type="line",
+        x0=dia_actual, x1=dia_actual,  # Usar el día actual
+        y0=-0.5, y1=len(df)-0.5,
+        line=dict(color="blue", width=2, dash="dash"),
+        name="Hoy"
+    )
 
     # Configuración del eje X (fechas) y eje Y (procesos)
     fig.update_layout(
@@ -62,12 +80,12 @@ df = pd.DataFrame({
 })
 
 # Convertir las fechas a datetime en el DataFrame
-df['fecha_inicio'] = pd.to_datetime(df['fecha_inicio']).dt.date
-df['fecha_fin'] = pd.to_datetime(df['fecha_fin']).dt.date
+df['fecha_inicio'] = pd.to_datetime(df['fecha_inicio'])
+df['fecha_fin'] = pd.to_datetime(df['fecha_fin'])
 
 # Definir F_EMISION y F_ENTREGA
-f_emision = datetime(2024, 6, 28).date()  # Ejemplo de fecha de emisión
-f_entrega = datetime(2024, 8, 25).date()  # Ejemplo de fecha de entrega
+f_emision = datetime(2024, 6, 28)  # Ejemplo de fecha de emisión
+f_entrega = datetime(2024, 8, 25)  # Ejemplo de fecha de entrega
 
 # Título de la aplicación
 st.title("Gráfico de Gantt - Proceso por Pedido")
