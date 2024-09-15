@@ -140,9 +140,21 @@ def crear_gantt(df, fecha_pedido, fecha_entrega, fecha_actual):
 
     return fig
 
-# Aplicación Streamlit (sin cambios)
+# Aplicación Streamlit
 def main():
-    # ... (código sin cambios)
+    st.title("Seguimiento de Pedido - Gráfico de Gantt")
+
+    df, fecha_pedido, fecha_entrega, fecha_actual = generar_datos_prueba()
+
+    st.write("Datos del Pedido:")
+    st.dataframe(df)
+
+    fig = crear_gantt(df, fecha_pedido, fecha_entrega, fecha_actual)
+    st.plotly_chart(fig)
+
+    st.write(f"Fecha de Pedido: {fecha_pedido}")
+    st.write(f"Fecha de Entrega Programada: {fecha_entrega}")
+    st.write(f"Fecha Actual: {fecha_actual}")
 
 if __name__ == "__main__":
     main()
