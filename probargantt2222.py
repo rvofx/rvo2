@@ -1,17 +1,15 @@
-# Función para crear el gráfico de Gantt
-import plotly.graph_objs as go
-from datetime import datetime
-import pandas as pd
-import streamlit as st
-
-
-
 import plotly.graph_objs as go
 from datetime import datetime
 import pandas as pd
 import streamlit as st
 
 def create_gantt(df, f_emision, f_entrega):
+    # Asegurarse de que las fechas sean objetos datetime
+    df['fecha_inicio'] = pd.to_datetime(df['fecha_inicio'])
+    df['fecha_fin'] = pd.to_datetime(df['fecha_fin'])
+    f_emision = pd.to_datetime(f_emision)
+    f_entrega = pd.to_datetime(f_entrega)
+
     # Crear el gráfico de Gantt
     fig = go.Figure()
     
@@ -27,8 +25,8 @@ def create_gantt(df, f_emision, f_entrega):
         
         # Agregar la barra de Gantt para cada proceso
         fig.add_trace(go.Bar(
-            x=[fecha_inicio, fecha_fin],  # Usar fecha_inicio y fecha_fin directamente
-            y=[row['proceso'], row['proceso']],  # Repetir el proceso para mantener la barra horizontal
+            x=[fecha_inicio, fecha_fin],
+            y=[row['proceso'], row['proceso']],
             orientation='h',
             text=f"{row['proceso']}: {row['progreso']}%",
             hoverinfo='text',
@@ -54,7 +52,7 @@ def create_gantt(df, f_emision, f_entrega):
     )
 
     # Trazar el día actual
-    dia_actual = datetime.today().date()
+    dia_actual = pd.to_datetime(datetime.today().date())
     fig.add_shape(
         type="line",
         x0=dia_actual, x1=dia_actual,
@@ -71,13 +69,13 @@ def create_gantt(df, f_emision, f_entrega):
         xaxis=dict(
             type='date',
             tickformat='%d-%m-%Y',
-            dtick="D7",  # Mostrar ticks cada 7 días
-            range=[f_emision, f_entrega]  # Establecer el rango del eje X
+            dtick="D7",
+            range=[f_emision, f_entrega]
         ),
         yaxis=dict(categoryorder="array", categoryarray=df['proceso']),
-        barmode='overlay',  # Asegura que las barras se superpongan correctamente
+        barmode='overlay',
         bargap=0.2,
-        height=400 + (len(df) * 30),  # Ajustar la altura del gráfico según el número de procesos
+        height=400 + (len(df) * 30),
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -94,6 +92,16 @@ def create_gantt(df, f_emision, f_entrega):
 
     # Mostrar el gráfico en Streamlit
     st.plotly_chart(fig)
+
+# Función para imprimir los detalles del DataFrame
+def print_df_details(df):
+    st.write("Detalles del DataFrame:")
+    st.write(df)
+    st.write("\nTipos de datos de las columnas:")
+    st.write(df.dtypes)
+
+# Asegúrate de llamar a esta función antes de create_gantt
+print_df_details(df)
 
 # Datos de prueba ajustados
 df = pd.DataFrame({
