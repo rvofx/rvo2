@@ -3,11 +3,55 @@ import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
-# Generar datos de prueba (sin cambios)
+# Generar datos de prueba
 def generar_datos_prueba():
-    # ... (código sin cambios)
-    return df, fecha_pedido, fecha_entrega, fecha_actual
+    fecha_actual = datetime.now().date()
+    fecha_pedido = fecha_actual - timedelta(days=30)
+    fecha_entrega = fecha_actual + timedelta(days=60)
 
+    procesos = [
+        {
+            "Tarea": "Diseño",
+            "Inicio Programado": fecha_pedido + timedelta(days=5),
+            "Fin Programado": fecha_pedido + timedelta(days=15),
+            "Inicio Real": fecha_pedido + timedelta(days=7),
+            "Fin Real": fecha_pedido + timedelta(days=18),
+            "Avance": 100
+        },
+        {
+            "Tarea": "Fabricación",
+            "Inicio Programado": fecha_pedido + timedelta(days=16),
+            "Fin Programado": fecha_pedido + timedelta(days=45),
+            "Inicio Real": fecha_pedido + timedelta(days=19),
+            "Fin Real": fecha_actual + timedelta(days=5),
+            "Avance": 80
+        },
+        {
+            "Tarea": "Control de Calidad",
+            "Inicio Programado": fecha_pedido + timedelta(days=46),
+            "Fin Programado": fecha_pedido + timedelta(days=55),
+            "Inicio Real": fecha_actual + timedelta(days=6),
+            "Fin Real": fecha_actual + timedelta(days=6),
+            "Avance": 0
+        },
+        {
+            "Tarea": "Empaque y Envío",
+            "Inicio Programado": fecha_pedido + timedelta(days=56),
+            "Fin Programado": fecha_entrega,
+            "Inicio Real": None,
+            "Fin Real": None,
+            "Avance": 0
+        }
+    ]
+    
+    df = pd.DataFrame(procesos)
+    
+    # Convertir fechas a cadenas para evitar problemas con Plotly
+    date_columns = ['Inicio Programado', 'Fin Programado', 'Inicio Real', 'Fin Real']
+    for col in date_columns:
+        df[col] = df[col].apply(lambda x: x.strftime('%Y-%m-%d') if pd.notnull(x) else None)
+    
+    return df, fecha_pedido, fecha_entrega, fecha_actual
 # Crear gráfico de Gantt (con cambios)
 def crear_gantt(df, fecha_pedido, fecha_entrega, fecha_actual):
     fig = go.Figure()
