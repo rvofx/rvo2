@@ -15,9 +15,9 @@ def create_gantt(df):
         #fecha_fin = row['fecha_fin'].date()  # Convertir a solo fecha
 
         # Asegurarnos de que la fecha de inicio sea menor a la de fin
-        if fecha_inicio >= fecha_fin:
-            st.write(f"Error: La fecha de inicio ({fecha_inicio}) es mayor o igual a la fecha de fin ({fecha_fin}) para el proceso {row['proceso']}")
-            continue
+        #if fecha_inicio >= fecha_fin:
+            #st.write(f"Error: La fecha de inicio ({fecha_inicio}) es mayor o igual a la fecha de fin ({fecha_fin}) para el proceso {row['proceso']}")
+            #continue
 
         # Imprimir para verificar valores de las fechas
         st.write(f"Proceso: {row['proceso']}, Fecha Inicio: {fecha_inicio}, Fecha Fin: {fecha_fin}")
