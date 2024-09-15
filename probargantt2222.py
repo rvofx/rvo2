@@ -51,7 +51,7 @@ def generar_datos_prueba():
     for col in date_columns:
         df[col] = df[col].apply(lambda x: x.strftime('%Y-%m-%d') if pd.notnull(x) else None)
     
-    return df, fecha_pedido.strftime('%Y-%m-%d'), fecha_entrega.strftime('%Y-%m-%d'), fecha_actual.strftime('%Y-%m-%d')
+    return df, fecha_pedido, fecha_entrega, fecha_actual
 
 # Crear gráfico de Gantt
 def crear_gantt(df, fecha_pedido, fecha_entrega, fecha_actual):
@@ -99,10 +99,21 @@ def crear_gantt(df, fecha_pedido, fecha_entrega, fecha_actual):
                 name=f"{task['Tarea']} (Fin Real)"
             ))
 
-    # Líneas verticales para fechas clave
-    fig.add_vline(x=fecha_pedido, line_dash="dash", line_color="purple", annotation_text="Fecha de Pedido")
-    fig.add_vline(x=fecha_entrega, line_dash="dash", line_color="orange", annotation_text="Fecha de Entrega Programada")
-    fig.add_vline(x=fecha_actual, line_dash="solid", line_color="green", annotation_text="Fecha Actual")
+    # Líneas verticales para fechas clave usando add_shape
+    shapes = [
+        dict(type="line", x0=fecha_pedido, x1=fecha_pedido, y0=0, y1=1, yref="paper",
+             line=dict(color="purple", width=2, dash="dash")),
+        dict(type="line", x0=fecha_entrega, x1=fecha_entrega, y0=0, y1=1, yref="paper",
+             line=dict(color="orange", width=2, dash="dash")),
+        dict(type="line", x0=fecha_actual, x1=fecha_actual, y0=0, y1=1, yref="paper",
+             line=dict(color="green", width=2))
+    ]
+
+    annotations = [
+        dict(x=fecha_pedido, y=1.05, yref="paper", text="Fecha de Pedido", showarrow=False),
+        dict(x=fecha_entrega, y=1.05, yref="paper", text="Fecha de Entrega Programada", showarrow=False),
+        dict(x=fecha_actual, y=1.05, yref="paper", text="Fecha Actual", showarrow=False)
+    ]
 
     fig.update_layout(
         title="Gráfico de Gantt del Pedido",
@@ -110,7 +121,9 @@ def crear_gantt(df, fecha_pedido, fecha_entrega, fecha_actual):
         yaxis_title="Tarea",
         height=400,
         width=800,
-        showlegend=False
+        showlegend=False,
+        shapes=shapes,
+        annotations=annotations
     )
 
     return fig
