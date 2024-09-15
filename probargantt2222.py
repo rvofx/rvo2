@@ -22,7 +22,7 @@ def create_gantt(df, f_emision, f_entrega):
 
         # Agregar la barra de Gantt para cada proceso
         fig.add_trace(go.Bar(
-            x=[fecha_inicio, fecha_fin],  # Fecha de inicio y fin
+            x=[fecha_fin, fecha_fin],  # Fecha de inicio y fin
             y=[row['proceso']],  # Proceso
             orientation='h',
             text=f"Progreso: {row['progreso']}%",
@@ -84,7 +84,7 @@ df['fecha_inicio'] = pd.to_datetime(df['fecha_inicio'])
 df['fecha_fin'] = pd.to_datetime(df['fecha_fin'])
 
 # Definir F_EMISION y F_ENTREGA
-f_emision = datetime(2024, 7, 1)  # Ejemplo de fecha de emisión
+f_emision = datetime(2024, 6, 28)  # Ejemplo de fecha de emisión
 f_entrega = datetime(2024, 8, 25)  # Ejemplo de fecha de entrega
 
 # Título de la aplicación
