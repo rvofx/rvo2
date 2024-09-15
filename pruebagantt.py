@@ -14,8 +14,12 @@ def create_gantt(df):
         fecha_inicio = row['fecha_inicio']
         fecha_fin = row['fecha_fin']
 
+        # Imprimir para verificar valores de las fechas
+        st.write(f"Proceso: {row['proceso']}, Fecha Inicio: {fecha_inicio}, Fecha Fin: {fecha_fin}")
+
         # Calcular la duración del proceso
         duracion = (fecha_fin - fecha_inicio).days
+        st.write(f"Duración calculada: {duracion} días")
 
         # Agregar la barra de Gantt para cada proceso
         fig.add_trace(go.Bar(
@@ -38,6 +42,7 @@ def create_gantt(df):
     }
 
     for etiqueta, fecha in fechas_importantes.items():
+        st.write(f"{etiqueta}: {fecha}")  # Verificar las fechas importantes
         fig.add_shape(
             type="line",
             x0=fecha,
@@ -69,12 +74,12 @@ def create_gantt(df):
     # Mostrar el gráfico en Streamlit
     st.plotly_chart(fig)
 
-# Ejemplo de datos ficticios
+# Ejemplo de datos modificados
 df = pd.DataFrame({
     'proceso': ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO'],
-    'fecha_inicio': ['2024-07-10', '2024-07-19', '2024-08-15', '2024-08-20', '2024-09-02'],
-    'fecha_fin': ['2024-07-12', '2024-07-24', '2024-08-21', '2024-08-23', '2024-09-12'],
-    'progreso': [116, 116, 101, 105, 103]
+    'fecha_inicio': ['2024-07-01', '2024-07-10', '2024-07-20', '2024-08-01', '2024-08-15'],
+    'fecha_fin': ['2024-07-05', '2024-07-15', '2024-07-25', '2024-08-05', '2024-08-20'],
+    'progreso': [100, 80, 60, 90, 75]
 })
 
 # Convertir las fechas a datetime en el DataFrame
@@ -86,4 +91,3 @@ st.title("Gráfico de Gantt - Proceso por Pedido")
 
 # Llamar a la función para crear el gráfico
 create_gantt(df)
-
