@@ -1,49 +1,99 @@
-import plotly.figure_factory as ff
+# Función para crear el gráfico de Gantt
+import plotly.graph_objs as go
+from datetime import datetime
+import pandas as pd
+import streamlit as st
+
+import plotly.graph_objs as go
 from datetime import datetime
 import pandas as pd
 import streamlit as st
 
 def create_gantt(df, f_emision, f_entrega):
-    # Preparar los datos para el gráfico de Gantt
-    gantt_data = []
-    for _, row in df.iterrows():
-        gantt_data.append(dict(
-            Task=row['proceso'],
-            Start=row['fecha_inicio'],
-            Finish=row['fecha_fin'],
-            Description=f"Progreso: {row['progreso']}%"
+    # Crear el gráfico de Gantt
+    fig = go.Figure()
+    
+    # Iterar sobre los procesos y agregar trazas al gráfico
+    for i, row in df.iterrows():
+        fecha_inicio = row['fecha_inicio']
+        fecha_fin = row['fecha_fin']
+        if fecha_inicio >= fecha_fin:
+            st.write(f"Error: La fecha de inicio ({fecha_inicio}) es mayor o igual a la fecha de fin ({fecha_fin}) para el proceso {row['proceso']}")
+            continue
+        duracion = (fecha_fin - fecha_inicio).days
+        st.write(f"Proceso: {row['proceso']}, Fecha Inicio: {fecha_inicio}, Fecha Fin: {fecha_fin}, Duración: {duracion} días")
+        
+        # Agregar la barra de Gantt para cada proceso
+        fig.add_trace(go.Bar(
+            x=[duracion],  # Duración del proceso
+            y=[row['proceso']],  # Proceso
+            orientation='h',
+            text=f"Progreso: {row['progreso']}%",
+            hoverinfo='text',
+            marker=dict(color='skyblue'),
+            showlegend=False,
+            base=fecha_inicio,  # Establecer la fecha de inicio como base
+            name=row['proceso']  # Agregar el nombre del proceso
         ))
 
-    # Crear el gráfico de Gantt
-    fig = ff.create_gantt(gantt_data, index_col='Task', show_colorbar=True, group_tasks=True)
+    # Trazar la fecha de emisión y la fecha de entrega usando add_shape()
+    fig.add_shape(
+        type="line",
+        x0=f_emision, x1=f_emision,
+        y0=-0.5, y1=len(df)-0.5,
+        line=dict(color="green", width=2, dash="dash"),
+        name="F. Emisión"
+    )
+    fig.add_shape(
+        type="line",
+        x0=f_entrega, x1=f_entrega,
+        y0=-0.5, y1=len(df)-0.5,
+        line=dict(color="red", width=2, dash="dash"),
+        name="F. Entrega"
+    )
 
-    # Ajustar el diseño del gráfico
+    # Trazar el día actual
+    dia_actual = datetime.today().date()
+    fig.add_shape(
+        type="line",
+        x0=dia_actual, x1=dia_actual,
+        y0=-0.5, y1=len(df)-0.5,
+        line=dict(color="blue", width=2, dash="dash"),
+        name="Hoy"
+    )
+
+    # Configuración del eje X (fechas) y eje Y (procesos)
     fig.update_layout(
         title="Gráfico de Gantt - Procesos de Producción",
         xaxis_title="Fecha",
         yaxis_title="Proceso",
-        height=600,
+        xaxis=dict(
+            type='date',
+            tickformat='%d-%m-%Y',
+            dtick="D1",
+            range=[f_emision, f_entrega]  # Establecer el rango del eje X
+        ),
+        yaxis=dict(categoryorder="array", categoryarray=df['proceso']),
+        bargap=0.2,
+        height=400 + (len(df) * 30),  # Ajustar la altura del gráfico según el número de procesos
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        )
     )
 
-    # Añadir líneas verticales para fechas importantes
-    lineas = [
-        ("F. Emisión", f_emision, "green"),
-        ("F. Entrega", f_entrega, "red"),
-        ("Hoy", datetime.today().date(), "blue")
-    ]
-
-    for nombre, fecha, color in lineas:
-        fig.add_vline(x=fecha, line_dash="dash", line_color=color, annotation_text=nombre, annotation_position="top right")
+    # Agregar leyenda para las líneas de fecha
+    fig.add_trace(go.Scatter(x=[None], y=[None], mode='lines', line=dict(color='green', dash='dash'), name='F. Emisión'))
+    fig.add_trace(go.Scatter(x=[None], y=[None], mode='lines', line=dict(color='red', dash='dash'), name='F. Entrega'))
+    fig.add_trace(go.Scatter(x=[None], y=[None], mode='lines', line=dict(color='blue', dash='dash'), name='Hoy'))
 
     # Mostrar el gráfico en Streamlit
     st.plotly_chart(fig)
 
-    # Imprimir información de los procesos
-    for _, row in df.iterrows():
-        duracion = (row['fecha_fin'] - row['fecha_inicio']).days
-        st.write(f"Proceso: {row['proceso']}, Fecha Inicio: {row['fecha_inicio']}, Fecha Fin: {row['fecha_fin']}, Duración: {duracion} días")
-
-# Datos de prueba
+# Datos de prueba ajustados
 df = pd.DataFrame({
     'proceso': ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO'],
     'fecha_inicio': ['2024-07-01', '2024-07-10', '2024-07-20', '2024-08-01', '2024-08-15'],
@@ -56,8 +106,8 @@ df['fecha_inicio'] = pd.to_datetime(df['fecha_inicio'])
 df['fecha_fin'] = pd.to_datetime(df['fecha_fin'])
 
 # Definir F_EMISION y F_ENTREGA
-f_emision = datetime(2024, 6, 28)
-f_entrega = datetime(2024, 8, 25)
+f_emision = datetime(2024, 6, 28)  # Ejemplo de fecha de emisión
+f_entrega = datetime(2024, 8, 25)  # Ejemplo de fecha de entrega
 
 # Título de la aplicación
 st.title("Gráfico de Gantt - Proceso por Pedido")
