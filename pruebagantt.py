@@ -14,6 +14,11 @@ def create_gantt(df):
         fecha_inicio = row['fecha_inicio']
         fecha_fin = row['fecha_fin']
 
+        # Asegurarnos de que la fecha de inicio sea menor a la de fin
+        if fecha_inicio >= fecha_fin:
+            st.write(f"Error: La fecha de inicio ({fecha_inicio}) es mayor o igual a la fecha de fin ({fecha_fin}) para el proceso {row['proceso']}")
+            continue
+
         # Imprimir para verificar valores de las fechas
         st.write(f"Proceso: {row['proceso']}, Fecha Inicio: {fecha_inicio}, Fecha Fin: {fecha_fin}")
 
@@ -33,34 +38,6 @@ def create_gantt(df):
             showlegend=False
         ))
 
-    # Agregar las líneas verticales para F_EMISION, F_ENTREGA y la fecha actual
-    fecha_actual = datetime.now().date()
-    fechas_importantes = {
-        'F_EMISION': pd.to_datetime('2024-07-01').date(),
-        'F_ENTREGA': pd.to_datetime('2024-09-15').date(),
-        'Hoy': fecha_actual
-    }
-
-    for etiqueta, fecha in fechas_importantes.items():
-        st.write(f"{etiqueta}: {fecha}")  # Verificar las fechas importantes
-        fig.add_shape(
-            type="line",
-            x0=fecha,
-            x1=fecha,
-            y0=0,
-            y1=1,
-            yref="paper",
-            line=dict(color='red' if etiqueta == 'Hoy' else 'green', width=2),
-        )
-        fig.add_annotation(
-            x=fecha,
-            y=1,
-            yref="paper",
-            text=etiqueta,
-            showarrow=False,
-            yshift=10
-        )
-
     # Configuración del eje X (fechas) y eje Y (procesos)
     fig.update_layout(
         title="Gráfico de Gantt - Procesos de Producción",
@@ -74,7 +51,7 @@ def create_gantt(df):
     # Mostrar el gráfico en Streamlit
     st.plotly_chart(fig)
 
-# Ejemplo de datos modificados
+# Datos de prueba simplificados
 df = pd.DataFrame({
     'proceso': ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO'],
     'fecha_inicio': ['2024-07-01', '2024-07-10', '2024-07-20', '2024-08-01', '2024-08-15'],
