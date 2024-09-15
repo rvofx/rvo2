@@ -1,35 +1,31 @@
-import plotly.graph_objs as go
+import plotly.figure_factory as ff
 from datetime import datetime
 import pandas as pd
 import streamlit as st
 
 def create_gantt(df, f_emision, f_entrega):
-    # Crear el gráfico de Gantt
-    fig = go.Figure()
-
-    # Crear la línea de tiempo para cada proceso
-    for i, row in df.iterrows():
-        fecha_inicio = row['fecha_inicio']
-        fecha_fin = row['fecha_fin']
-        if fecha_inicio >= fecha_fin:
-            st.write(f"Error: La fecha de inicio ({fecha_inicio}) es mayor o igual a la fecha de fin ({fecha_fin}) para el proceso {row['proceso']}")
-            continue
-        duracion = (fecha_fin - fecha_inicio).days
-        st.write(f"Proceso: {row['proceso']}, Fecha Inicio: {fecha_inicio}, Fecha Fin: {fecha_fin}, Duración: {duracion} días")
-
-        # Usar timeline en lugar de add_trace
-        fig.add_trace(go.Timeline(
-            x0=fecha_inicio,
-            x1=fecha_fin,
-            y=row['proceso'],
-            text=f"Progreso: {row['progreso']}%",
-            hoverinfo='text',
-            mode='lines',
-            line=dict(color='skyblue', width=20),
-            name=row['proceso']
+    # Preparar los datos para el gráfico de Gantt
+    gantt_data = []
+    for _, row in df.iterrows():
+        gantt_data.append(dict(
+            Task=row['proceso'],
+            Start=row['fecha_inicio'],
+            Finish=row['fecha_fin'],
+            Description=f"Progreso: {row['progreso']}%"
         ))
 
-    # Trazar la fecha de emisión, fecha de entrega y día actual
+    # Crear el gráfico de Gantt
+    fig = ff.create_gantt(gantt_data, index_col='Task', show_colorbar=True, group_tasks=True)
+
+    # Ajustar el diseño del gráfico
+    fig.update_layout(
+        title="Gráfico de Gantt - Procesos de Producción",
+        xaxis_title="Fecha",
+        yaxis_title="Proceso",
+        height=600,
+    )
+
+    # Añadir líneas verticales para fechas importantes
     lineas = [
         ("F. Emisión", f_emision, "green"),
         ("F. Entrega", f_entrega, "red"),
@@ -37,35 +33,15 @@ def create_gantt(df, f_emision, f_entrega):
     ]
 
     for nombre, fecha, color in lineas:
-        fig.add_shape(
-            type="line",
-            x0=fecha, x1=fecha,
-            y0=-0.5, y1=len(df)-0.5,
-            line=dict(color=color, width=2, dash="dash"),
-            name=nombre
-        )
-        fig.add_annotation(
-            x=fecha,
-            y=len(df),
-            text=nombre,
-            showarrow=False,
-            yshift=10,
-            font=dict(color=color)
-        )
-
-    # Configuración del diseño
-    fig.update_layout(
-        title="Gráfico de Gantt - Procesos de Producción",
-        xaxis_title="Fecha",
-        yaxis_title="Proceso",
-        xaxis=dict(type='date', tickformat='%d-%m-%Y', dtick="D1"),
-        yaxis=dict(categoryorder="array", categoryarray=df['proceso']),
-        height=600,
-        showlegend=False
-    )
+        fig.add_vline(x=fecha, line_dash="dash", line_color=color, annotation_text=nombre, annotation_position="top right")
 
     # Mostrar el gráfico en Streamlit
     st.plotly_chart(fig)
+
+    # Imprimir información de los procesos
+    for _, row in df.iterrows():
+        duracion = (row['fecha_fin'] - row['fecha_inicio']).days
+        st.write(f"Proceso: {row['proceso']}, Fecha Inicio: {row['fecha_inicio']}, Fecha Fin: {row['fecha_fin']}, Duración: {duracion} días")
 
 # Datos de prueba
 df = pd.DataFrame({
