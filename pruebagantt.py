@@ -61,8 +61,8 @@ df = pd.DataFrame({
 })
 
 # Convertir las fechas a datetime en el DataFrame
-df['fecha_inicio'] = pd.to_datetime(df['fecha_inicio']).dt.date
-df['fecha_fin'] = pd.to_datetime(df['fecha_fin']).dt.date
+#df['fecha_inicio'] = pd.to_datetime(df['fecha_inicio']).dt.date
+#df['fecha_fin'] = pd.to_datetime(df['fecha_fin']).dt.date
 
 # Título de la aplicación
 st.title("Gráfico de Gantt - Proceso por Pedido")
