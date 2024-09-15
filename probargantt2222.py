@@ -13,19 +13,19 @@ def create_gantt(df, f_emision, f_entrega):
         fecha_inicio = row['fecha_inicio']
         fecha_fin = row['fecha_fin']
 
+        # Asegurarnos de que la fecha de inicio sea menor a la de fin
         if fecha_inicio >= fecha_fin:
             st.write(f"Error: La fecha de inicio ({fecha_inicio}) es mayor o igual a la fecha de fin ({fecha_fin}) para el proceso {row['proceso']}")
             continue
 
-        # Calcular la duración del proceso en días
+        # Calcular la duración del proceso
         duracion = (fecha_fin - fecha_inicio).days
         st.write(f"Proceso: {row['proceso']}, Fecha Inicio: {fecha_inicio}, Fecha Fin: {fecha_fin}, Duración: {duracion} días")
 
         # Agregar la barra de Gantt para cada proceso
         fig.add_trace(go.Bar(
-            x=[duracion],  # Duración del proceso
-            y=[row['proceso']],  # Proceso
-            base=[fecha_inicio],  # La barra comienza en la fecha de inicio
+            x=[fecha_inicio, fecha_fin],  # Fecha de inicio y fin
+            y=[row['proceso'], row['proceso']],  # El mismo proceso (para ambos extremos)
             orientation='h',  # Barra horizontal
             text=f"Progreso: {row['progreso']}%",  # Tooltip
             hoverinfo='text',
