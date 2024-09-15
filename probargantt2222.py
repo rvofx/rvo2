@@ -27,17 +27,14 @@ def create_gantt(df, f_emision, f_entrega):
         st.write(f"Fecha Fin: {fecha_fin}")
         st.write(f"Duración calculada: {duracion} días")
 
-        # Agregar la barra de Gantt para cada proceso
-        fig.add_trace(go.Bar(
-            x=[fecha_inicio, fecha_fin],  # El rango de fechas como inicio y fin
-            y=[row['proceso'], row['proceso']],  # Proceso (repetido para dos puntos)
-            orientation='h',  # Barra horizontal
-            text=f"Progreso: {row['progreso']}%",  # Tooltip
-            hoverinfo='text',
-            width=0.4,  # Ancho de la barra
-            marker=dict(color='skyblue'),
-            showlegend=False
-        ))
+        # Usar add_shape para agregar las barras manualmente entre las fechas de inicio y fin
+        fig.add_shape(
+            type="rect",  # Crear una barra rectangular
+            x0=fecha_inicio, x1=fecha_fin,  # Usar la fecha de inicio y fin como límites de la barra
+            y0=i-0.4, y1=i+0.4,  # Controlar la altura de la barra en el eje Y
+            line=dict(color='skyblue'),  # Color de la barra
+            fillcolor='skyblue',
+        )
 
     # Trazar la fecha de emisión y la fecha de entrega usando add_shape()
     fig.add_shape(
@@ -71,8 +68,12 @@ def create_gantt(df, f_emision, f_entrega):
         xaxis_title="Fecha",
         yaxis_title="Proceso",
         xaxis=dict(type='date', tickformat='%d-%m-%Y', dtick="D1"),  # Mostrar un tick por día
-        yaxis=dict(categoryorder="array", categoryarray=df['proceso']),
-        bargap=0.3
+        yaxis=dict(
+            tickvals=list(range(len(df))),  # Alinear cada proceso con su índice
+            ticktext=df['proceso'],  # Mostrar nombres de los procesos
+        ),
+        bargap=0.3,
+        height=400 + 100 * len(df)  # Ajustar el tamaño en función de la cantidad de procesos
     )
 
     # Mostrar el gráfico en Streamlit
