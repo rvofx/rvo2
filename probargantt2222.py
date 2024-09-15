@@ -29,9 +29,8 @@ def create_gantt(df, f_emision, f_entrega):
 
         # Agregar la barra de Gantt para cada proceso
         fig.add_trace(go.Bar(
-            x=[duracion],  # La duración en días del proceso
-            y=[row['proceso']],  # Proceso
-            base=[fecha_inicio],  # La barra comienza en la fecha de inicio
+            x=[fecha_inicio, fecha_fin],  # El rango de fechas como inicio y fin
+            y=[row['proceso'], row['proceso']],  # Proceso (repetido para dos puntos)
             orientation='h',  # Barra horizontal
             text=f"Progreso: {row['progreso']}%",  # Tooltip
             hoverinfo='text',
