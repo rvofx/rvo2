@@ -84,7 +84,7 @@ df['fecha_inicio'] = pd.to_datetime(df['fecha_inicio'])
 df['fecha_fin'] = pd.to_datetime(df['fecha_fin'])
 
 # Definir F_EMISION y F_ENTREGA
-f_emision = datetime(2024, 6, 28)  # Ejemplo de fecha de emisión
+f_emision = datetime(2024, 7, 1)  # Ejemplo de fecha de emisión
 f_entrega = datetime(2024, 8, 25)  # Ejemplo de fecha de entrega
 
 # Título de la aplicación
