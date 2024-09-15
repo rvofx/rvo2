@@ -1,10 +1,16 @@
+# Función para crear el gráfico de Gantt
+import plotly.graph_objs as go
+from datetime import datetime
+import pandas as pd
+import streamlit as st
+
 def create_gantt(df):
     # Crear el gráfico de Gantt
     fig = go.Figure()
 
     # Iterar sobre los procesos y agregar trazas al gráfico
     for i, row in df.iterrows():
-        # Obtener las fechas de inicio y fin directamente (ya son objetos de tipo date)
+        # Obtener las fechas de inicio y fin (ya están en formato de solo fecha)
         fecha_inicio = row['fecha_inicio']
         fecha_fin = row['fecha_fin']
 
@@ -45,3 +51,22 @@ def create_gantt(df):
 
     # Mostrar el gráfico en Streamlit
     st.plotly_chart(fig)
+
+# Datos de prueba ajustados
+df = pd.DataFrame({
+    'proceso': ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO'],
+    'fecha_inicio': ['2024-07-01', '2024-07-10', '2024-07-20', '2024-08-01', '2024-08-15'],
+    'fecha_fin': ['2024-07-05', '2024-07-15', '2024-07-25', '2024-08-05', '2024-08-20'],
+    'progreso': [100, 80, 60, 90, 75]
+})
+
+# Convertir las fechas a datetime en el DataFrame
+df['fecha_inicio'] = pd.to_datetime(df['fecha_inicio']).dt.date
+df['fecha_fin'] = pd.to_datetime(df['fecha_fin']).dt.date
+
+# Título de la aplicación
+st.title("Gráfico de Gantt - Proceso por Pedido")
+
+# Llamar a la función para crear el gráfico
+create_gantt(df)
+
