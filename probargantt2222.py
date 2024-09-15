@@ -44,7 +44,14 @@ def generar_datos_prueba():
         }
     ]
     
-    return pd.DataFrame(procesos), fecha_pedido, fecha_entrega, fecha_actual
+    df = pd.DataFrame(procesos)
+    
+    # Convertir fechas a cadenas para evitar problemas con Plotly
+    date_columns = ['Inicio Programado', 'Fin Programado', 'Inicio Real', 'Fin Real']
+    for col in date_columns:
+        df[col] = df[col].apply(lambda x: x.strftime('%Y-%m-%d') if pd.notnull(x) else None)
+    
+    return df, fecha_pedido.strftime('%Y-%m-%d'), fecha_entrega.strftime('%Y-%m-%d'), fecha_actual.strftime('%Y-%m-%d')
 
 # Crear gráfico de Gantt
 def crear_gantt(df, fecha_pedido, fecha_entrega, fecha_actual):
@@ -53,7 +60,7 @@ def crear_gantt(df, fecha_pedido, fecha_entrega, fecha_actual):
     for i, task in df.iterrows():
         # Barra de fecha programada
         fig.add_trace(go.Bar(
-            x=[task['Fin Programado'] - task['Inicio Programado']],
+            x=[pd.Timestamp(task['Fin Programado']) - pd.Timestamp(task['Inicio Programado'])],
             y=[task['Tarea']],
             orientation='h',
             base=task['Inicio Programado'],
@@ -62,15 +69,17 @@ def crear_gantt(df, fecha_pedido, fecha_entrega, fecha_actual):
         ))
 
         # Barra de progreso
-        fig.add_trace(go.Bar(
-            x=[(task['Fin Programado'] - task['Inicio Programado']) * task['Avance'] / 100],
-            y=[task['Tarea']],
-            orientation='h',
-            base=task['Inicio Programado'],
-            marker_color='green',
-            opacity=0.5,
-            name=f"{task['Tarea']} (Progreso)"
-        ))
+        if task['Avance'] > 0:
+            progress_duration = (pd.Timestamp(task['Fin Programado']) - pd.Timestamp(task['Inicio Programado'])) * task['Avance'] / 100
+            fig.add_trace(go.Bar(
+                x=[progress_duration],
+                y=[task['Tarea']],
+                orientation='h',
+                base=task['Inicio Programado'],
+                marker_color='green',
+                opacity=0.5,
+                name=f"{task['Tarea']} (Progreso)"
+            ))
 
         # Marcadores para fechas reales
         if task['Inicio Real']:
