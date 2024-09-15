@@ -4,6 +4,8 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 
+
+
 import plotly.graph_objs as go
 from datetime import datetime
 import pandas as pd
@@ -25,15 +27,14 @@ def create_gantt(df, f_emision, f_entrega):
         
         # Agregar la barra de Gantt para cada proceso
         fig.add_trace(go.Bar(
-            x=[duracion],  # Duración del proceso
-            y=[row['proceso']],  # Proceso
+            x=[fecha_inicio, fecha_fin],  # Usar fecha_inicio y fecha_fin directamente
+            y=[row['proceso'], row['proceso']],  # Repetir el proceso para mantener la barra horizontal
             orientation='h',
-            text=f"Progreso: {row['progreso']}%",
+            text=f"{row['proceso']}: {row['progreso']}%",
             hoverinfo='text',
             marker=dict(color='skyblue'),
             showlegend=False,
-            base=fecha_inicio,  # Establecer la fecha de inicio como base
-            name=row['proceso']  # Agregar el nombre del proceso
+            name=row['proceso']
         ))
 
     # Trazar la fecha de emisión y la fecha de entrega usando add_shape()
@@ -70,10 +71,11 @@ def create_gantt(df, f_emision, f_entrega):
         xaxis=dict(
             type='date',
             tickformat='%d-%m-%Y',
-            dtick="D1",
+            dtick="D7",  # Mostrar ticks cada 7 días
             range=[f_emision, f_entrega]  # Establecer el rango del eje X
         ),
         yaxis=dict(categoryorder="array", categoryarray=df['proceso']),
+        barmode='overlay',  # Asegura que las barras se superpongan correctamente
         bargap=0.2,
         height=400 + (len(df) * 30),  # Ajustar la altura del gráfico según el número de procesos
         legend=dict(
