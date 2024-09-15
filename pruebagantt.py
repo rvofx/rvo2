@@ -11,13 +11,13 @@ def create_gantt(df):
     # Iterar sobre los procesos y agregar trazas al gráfico
     for i, row in df.iterrows():
         # Obtener las fechas de inicio y fin, asegurando que solo se considere la fecha (sin tiempo)
-        #fecha_inicio = row['fecha_inicio'].date()  # Convertir a solo fecha
-        #fecha_fin = row['fecha_fin'].date()  # Convertir a solo fecha
+        fecha_inicio = row['fecha_inicio'].date()  # Convertir a solo fecha
+        fecha_fin = row['fecha_fin'].date()  # Convertir a solo fecha
 
         # Asegurarnos de que la fecha de inicio sea menor a la de fin
-        #if fecha_inicio >= fecha_fin:
-            #st.write(f"Error: La fecha de inicio ({fecha_inicio}) es mayor o igual a la fecha de fin ({fecha_fin}) para el proceso {row['proceso']}")
-            #continue
+        if fecha_inicio >= fecha_fin:
+            st.write(f"Error: La fecha de inicio ({fecha_inicio}) es mayor o igual a la fecha de fin ({fecha_fin}) para el proceso {row['proceso']}")
+            continue
 
         # Imprimir para verificar valores de las fechas
         st.write(f"Proceso: {row['proceso']}, Fecha Inicio: {fecha_inicio}, Fecha Fin: {fecha_fin}")
@@ -61,8 +61,8 @@ df = pd.DataFrame({
 })
 
 # Convertir las fechas a datetime en el DataFrame
-#df['fecha_inicio'] = pd.to_datetime(df['fecha_inicio']).dt.date
-#df['fecha_fin'] = pd.to_datetime(df['fecha_fin']).dt.date
+df['fecha_inicio'] = pd.to_datetime(df['fecha_inicio']).dt.date
+df['fecha_fin'] = pd.to_datetime(df['fecha_fin']).dt.date
 
 # Título de la aplicación
 st.title("Gráfico de Gantt - Proceso por Pedido")
