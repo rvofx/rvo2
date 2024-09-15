@@ -21,6 +21,12 @@ def create_gantt(df, f_emision, f_entrega):
         # Calcular la duración del proceso en días
         duracion = (fecha_fin - fecha_inicio).days
 
+        # Impresiones intermedias para verificar los valores
+        st.write(f"Proceso: {row['proceso']}")
+        st.write(f"Fecha Inicio: {fecha_inicio}")
+        st.write(f"Fecha Fin: {fecha_fin}")
+        st.write(f"Duración calculada: {duracion} días")
+
         # Agregar la barra de Gantt para cada proceso
         fig.add_trace(go.Bar(
             x=[duracion],  # La duración en días del proceso
