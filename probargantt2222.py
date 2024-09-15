@@ -101,7 +101,7 @@ def print_df_details(df):
     st.write(df.dtypes)
 
 # Asegúrate de llamar a esta función antes de create_gantt
-print_df_details(df)
+#print_df_details(df)
 
 # Datos de prueba ajustados
 df = pd.DataFrame({
