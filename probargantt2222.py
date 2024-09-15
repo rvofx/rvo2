@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import plotly.figure_factory as ff
+import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
 # Generar datos de prueba
@@ -48,35 +48,62 @@ def generar_datos_prueba():
 
 # Crear gráfico de Gantt
 def crear_gantt(df, fecha_pedido, fecha_entrega, fecha_actual):
-    fig = ff.create_gantt(df, x_start="Inicio Programado", x_end="Fin Programado", y="Tarea",
-                          title="Gráfico de Gantt del Pedido",
-                          showgrid_x=True, showgrid_y=True)
+    fig = go.Figure()
 
-    # Agregar barras de progreso
-    for i, row in df.iterrows():
-        fig.add_shape(type="rect",
-                      x0=row["Inicio Programado"], y0=i-0.2,
-                      x1=row["Inicio Programado"] + (row["Fin Programado"] - row["Inicio Programado"]) * row["Avance"] / 100,
-                      y1=i+0.2,
-                      fillcolor="green", opacity=0.5, line=dict(width=0))
+    for i, task in df.iterrows():
+        # Barra de fecha programada
+        fig.add_trace(go.Bar(
+            x=[task['Fin Programado'] - task['Inicio Programado']],
+            y=[task['Tarea']],
+            orientation='h',
+            base=task['Inicio Programado'],
+            marker_color='lightblue',
+            name=task['Tarea']
+        ))
 
-    # Agregar marcadores para fechas reales
-    for i, row in df.iterrows():
-        if row["Inicio Real"]:
-            fig.add_trace(dict(x=[row["Inicio Real"]], y=[row["Tarea"]], mode="markers",
-                               marker=dict(symbol="triangle-up", size=10, color="blue"),
-                               showlegend=False))
-        if row["Fin Real"]:
-            fig.add_trace(dict(x=[row["Fin Real"]], y=[row["Tarea"]], mode="markers",
-                               marker=dict(symbol="triangle-down", size=10, color="red"),
-                               showlegend=False))
+        # Barra de progreso
+        fig.add_trace(go.Bar(
+            x=[(task['Fin Programado'] - task['Inicio Programado']) * task['Avance'] / 100],
+            y=[task['Tarea']],
+            orientation='h',
+            base=task['Inicio Programado'],
+            marker_color='green',
+            opacity=0.5,
+            name=f"{task['Tarea']} (Progreso)"
+        ))
 
-    # Agregar líneas verticales para fechas clave
+        # Marcadores para fechas reales
+        if task['Inicio Real']:
+            fig.add_trace(go.Scatter(
+                x=[task['Inicio Real']],
+                y=[task['Tarea']],
+                mode='markers',
+                marker=dict(symbol='triangle-up', size=10, color='blue'),
+                name=f"{task['Tarea']} (Inicio Real)"
+            ))
+        if task['Fin Real']:
+            fig.add_trace(go.Scatter(
+                x=[task['Fin Real']],
+                y=[task['Tarea']],
+                mode='markers',
+                marker=dict(symbol='triangle-down', size=10, color='red'),
+                name=f"{task['Tarea']} (Fin Real)"
+            ))
+
+    # Líneas verticales para fechas clave
     fig.add_vline(x=fecha_pedido, line_dash="dash", line_color="purple", annotation_text="Fecha de Pedido")
     fig.add_vline(x=fecha_entrega, line_dash="dash", line_color="orange", annotation_text="Fecha de Entrega Programada")
     fig.add_vline(x=fecha_actual, line_dash="solid", line_color="green", annotation_text="Fecha Actual")
 
-    fig.update_layout(height=400, width=800)
+    fig.update_layout(
+        title="Gráfico de Gantt del Pedido",
+        xaxis_title="Fecha",
+        yaxis_title="Tarea",
+        height=400,
+        width=800,
+        showlegend=False
+    )
+
     return fig
 
 # Aplicación Streamlit
