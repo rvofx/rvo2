@@ -68,8 +68,8 @@ fig.add_trace(go.Scatter(
 ))
 
 # Fechas de colocación y entrega
-fecha_colocacion = '2024-06-20'
-fecha_entrega = '2024-09-06'
+fecha_colocacion = df['F_EMISION'][0]
+fecha_entrega = df['F_ENTREGA'][0]
 
 # Agregar líneas verticales para las fechas de colocación y entrega
 fig.add_shape(
