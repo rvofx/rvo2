@@ -264,7 +264,7 @@ WHERE gg.PEDIDO = ? """
         df[col] = pd.to_datetime(df[col]).dt.date
 
     return df
-	
+    st.dataframe(df)
 
 # Función para crear el gráfico de Gantt
 #import plotly.graph_objs as go
