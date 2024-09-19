@@ -29,7 +29,7 @@ data = {
     'FMAXCOSIDO': ['2024-09-12']
 }
 
-df1 = pd.DataFrame(data)
+df = pd.DataFrame(data)
 
 # Crear un nuevo DataFrame con los procesos y sus fechas correspondientes
 df_gantt = pd.DataFrame({
