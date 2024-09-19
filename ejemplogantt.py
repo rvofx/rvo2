@@ -8,7 +8,7 @@ from datetime import datetime
 data = {
     'PEDIDO': [1198],
     'IdDocumento': [441563],
-    'F_EMISION': ['2024-08-15'],
+    'F_EMISION': ['2024-06-20'],
     'F_ENTREGA': ['2024-09-06'],
     'DIAS': [78],
     'CLIENTE': ['THE BEAUFORT BO'],
@@ -68,8 +68,8 @@ fig.add_trace(go.Scatter(
 ))
 
 # Fechas de colocación y entrega
-fecha_colocacion = '2024-08-15'
-fecha_entrega = '2024-10-31'
+fecha_colocacion = '2024-06-20'
+fecha_entrega = '2024-09-06'
 
 # Agregar líneas verticales para las fechas de colocación y entrega
 fig.add_shape(
