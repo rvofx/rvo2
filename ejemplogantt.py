@@ -101,6 +101,6 @@ fig.add_shape(
 
 # Mostrar la aplicación Streamlit
 pedido= df['PEDIDO'][0]
-st.title("Pedido",pedido)
+st.title("Pedido"+pedido)
 st.write("Este es un gráfico de Gantt que muestra el avance de los procesos de los pedidos.")
 st.plotly_chart(fig)
