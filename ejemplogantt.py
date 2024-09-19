@@ -60,7 +60,7 @@ fig.add_trace(go.Scatter(
 ))
 
 fig.add_trace(go.Scatter(
-    x=df_gant['Finish Real'],
+    x=df_gantt['Finish Real'],
     y=df-gantt['Task'],
     mode='markers',
     marker=dict(color='red', size=10),
