@@ -8,8 +8,8 @@ from datetime import datetime
 data = {
     'PEDIDO': [1198],
     'IdDocumento': [441563],
-    'F_EMISION': ['6/20/2024'],
-    'F_ENTREGA': ['9/6/2024'],
+    'F_EMISION': ['2024-08-15'],
+    'F_ENTREGA': ['2024-09-06'],
     'DIAS': [78],
     'CLIENTE': ['THE BEAUFORT BO'],
     'KG_ARMP': ['114%'],
@@ -17,16 +17,16 @@ data = {
     'KG_TELAPROBP': ['102%'],
     'CORTADOP': ['113%'],
     'COSIDOP': ['19%'],
-    'FMINARM': ['6/25/2024'],
-    'FMAXARM': ['7/5/2024'],
-    'FMINTENID': ['6/28/2024'],
-    'FMAXTENID': ['7/20/2024'],
-    'FMINTELAPROB': ['7/12/2024'],
-    'FMAXTELAPROB': ['9/6/2024'],
-    'FMINCORTE': ['7/17/2024'],
-    'FMAXCORTE': ['9/9/2024'],
-    'FMINCOSIDO': ['8/8/2024'],
-    'FMAXCOSIDO': ['9/12/2024']
+    'FMINARM': ['2024-06-25'],
+    'FMAXARM': ['2024-07-05'],
+    'FMINTENID': ['2024-06-28'],
+    'FMAXTENID': ['2024-07-20'],
+    'FMINTELAPROB': ['2024-07-12'],
+    'FMAXTELAPROB': ['2024-09-06'],
+    'FMINCORTE': ['2024-07-17'],
+    'FMAXCORTE': ['2024-09-09'],
+    'FMINCOSIDO': ['2024-08-08'],
+    'FMAXCOSIDO': ['2024-09-12']
 }
 
 df = pd.DataFrame(data)
