@@ -33,19 +33,19 @@ df = pd.DataFrame(data)
 
 # Crear un nuevo DataFrame con los procesos y sus fechas correspondientes
 df_gantt = pd.DataFrame({
-    'Task': ['ARM', 'TENID', 'TELAPROB', 'CORTE', 'COSIDO'],
+    'Proceso': ['ARMADO', 'TEÑIDO', 'TELA_APROB', 'CORTE', 'COSTURA'],
     'Start': [df['FMINARM'][0], df['FMINTENID'][0], df['FMINTELAPROB'][0], df['FMINCORTE'][0], df['FMINCOSIDO'][0]],
     'Finish': [df['FMAXARM'][0], df['FMAXTENID'][0], df['FMAXTELAPROB'][0], df['FMAXCORTE'][0], df['FMAXCOSIDO'][0]],
     'Start Real': [df['FMINARM'][0], df['FMINTENID'][0], df['FMINTELAPROB'][0], df['FMINCORTE'][0], df['FMINCOSIDO'][0]],
     'Finish Real': [df['FMAXARM'][0], df['FMAXTENID'][0], df['FMAXTELAPROB'][0], df['FMAXCORTE'][0], df['FMAXCOSIDO'][0]],
-    'Resource': [df['KG_ARMP'][0], df['KG_TENIDP'][0], df['KG_TELAPROBP'][0], df['CORTADOP'][0], df['COSIDOP'][0]]
+    'Avance': [df['KG_ARMP'][0], df['KG_TENIDP'][0], df['KG_TELAPROBP'][0], df['CORTADOP'][0], df['COSIDOP'][0]]
 })
 
 
 st.dataframe(df_gantt)
 
 # Crear el gráfico de Gantt
-fig = px.timeline(df_gantt, x_start="Start", x_end="Finish", y="Task", text="Resource")
+fig = px.timeline(df_gantt, x_start="Start", x_end="Finish", y="Proceso", text="Avance")
 
 # Ajustar el diseño del gráfico
 fig.update_yaxes(autorange="reversed")  # Esto invierte el eje Y para que los pedidos estén en orden
@@ -53,7 +53,7 @@ fig.update_yaxes(autorange="reversed")  # Esto invierte el eje Y para que los pe
 # Agregar las barras de las fechas reales
 fig.add_trace(go.Scatter(
     x=df_gantt['Start Real'],
-    y=df_gantt['Task'],
+    y=df_gantt['Proceso'],
     mode='markers',
     marker=dict(color='black', size=10),
     name='Start Real'
@@ -61,7 +61,7 @@ fig.add_trace(go.Scatter(
 
 fig.add_trace(go.Scatter(
     x=df_gantt['Finish Real'],
-    y=df_gantt['Task'],
+    y=df_gantt['Proceso'],
     mode='markers',
     marker=dict(color='red', size=10),
     name='Finish Real'
