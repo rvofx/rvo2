@@ -4,22 +4,48 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 
-# Datos de ejemplo para el gráfico de Gantt
+# Crear el DataFrame original (Ejemplo de un solo pedido)
 data = {
-    'Task': ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO'],
-    'Start': ['2024-09-01', '2024-09-10', '2024-09-20', '2024-10-01', '2024-10-10'],
-    'Finish': ['2024-09-15', '2024-09-25', '2024-10-05', '2024-10-15', '2024-10-25'],
-    'Start Real': ['2024-09-02', '2024-09-12', '2024-09-22', '2024-10-02', '2024-10-12'],
-    'Finish Real': ['2024-09-16', '2024-09-26', '2024-10-06', '2024-10-16', '2024-10-26'],
-    'Resource': ['100', '80', '60', '40', '20']
+    'PEDIDO': [1198],
+    'IdDocumento': [441563],
+    'F_EMISION': ['6/20/2024'],
+    'F_ENTREGA': ['9/6/2024'],
+    'DIAS': [78],
+    'CLIENTE': ['THE BEAUFORT BO'],
+    'KG_ARMP': ['114%'],
+    'KG_TENIDP': ['114%'],
+    'KG_TELAPROBP': ['102%'],
+    'CORTADOP': ['113%'],
+    'COSIDOP': ['19%'],
+    'FMINARM': ['6/25/2024'],
+    'FMAXARM': ['7/5/2024'],
+    'FMINTENID': ['6/28/2024'],
+    'FMAXTENID': ['7/20/2024'],
+    'FMINTELAPROB': ['7/12/2024'],
+    'FMAXTELAPROB': ['9/6/2024'],
+    'FMINCORTE': ['7/17/2024'],
+    'FMAXCORTE': ['9/9/2024'],
+    'FMINCOSIDO': ['8/8/2024'],
+    'FMAXCOSIDO': ['9/12/2024']
 }
 
-# Convertir los datos a un DataFrame
 df = pd.DataFrame(data)
-st.dataframe(df)
+
+# Crear un nuevo DataFrame con los procesos y sus fechas correspondientes
+df_gantt = pd.DataFrame({
+    'Task': ['ARM', 'TENID', 'TELAPROB', 'CORTE', 'COSIDO'],
+    'Start': [df['FMINARM'][0], df['FMINTENID'][0], df['FMINTELAPROB'][0], df['FMINCORTE'][0], df['FMINCOSIDO'][0]],
+    'Finish': [df['FMAXARM'][0], df['FMAXTENID'][0], df['FMAXTELAPROB'][0], df['FMAXCORTE'][0], df['FMAXCOSIDO'][0]],
+    'Start Real': [df['FMINARM'][0], df['FMINTENID'][0], df['FMINTELAPROB'][0], df['FMINCORTE'][0], df['FMINCOSIDO'][0]],
+    'Finish Real': [df['FMAXARM'][0], df['FMAXTENID'][0], df['FMAXTELAPROB'][0], df['FMAXCORTE'][0], df['FMAXCOSIDO'][0]],
+    'Resource': [df['KG_ARMP'][0], df['KG_TENIDP'][0], df['KG_TELAPROBP'][0], df['CORTADOP'][0], df['COSIDOP'][0]]
+})
+
+
+st.dataframe(df_gantt)
 
 # Crear el gráfico de Gantt
-fig = px.timeline(df, x_start="Start", x_end="Finish", y="Task", text="Resource")
+fig = px.timeline(df_gantt, x_start="Start", x_end="Finish", y="Task", text="Resource")
 
 # Ajustar el diseño del gráfico
 fig.update_yaxes(autorange="reversed")  # Esto invierte el eje Y para que los pedidos estén en orden
