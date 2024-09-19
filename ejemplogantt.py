@@ -52,16 +52,16 @@ fig.update_yaxes(autorange="reversed")  # Esto invierte el eje Y para que los pe
 
 # Agregar las barras de las fechas reales
 fig.add_trace(go.Scatter(
-    x=df['Start Real'],
-    y=df['Task'],
+    x=df_gantt['Start Real'],
+    y=df_gantt['Task'],
     mode='markers',
     marker=dict(color='black', size=10),
     name='Start Real'
 ))
 
 fig.add_trace(go.Scatter(
-    x=df['Finish Real'],
-    y=df['Task'],
+    x=df_gant['Finish Real'],
+    y=df-gantt['Task'],
     mode='markers',
     marker=dict(color='red', size=10),
     name='Finish Real'
@@ -74,14 +74,14 @@ fecha_entrega = '2024-10-31'
 # Agregar líneas verticales para las fechas de colocación y entrega
 fig.add_shape(
     type="line",
-    x0=fecha_colocacion, y0=0, x1=fecha_colocacion, y1=len(df),
+    x0=fecha_colocacion, y0=0, x1=fecha_colocacion, y1=len(df_gantt),
     line=dict(color="green", width=2, dash="dash"),
     name="Fecha Colocación"
 )
 
 fig.add_shape(
     type="line",
-    x0=fecha_entrega, y0=0, x1=fecha_entrega, y1=len(df),
+    x0=fecha_entrega, y0=0, x1=fecha_entrega, y1=len(df_gantt),
     line=dict(color="red", width=2, dash="dash"),
     name="Fecha Entrega"
 )
@@ -92,7 +92,7 @@ fecha_actual = datetime.now().strftime('%Y-%m-%d')
 # Agregar una línea vertical para la fecha actual
 fig.add_shape(
     type="line",
-    x0=fecha_actual, y0=0, x1=fecha_actual, y1=len(df),
+    x0=fecha_actual, y0=0, x1=fecha_actual, y1=len(df_gantt),
     line=dict(color="black", width=2, dash="dash"),
     name="Fecha Actual"
 )
