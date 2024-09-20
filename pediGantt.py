@@ -3,12 +3,12 @@ import pyodbc
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Configurar la conexión a la base de datos utilizando las credenciales almacenadas en secrets
 def connect_db():
     connection = pyodbc.connect(
-        "driver={ODBC Driver 17 for SQL Server};"
+        "driver={odbc driver 17 for sql server};"
         "server=" + st.secrets["server"] + ";"
         "database=" + st.secrets["database"] + ";"
         "uid=" + st.secrets["username"] + ";"
@@ -32,18 +32,12 @@ FROM
     SUBSTRING(b.NommaeAnexoCliente, 1, 15) AS CLIENTE,
     a.nvDocumentoReferencia AS PO,
     CONVERT(INT, COALESCE(d.KG, 0)) AS KG_REQ,
-    --CONVERT(INT, COALESCE(t.KG_ARM, 0)) AS KG_ARM,
     FORMAT(CASE WHEN d.KG = 0 THEN 0 ELSE (COALESCE(t.KG_ARM, 0) / d.KG) END, '0%') AS KG_ARMP,
-    --CONVERT(INT, COALESCE(t.KG_TEÑIDOS, 0)) AS KG_TEÑIDOS,
     FORMAT(CASE WHEN d.KG = 0 THEN 0 ELSE (COALESCE(t.KG_TEÑIDOS, 0) / d.KG) END, '0%') AS KG_TENIDP,
-    --CONVERT(INT, COALESCE(t.KG_PRODUC, 0)) AS KG_DESPACH,
     FORMAT(CASE WHEN d.KG = 0 THEN 0 ELSE (COALESCE(t.KG_PRODUC, 0) / d.KG) END, '0%') AS KG_TELAPROBP,
     CONVERT(INT, a.dCantidad) AS UNID,
-    --CONVERT(INT, COALESCE(programado.PROG, 0)) AS PROG,
     FORMAT(CASE WHEN a.dCantidad = 0 THEN 0 ELSE (COALESCE(programado.PROG, 0) / a.dCantidad) END, '0%') AS PROGP,
-    --CONVERT(INT, COALESCE(cortado.CORTADO, 0)) AS CORTADO,
     FORMAT(CASE WHEN a.dCantidad = 0 THEN 0 ELSE (COALESCE(cortado.CORTADO, 0) / a.dCantidad) END, '0%') AS CORTADOP,
-    --CONVERT(INT, COALESCE(cosido.COSIDO, 0)) AS COSIDO,
     FORMAT(CASE WHEN a.dCantidad = 0 THEN 0 ELSE (COALESCE(cosido.COSIDO, 0) / a.dCantidad) END, '0%') AS COSIDOP
 FROM docOrdenVenta a
 INNER JOIN maeAnexoCliente b ON a.IdmaeAnexo_Cliente = b.IdmaeAnexo_Cliente
@@ -139,7 +133,6 @@ WHERE
 INNER JOIN 
     (SELECT 
     x.IdDocumento_OrdenVenta,
-    --x.CoddocOrdenVenta,
 	q0.FMINARM,
 	q0.FMAXARM,
     q1.FMINTENID,
@@ -207,7 +200,6 @@ LEFT JOIN (
     INNER JOIN dbo.maeCentroCosto a1 WITH (NOLOCK) ON a.IdmaeCentroCosto = a1.IdmaeCentroCosto AND a1.bConOrdenProduccion = 1
     INNER JOIN dbo.docNotaInventarioItem b WITH (NOLOCK) ON a.IdDocumento_NotaInventario = b.IdDocumento_NotaInventario AND b.dCantidadIng <> 0
     INNER JOIN dbo.docOrdenProduccion c WITH (NOLOCK) ON a.IdDocumento_OrdenProduccion = c.IdDocumento_OrdenProduccion 
-	--AND c.bCerrado = 0 
 	AND c.bAnulado = 0 AND c.IdtdDocumentoForm = 127
     INNER JOIN dbo.docOrdenVenta g WITH (NOLOCK) ON c.IdDocumento_Referencia = g.IdDocumento_OrdenVenta
     INNER JOIN dbo.docOrdenProduccionRuta d WITH (NOLOCK) ON a.IddocOrdenProduccionRuta = d.IddocOrdenProduccionRuta
@@ -230,7 +222,6 @@ LEFT JOIN (
     INNER JOIN dbo.maeCentroCosto a1 WITH (NOLOCK) ON a.IdmaeCentroCosto = a1.IdmaeCentroCosto AND a1.bConOrdenProduccion = 1
     INNER JOIN dbo.docNotaInventarioItem b WITH (NOLOCK) ON a.IdDocumento_NotaInventario = b.IdDocumento_NotaInventario AND b.dCantidadIng <> 0
     INNER JOIN dbo.docOrdenProduccion c WITH (NOLOCK) ON a.IdDocumento_OrdenProduccion = c.IdDocumento_OrdenProduccion 
-	--AND c.bCerrado = 0 
 	AND c.bAnulado = 0 AND c.IdtdDocumentoForm = 127
     INNER JOIN dbo.docOrdenVenta g WITH (NOLOCK) ON c.IdDocumento_Referencia = g.IdDocumento_OrdenVenta
     INNER JOIN dbo.docOrdenProduccionRuta d WITH (NOLOCK) ON a.IddocOrdenProduccionRuta = d.IddocOrdenProduccionRuta
@@ -248,108 +239,155 @@ WHERE x.CoddocOrdenVenta IS NOT NULL
 		and x.IdtdDocumentoForm=10 
 		and x.IdtdTipoVenta=4
 		and x.bAnulado=0
-		--and c.IdDocumento_OrdenVenta=441563
---ORDER BY x.IdDocumento_OrdenVenta;
     ) ff
 ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
-WHERE gg.PEDIDO = ? """
-    
+WHERE gg.PEDIDO = ?"""
+
     df = pd.read_sql(query, conn, params=(pedido,))
     conn.close()
-    
-    # Convertir columnas de fechas a un único formato
-    date_columns = ['F_EMISION', 'F_ENTREGA', 'FMINARM', 'FMAXARM', 'FMINTENID', 'FMAXTENID', 
-                    'FMINTELAPROB', 'FMAXTELAPROB', 'FMINCORTE', 'FMAXCORTE', 'FMINCOSIDO', 'FMAXCOSIDO']
-    for col in date_columns:
-        df[col] = pd.to_datetime(df[col]).dt.date
-
     return df
-    st.dataframe(df)
 
-# Función para crear el gráfico de Gantt
-#import plotly.graph_objs as go
-#from datetime import datetime
-#import pandas as pd
-#import streamlit as st
+# Parámetros constantes
+FACTOR = 0.06
+DARM = 0.2
+DTENID = 0.25
+DTELAPROB = 0.27
+DCORTADO = 0.25
+DCOSIDO = 0.62
 
-def create_gantt(df):
-    # Crear el gráfico de Gantt
-    fig = go.Figure()
-    processes = ['ARM', 'TENID', 'TELAPROB', 'CORTADO', 'COSIDO']
+# Interfaz de usuario de Streamlit
+st.title("Visualización de Pedidos")
 
-    date_min_cols = ['FMINARM', 'FMINTENID', 'FMINTELAPROB', 'FMINCORTE', 'FMINCOSIDO']
-    date_max_cols = ['FMAXARM', 'FMAXTENID', 'FMAXTELAPROB', 'FMAXCORTE', 'FMAXCOSIDO']
-    progress_cols = ['KG_ARMP', 'KG_TENIDP', 'KG_TELAPROBP', 'CORTADOP', 'COSIDOP']
-	
-    for i, process in enumerate(processes):
+# Campo de entrada para ingresar el número de pedido
+pedido = st.text_input("Ingresa el número de pedido")
+
+# Si el botón se presiona y hay un número de pedido ingresado, se ejecuta la consulta
+if st.button("Ejecutar Consulta"):
+    if pedido:
         try:
-            # Asegúrate de que las fechas sean objetos datetime
-            date_min = pd.to_datetime(df[date_min_cols[i]].iloc[0])
-            date_max = pd.to_datetime(df[date_max_cols[i]].iloc[0])
-        
-            fig.add_trace(go.Bar(
-                x=[date_max - date_min],
-                y=[process],
-                base=[date_min],
-                orientation='h',
-                text=f"Progreso: {df[progress_cols[i]].iloc[0]}%",
-                hoverinfo='text',
-                marker=dict(color='skyblue'),
-                showlegend=False
-            ))
-        except KeyError as e:
-            st.warning(f"Columna no encontrada en el DataFrame: {e}")
+            # Ejecutar la consulta y obtener los resultados
+            df = run_query(pedido)
+            if df.empty:
+                st.warning("No se encontraron datos para este pedido.")
+            else:
+                # Mostrar los datos en una tabla
+                st.dataframe(df)
+
+                # Procesar los datos para el gráfico de Gantt
+                f_emision = pd.to_datetime(df['F_EMISION'].iloc[0])
+                dias = df['DIAS'].iloc[0]
+
+                # Cálculo de las fechas de inicio y fin
+                start_armado = f_emision + timedelta(days=FACTOR * dias)
+                start_tenido = f_emision + timedelta(days=2 * FACTOR * dias)
+                start_telaprob = f_emision + timedelta(days=3 * FACTOR * dias)
+                start_corte = f_emision + timedelta(days=4 * FACTOR * dias)
+                start_costura = f_emision + timedelta(days=5 * FACTOR * dias)
+
+                finish_armado = f_emision + timedelta(days=(FACTOR + DARM) * dias)
+                finish_tenido = f_emision + timedelta(days=(2 * FACTOR + DTENID) * dias)
+                finish_telaprob = f_emision + timedelta(days=(3 * FACTOR + DTELAPROB) * dias)
+                finish_corte = f_emision + timedelta(days=(4 * FACTOR + DCORTADO) * dias)
+                finish_costura = f_emision + timedelta(days=(5 * FACTOR + DCOSIDO) * dias)
+
+                # Crear DataFrame para el gráfico de Gantt
+                df_gantt = pd.DataFrame({
+                    'Proceso': ['ARMADO', 'TEÑIDO', 'TELA_APROB', 'CORTE', 'COSTURA'],
+                    'Start': [start_armado, start_tenido, start_telaprob, start_corte, start_costura],
+                    'Finish': [finish_armado, finish_tenido, finish_telaprob, finish_corte, finish_costura],
+                    'Start Real': [pd.to_datetime(df['FMINARM'].iloc[0]), pd.to_datetime(df['FMINTENID'].iloc[0]), 
+                                   pd.to_datetime(df['FMINTELAPROB'].iloc[0]), pd.to_datetime(df['FMINCORTE'].iloc[0]), 
+                                   pd.to_datetime(df['FMINCOSIDO'].iloc[0])],
+                    'Finish Real': [pd.to_datetime(df['FMAXARM'].iloc[0]), pd.to_datetime(df['FMAXTENID'].iloc[0]), 
+                                    pd.to_datetime(df['FMAXTELAPROB'].iloc[0]), pd.to_datetime(df['FMAXCORTE'].iloc[0]), 
+                                    pd.to_datetime(df['FMAXCOSIDO'].iloc[0])],
+                    'Avance': [df['KG_ARMP'].iloc[0], df['KG_TENIDP'].iloc[0], df['KG_TELAPROBP'].iloc[0], 
+                               df['CORTADOP'].iloc[0], df['COSIDOP'].iloc[0]]
+                })
+
+                # Crear el gráfico de Gantt
+                fig = px.timeline(df_gantt, x_start="Start", x_end="Finish", y="Proceso", text="Avance")
+
+                # Mostrar las etiquetas del eje X cada 7 días
+                tick0_date = f_emision.strftime('%Y-%m-%d')
+                fig.update_xaxes(tickmode='linear', tick0=tick0_date, dtick=7 * 24 * 60 * 60 * 1000)
+
+                # Ajustar el diseño del gráfico
+                fig.update_yaxes(autorange="reversed")
+
+                # Agregar las barras de las fechas reales
+                fig.add_trace(go.Scatter(
+                    x=df_gantt['Start Real'],
+                    y=df_gantt['Proceso'],
+                    mode='markers',
+                    marker=dict(color='black', size=10),
+                    name='Start Real'
+                ))
+                fig.add_trace(go.Scatter(
+                    x=df_gantt['Finish Real'],
+                    y=df_gantt['Proceso'],
+                    mode='markers',
+                    marker=dict(color='red', size=10),
+                    name='Finish Real'
+                ))
+
+                # Fechas de colocación y entrega
+                fecha_colocacion = pd.to_datetime(df['F_EMISION'].iloc[0])
+                fecha_entrega = pd.to_datetime(df['F_ENTREGA'].iloc[0])
+
+                # Agregar líneas verticales para las fechas de colocación y entrega
+                fig.add_shape(
+                    type="line",
+                    x0=fecha_colocacion,
+                    y0=0,
+                    x1=fecha_colocacion,
+                    y1=len(df_gantt),
+                    line=dict(color="green", width=2, dash="dash"),
+                    name="Fecha Colocación"
+                )
+                fig.add_shape(
+                    type="line",
+                    x0=fecha_entrega,
+                    y0=0,
+                    x1=fecha_entrega,
+                    y1=len(df_gantt),
+                    line=dict(color="red", width=2, dash="dash"),
+                    name="Fecha Entrega"
+                )
+
+                # Agregar una línea vertical para la fecha actual
+                fecha_actual = datetime.now().strftime('%Y-%m-%d')
+                fig.add_shape(
+                    type="line",
+                    x0=fecha_actual,
+                    y0=0,
+                    x1=fecha_actual,
+                    y1=len(df_gantt),
+                    line=dict(color="black", width=2, dash="dash"),
+                    name="Fecha Actual"
+                )
+
+                # Agregar líneas verticales muy tenues cada 2 días
+                start_date = datetime.strptime(df['F_EMISION'].iloc[0], '%Y-%m-%d')
+                end_date = datetime.strptime(df['F_ENTREGA'].iloc[0], '%Y-%m-%d')
+                current_date = start_date
+                while current_date <= end_date:
+                    fig.add_shape(
+                        type="line",
+                        x0=current_date,
+                        y0=0,
+                        x1=current_date,
+                        y1=len(df_gantt),
+                        line=dict(color="gray", width=1, dash="dot"),
+                    )
+                    current_date += timedelta(days=2)
+
+                # Mostrar el gráfico
+                st.title(f"Pedido: {df['PEDIDO'].iloc[0]}")
+                st.write(f"Cliente: {df['CLIENTE'].iloc[0]}")
+                st.plotly_chart(fig)
+
         except Exception as e:
-            st.error(f"Error al procesar el proceso {process}: {e}")
-    
-    # Agregar las líneas verticales para F_EMISION, F_ENTREGA y fecha actual
-    current_date = datetime.now().date()
-    important_dates = {
-        'F_EMISION': pd.to_datetime(df['F_EMISION'][0]).date(),
-        'F_ENTREGA': pd.to_datetime(df['F_ENTREGA'][0]).date(),
-        'Hoy': current_date
-    }
-    
-    for label, date in important_dates.items():
-	    fig.add_shape(
-	        type="line",
-	        x0=date,
-	        x1=date,
-	        y0=0,
-	        y1=1,
-	        yref="paper",
-	        line=dict(color='red' if label == 'Hoy' else 'green', width=2),
-	    )
-	    fig.add_annotation(
-	        x=date,
-	        y=1,
-	        yref="paper",
-	        text=label,
-	        showarrow=False,
-	        yshift=10
-	    )
-    # Configuración del eje X (días) y eje Y (procesos)
-    fig.update_layout(
-        title="Gráfico de Gantt - Procesos de Producción",
-        xaxis_title="Fecha",
-        yaxis_title="Proceso",
-        xaxis=dict(type='date', tickformat='%d', dtick="D2"),
-        yaxis=dict(categoryorder="array", categoryarray=processes),
-        bargap=0.3
-    )
-    
-    st.plotly_chart(fig)
-
-# Interfaz de Streamli
-st.title("Gráfico de Gantt - Proceso por Pedido")
-
-pedido = st.text_input("Ingrese el número de pedido:")
-
-if pedido:
-    df = run_query(pedido)
-    if not df.empty:
-        st.dataframe(df)  # Mostrar los datos obtenidos
-        create_gantt(df)  # Crear el gráfico de Gantt
+            st.error(f"Error al ejecutar la consulta: {e}")
     else:
-        st.warning("No se encontraron datos para el pedido ingresado.")
-
+        st.warning("Por favor ingresa un número de pedido.")
