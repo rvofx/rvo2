@@ -258,7 +258,7 @@ DCORTADO = 0.25
 DCOSIDO = 0.62
 
 # Interfaz de usuario de Streamlit
-st.title("Visualización de Pedidos")
+st.title("Progreso del Pedido")
 
 # Campo de entrada para ingresar el número de pedido
 pedido = st.text_input("Ingresa el número de pedido")
