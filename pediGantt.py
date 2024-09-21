@@ -5,6 +5,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
+st.set_page_config(layout="wide")
+
 # Configurar la conexión a la base de datos utilizando las credenciales almacenadas en secrets
 def connect_db():
     connection = pyodbc.connect(
