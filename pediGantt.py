@@ -75,8 +75,8 @@ LEFT JOIN (
         ON c.IdDocumento_Referencia = g.IdDocumento_OrdenVenta
     INNER JOIN dbo.docOrdenProduccionRuta b WITH (NOLOCK)
         ON c.IdDocumento_OrdenProduccion = b.IdDocumento_OrdenProduccion
-    WHERE c.bCerrado = 0
-        AND c.bAnulado = 0
+    WHERE --c.bCerrado = 0  AND
+        c.bAnulado = 0
         AND c.IdtdDocumentoForm = 127
         AND b.IdmaeCentroCosto = 29
     GROUP BY g.IdDocumento_OrdenVenta
