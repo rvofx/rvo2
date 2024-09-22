@@ -284,7 +284,7 @@ if st.button("Ejecutar Consulta"):
                 start_tenido = f_emision + timedelta(days=2 * FACTOR * dias)
                 start_telaprob = f_emision + timedelta(days=3 * FACTOR * dias)
                 start_corte = f_emision + timedelta(days=4 * FACTOR * dias)
-                start_costura = f_emision + timedelta(days=5 * FACTOR * dias)
+                start_costura = f_emision + timedelta(days=6 * FACTOR * dias)
 
                 finish_armado = f_emision + timedelta(days=(FACTOR + DARM) * dias)
                 finish_tenido = f_emision + timedelta(days=(2 * FACTOR + DTENID) * dias)
