@@ -255,7 +255,7 @@ DARM = 0.2
 DTENID = 0.25
 DTELAPROB = 0.27
 DCORTADO = 0.25
-DCOSIDO = 0.62
+DCOSIDO = 0.57
 
 # Interfaz de usuario de Streamlit
 st.title("Progreso del Pedido")
