@@ -290,7 +290,7 @@ if st.button("Ejecutar Consulta"):
                 finish_tenido = f_emision + timedelta(days=(2 * FACTOR + DTENID) * dias)
                 finish_telaprob = f_emision + timedelta(days=(3 * FACTOR + DTELAPROB) * dias)
                 finish_corte = f_emision + timedelta(days=(4 * FACTOR + DCORTADO) * dias)
-                finish_costura = f_emision + timedelta(days=(5 * FACTOR + DCOSIDO) * dias)
+                finish_costura = f_emision + timedelta(days=(6 * FACTOR + DCOSIDO) * dias)
 
                 # Crear DataFrame para el gráfico de Gantt
                 df_gantt = pd.DataFrame({
