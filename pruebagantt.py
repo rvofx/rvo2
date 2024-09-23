@@ -265,6 +265,15 @@ st.title("Progreso del Pedido")
 # Campo de entrada para ingresar el número de pedido
 pedido = st.text_input("Ingresa el número de pedido")
 
+# Campos de entrada adicionales para  parámetros numéricos
+
+
+dpieza = st.number_input("Ingresa los días de estampado en pieza", min_value=0, value=0)
+dpieza_sw = 1 if numero_adicional > 0 else 0 # Variable que dependerá del valor del número adicional
+st.write(f"Días de estampado en pieza: {dpieza}") # Mostrar el valor de la variable adicional en la aplicación (opcional)
+
+
+
 # Si el botón se presiona y hay un número de pedido ingresado, se ejecuta la consulta
 if st.button("Ejecutar Consulta"):
     if pedido:
