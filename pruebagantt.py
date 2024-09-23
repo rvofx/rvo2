@@ -374,14 +374,9 @@ if st.button("Ejecutar Consulta"):
                     name='Finish Real'
                 ))
 
-                # Fechas de colocación y entrega
-                #fecha_colocacion = pd.to_datetime(df['F_EMISION'].iloc[0])
-                #fecha_entrega = pd.to_datetime(df['F_ENTREGA'].iloc[0])
-
 		 # Determinar fechas de colocación y entrega basadas en la entrada del usuario
                 fecha_colocacion = pd.to_datetime(df['F_EMISION'].iloc[0]) if fecha_colocacion_input is None else fecha_colocacion_input
                 fecha_entrega = pd.to_datetime(df['F_ENTREGA'].iloc[0]) if fecha_entrega_input is None else fecha_entrega_input
-
 
                 # Agregar líneas verticales para las fechas de colocación y entrega
                 fig.add_shape(
