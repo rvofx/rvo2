@@ -298,6 +298,15 @@ if st.button("Ejecutar Consulta"):
                 f_emision = pd.to_datetime(df['F_EMISION'].iloc[0])
                 dias = df['DIAS'].iloc[0]
 
+		 # Usar la fecha de colocación ingresada si existe
+                if fecha_colocacion_input is not None:
+                    f_emision = pd.to_datetime(fecha_colocacion_input)
+
+                # Recalcular DIAS si ambas fechas de colocación y entrega han sido ingresadas
+                if fecha_colocacion_input is not None and fecha_entrega_input is not None:
+                    dias = (pd.to_datetime(fecha_entrega_input) - pd.to_datetime(fecha_colocacion_input)).days
+
+
                 # Cálculo de las fechas de inicio y fin
                 start_armado = f_emision + timedelta(days=FACTOR * dias)
                 start_tenido = f_emision + timedelta(days=2 * FACTOR * dias)
