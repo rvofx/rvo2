@@ -269,7 +269,7 @@ pedido = st.text_input("Ingresa el número de pedido")
 
 
 dpieza = st.number_input("Ingresa los días de estampado en pieza", min_value=0, value=0)
-dpieza_sw = 1 if numero_adicional > 0 else 0 # Variable que dependerá del valor del número adicional
+dpieza_sw = 1 if dpieza > 0 else 0 # Variable que dependerá del valor del número adicional
 st.write(f"Días de estampado en pieza: {dpieza}") # Mostrar el valor de la variable adicional en la aplicación (opcional)
 
 
