@@ -281,7 +281,7 @@ col4, col5, col6 = st.columns([1, 1, 1])
 
 with col4:
     dtex = st.number_input("Días proceso en tela", min_value=0, value=0)
-    
+
 with col5:
     dpieza = st.number_input("Días proceso en pieza", min_value=0, value=0)
     dpieza_sw = 1 if dpieza > 0 else 0
@@ -306,15 +306,19 @@ if st.button("Ejecutar Consulta"):
                 f_emision = pd.to_datetime(df['F_EMISION'].iloc[0])
                 dias = df['DIAS'].iloc[0]
 
-		 # Usar la fecha de colocación ingresada si existe
-                if fecha_colocacion_input is not None:
-                    f_emision = pd.to_datetime(fecha_colocacion_input)
-
-		
-
-                # Recalcular DIAS si ambas fechas de colocación y entrega han sido ingresadas
-                #if fecha_colocacion_input is not None and fecha_entrega_input is not None:
-                    #dias = (pd.to_datetime(fecha_entrega_input) - pd.to_datetime(fecha_colocacion_input)).days
+                # Recalcular DIAS si alguna de las fechas de colocación o entrega ha sido ingresada
+                if fecha_colocacion_input is not None or fecha_entrega_input is not None:
+                    if fecha_colocacion_input is not None and fecha_entrega_input is not None:
+                        # Si ambas fechas fueron ingresadas, recalcular DIAS
+                        dias = (pd.to_datetime(fecha_entrega_input) - pd.to_datetime(fecha_colocacion_input)).days
+                    elif fecha_colocacion_input is not None:
+                        # Si solo la fecha de colocación fue ingresada
+                        fecha_entrega_original = pd.to_datetime(df['F_ENTREGA'].iloc[0])
+                        dias = (fecha_entrega_original - pd.to_datetime(fecha_colocacion_input)).days
+                    elif fecha_entrega_input is not None:
+                        # Si solo la fecha de entrega fue ingresada
+                        fecha_colocacion_original = pd.to_datetime(df['F_EMISION'].iloc[0])
+                        dias = (pd.to_datetime(fecha_entrega_input) - fecha_colocacion_original).days
 
                 # Cálculo de las fechas de inicio y fin
                 start_armado = f_emision + timedelta(days=FACTOR * (dias-dtex-dpieza-dprenda))
@@ -347,7 +351,7 @@ if st.button("Ejecutar Consulta"):
                 # Crear el gráfico de Gantt
                 fig = px.timeline(df_gantt, x_start="Start", x_end="Finish", y="Proceso", text="Avance")
 
-	        # Cambiar el color de las barras
+                # Cambiar el color de las barras
                 for trace in fig.data:
                     trace.marker.color = 'lightsteelblue'  # Puedes cambiar a cualquier color válido
 
@@ -363,20 +367,18 @@ if st.button("Ejecutar Consulta"):
                     x=df_gantt['Start Real'],
                     y=df_gantt['Proceso'],
                     mode='markers',
-                    #marker=dict(color='black', size=10),
-		    marker=dict(symbol='triangle-up', size=10, color='black'),	
+                    marker=dict(symbol='triangle-up', size=10, color='black'),    
                     name='Start Real'
                 ))
                 fig.add_trace(go.Scatter(
                     x=df_gantt['Finish Real'],
                     y=df_gantt['Proceso'],
                     mode='markers',
-		    marker=dict(symbol='triangle-down', size=10, color='red'),
-                    #marker=dict(color='red', size=10),
+                    marker=dict(symbol='triangle-down', size=10, color='red'),
                     name='Finish Real'
                 ))
 
-		 # Determinar fechas de colocación y entrega basadas en la entrada del usuario
+                # Determinar fechas de colocación y entrega basadas en la entrada del usuario
                 fecha_colocacion = pd.to_datetime(df['F_EMISION'].iloc[0]) if fecha_colocacion_input is None else fecha_colocacion_input
                 fecha_entrega = pd.to_datetime(df['F_ENTREGA'].iloc[0]) if fecha_entrega_input is None else fecha_entrega_input
 
@@ -408,31 +410,14 @@ if st.button("Ejecutar Consulta"):
                     y0=0,
                     x1=fecha_actual,
                     y1=len(df_gantt),
-                    line=dict(color="black", width=2, dash="dash"),
+                    line=dict(color="blue", width=2, dash="dash"),
                     name="Fecha Actual"
                 )
 
-                # Agregar líneas verticales muy tenues cada 2 días
-                #start_date = datetime.strptime(df['F_EMISION'].iloc[0], '%Y-%m-%d')
-                #end_date = datetime.strptime(df['F_ENTREGA'].iloc[0], '%Y-%m-%d')
-                #current_date = start_date
-                #while current_date <= end_date:
-                    #fig.add_shape(
-                        #type="line",
-                        #x0=current_date,
-                        #y0=0,
-                        #x1=current_date,
-                        #y1=len(df_gantt),
-                        #line=dict(color="gray", width=1, dash="dot"),
-                    #)
-                    #current_date += timedelta(days=2)
-
                 # Mostrar el gráfico
-                st.title(f"Pedido: {df['PEDIDO'].iloc[0]}")
-                st.write(f"Cliente: {df['CLIENTE'].iloc[0]}")
                 st.plotly_chart(fig)
 
         except Exception as e:
-            st.error(f"Error al ejecutar la consulta: {e}")
+            st.error(f"Error al ejecutar la consulta: {str(e)}")
     else:
         st.warning("Por favor ingresa un número de pedido.")
