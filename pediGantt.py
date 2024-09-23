@@ -309,7 +309,11 @@ if st.button("Ejecutar Consulta"):
                 })
 
                 # Crear el gráfico de Gantt
-                fig = px.timeline(df_gantt, x_start="Start", x_end="Finish", y="Proceso", text="Avance", color="blue")
+                fig = px.timeline(df_gantt, x_start="Start", x_end="Finish", y="Proceso", text="Avance")
+
+	        # Cambiar el color de las barras
+                for trace in fig.data:
+                trace.marker.color = 'green'  # Puedes cambiar a cualquier color válido
 
                 # Mostrar las etiquetas del eje X cada 7 días
                 tick0_date = f_emision.strftime('%Y-%m-%d')
