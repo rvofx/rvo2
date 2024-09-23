@@ -313,7 +313,7 @@ if st.button("Ejecutar Consulta"):
 
 	        # Cambiar el color de las barras
                 for trace in fig.data:
-                    trace.marker.color = 'gainsboro'  # Puedes cambiar a cualquier color válido
+                    trace.marker.color = 'lightsteelblue'  # Puedes cambiar a cualquier color válido
 
                 # Mostrar las etiquetas del eje X cada 7 días
                 tick0_date = f_emision.strftime('%Y-%m-%d')
