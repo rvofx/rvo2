@@ -290,24 +290,6 @@ with col6:
     dprenda = st.number_input("Días proceso en prenda", min_value=0, value=0)
     dprenda_sw = 1 if dprenda > 0 else 0
 
-# Campo de entrada para ingresar el número de pedido
-#pedido = st.text_input("Ingresa el número de pedido")
-
-# Campos de entrada para las fechas de colocación y entrega (opcional)
-#fecha_colocacion_input = st.date_input("Ingresa la Fecha de Colocación (opcional)", value=None)
-#fecha_entrega_input = st.date_input("Ingresa la Fecha de Entrega (opcional)", value=None)
-
-# Campos de entrada adicionales para  parámetros numéricos
-#dtex = st.number_input("Días proceso en tela", min_value=0, value=0)
-
-#dpieza = st.number_input("Días proceso en pieza", min_value=0, value=0)
-#dpieza_sw = 1 if dpieza > 0 else 0 # Variable que dependerá del valor del número adicional
-#st.write(f"Días de estampado en pieza: {dpieza}") # Mostrar el valor de la variable adicional en la aplicación (opcional)
-
-#dprenda = st.number_input("Días proceso en prenda", min_value=0, value=0)
-#dprenda_sw = 1 if dprenda > 0 else 0 # Variable que dependerá del valor del número adicional
-#st.write(f"Días de estampado en prenda: {dprenda}") # Mostrar el valor de la variable adicional en la aplicación (opcional)
-
 # Si el botón se presiona y hay un número de pedido ingresado, se ejecuta la consulta
 if st.button("Ejecutar Consulta"):
     if pedido:
