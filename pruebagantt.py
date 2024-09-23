@@ -334,7 +334,7 @@ if st.button("Ejecutar Consulta"):
 
 
                 # Cálculo de las fechas de inicio y fin
-                start_armado = f_emision + timedelta(days=FACTOR * dias)
+                start_armado = f_emision + timedelta(days=FACTOR * (dias-dtex-dpieza-dprenda)
                 start_tenido = f_emision + timedelta(days=2 * FACTOR * dias)
                 start_telaprob = f_emision + timedelta(days=3 * FACTOR * dias)
                 start_corte = f_emision + timedelta(days=4 * FACTOR * dias)
