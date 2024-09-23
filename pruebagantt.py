@@ -331,7 +331,7 @@ if st.button("Ejecutar Consulta"):
                 # Recalcular DIAS si ambas fechas de colocación y entrega han sido ingresadas
                 if fecha_colocacion_input is not None and fecha_entrega_input is not None:
                     dias = (pd.to_datetime(fecha_entrega_input) - pd.to_datetime(fecha_colocacion_input)).days
-		st.write(dias)
+st.write({dias})
 
 
                 # Cálculo de las fechas de inicio y fin
