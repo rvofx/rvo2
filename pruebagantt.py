@@ -281,7 +281,7 @@ col4, col5, col6 = st.columns([1, 1, 1])
 
 with col4:
     dtex = st.number_input("Días proceso en tela", min_value=0, value=0)
-
+    
 with col5:
     dpieza = st.number_input("Días proceso en pieza", min_value=0, value=0)
     dpieza_sw = 1 if dpieza > 0 else 0
@@ -304,34 +304,29 @@ if st.button("Ejecutar Consulta"):
 
                 # Procesar los datos para el gráfico de Gantt
                 f_emision = pd.to_datetime(df['F_EMISION'].iloc[0])
+                f_entrega = pd.to_datetime(df['F_ENTREGA'].iloc[0])
                 dias = df['DIAS'].iloc[0]
 
-                # Recalcular DIAS si alguna de las fechas de colocación o entrega ha sido ingresada
-                if fecha_colocacion_input is not None or fecha_entrega_input is not None:
-                    if fecha_colocacion_input is not None and fecha_entrega_input is not None:
-                        # Si ambas fechas fueron ingresadas, recalcular DIAS
-                        dias = (pd.to_datetime(fecha_entrega_input) - pd.to_datetime(fecha_colocacion_input)).days
-                    elif fecha_colocacion_input is not None:
-                        # Si solo la fecha de colocación fue ingresada
-                        fecha_entrega_original = pd.to_datetime(df['F_ENTREGA'].iloc[0])
-                        dias = (fecha_entrega_original - pd.to_datetime(fecha_colocacion_input)).days
-                    elif fecha_entrega_input is not None:
-                        # Si solo la fecha de entrega fue ingresada
-                        fecha_colocacion_original = pd.to_datetime(df['F_EMISION'].iloc[0])
-                        dias = (pd.to_datetime(fecha_entrega_input) - fecha_colocacion_original).days
+                # Usar las fechas ingresadas si existen
+                if fecha_colocacion_input is not None:
+                    f_emision = pd.to_datetime(fecha_colocacion_input)
+
+                if fecha_entrega_input is not None:
+                    f_entrega = pd.to_datetime(fecha_entrega_input)
+                    dias = (f_entrega - f_emision).days
 
                 # Cálculo de las fechas de inicio y fin
                 start_armado = f_emision + timedelta(days=FACTOR * (dias-dtex-dpieza-dprenda))
                 start_tenido = f_emision + timedelta(days=2 * FACTOR * (dias-dtex-dpieza-dprenda))
-                start_telaprob = f_emision + timedelta(days=3 * FACTOR * (dias-dtex-dpieza-dprenda)+dtex+dpieza+dprenda-(dpieza*dpieza_sw)-(dprenda*dprenda_sw))
-                start_corte = f_emision + timedelta(days=4 * FACTOR * (dias-dtex-dpieza-dprenda)+dtex+dpieza+dprenda-(dprenda*dprenda_sw))
-                start_costura = f_emision + timedelta(days=6 * FACTOR * (dias-dtex-dpieza-dprenda)+dtex+dpieza+dprenda)
+                start_telaprob = f_emision + timedelta(days=3 * FACTOR * (dias-dtex-dpieza-dprenda) + dtex + dpieza + dprenda - (dpieza * dpieza_sw) - (dprenda * dprenda_sw))
+                start_corte = f_emision + timedelta(days=4 * FACTOR * (dias-dtex-dpieza-dprenda) + dtex + dpieza + dprenda - (dprenda * dprenda_sw))
+                start_costura = f_emision + timedelta(days=6 * FACTOR * (dias-dtex-dpieza-dprenda) + dtex + dpieza + dprenda)
 
                 finish_armado = f_emision + timedelta(days=(FACTOR + DARM) * (dias-dtex-dpieza-dprenda))
                 finish_tenido = f_emision + timedelta(days=(2 * FACTOR + DTENID) * (dias-dtex-dpieza-dprenda))
-                finish_telaprob = f_emision + timedelta(days=(3 * FACTOR + DTELAPROB) * (dias-dtex-dpieza-dprenda)+dtex+dpieza+dprenda-(dpieza*dpieza_sw)-(dprenda*dprenda_sw))
-                finish_corte = f_emision + timedelta(days=(4 * FACTOR + DCORTADO) * (dias-dtex-dpieza-dprenda)+dtex+dpieza+dprenda-(dprenda*dprenda_sw))
-                finish_costura = f_emision + timedelta(days=(6 * FACTOR + DCOSIDO) * (dias-dtex-dpieza-dprenda)+dtex+dpieza+dprenda)
+                finish_telaprob = f_emision + timedelta(days=(3 * FACTOR + DTELAPROB) * (dias-dtex-dpieza-dprenda) + dtex + dpieza + dprenda - (dpieza * dpieza_sw) - (dprenda * dprenda_sw))
+                finish_corte = f_emision + timedelta(days=(4 * FACTOR + DCORTADO) * (dias-dtex-dpieza-dprenda) + dtex + dpieza + dprenda - (dprenda * dprenda_sw))
+                finish_costura = f_emision + timedelta(days=(6 * FACTOR + DCOSIDO) * (dias-dtex-dpieza-dprenda) + dtex + dpieza + dprenda)
 
                 # Crear DataFrame para el gráfico de Gantt
                 df_gantt = pd.DataFrame({
@@ -353,7 +348,7 @@ if st.button("Ejecutar Consulta"):
 
                 # Cambiar el color de las barras
                 for trace in fig.data:
-                    trace.marker.color = 'lightsteelblue'  # Puedes cambiar a cualquier color válido
+                    trace.marker.color = 'lightsteelblue'
 
                 # Mostrar las etiquetas del eje X cada 7 días
                 tick0_date = f_emision.strftime('%Y-%m-%d')
@@ -367,7 +362,7 @@ if st.button("Ejecutar Consulta"):
                     x=df_gantt['Start Real'],
                     y=df_gantt['Proceso'],
                     mode='markers',
-                    marker=dict(symbol='triangle-up', size=10, color='black'),    
+                    marker=dict(symbol='triangle-up', size=10, color='black'),	
                     name='Start Real'
                 ))
                 fig.add_trace(go.Scatter(
@@ -378,31 +373,26 @@ if st.button("Ejecutar Consulta"):
                     name='Finish Real'
                 ))
 
-                # Determinar fechas de colocación y entrega basadas en la entrada del usuario
-                fecha_colocacion = pd.to_datetime(df['F_EMISION'].iloc[0]) if fecha_colocacion_input is None else fecha_colocacion_input
-                fecha_entrega = pd.to_datetime(df['F_ENTREGA'].iloc[0]) if fecha_entrega_input is None else fecha_entrega_input
-
-                # Agregar líneas verticales para las fechas de colocación y entrega
+                # Agregar líneas verticales para las fechas de colocación, entrega y la fecha actual
                 fig.add_shape(
                     type="line",
-                    x0=fecha_colocacion,
+                    x0=f_emision,
                     y0=0,
-                    x1=fecha_colocacion,
+                    x1=f_emision,
                     y1=len(df_gantt),
                     line=dict(color="green", width=2, dash="dash"),
                     name="Fecha Colocación"
                 )
                 fig.add_shape(
                     type="line",
-                    x0=fecha_entrega,
+                    x0=f_entrega,
                     y0=0,
-                    x1=fecha_entrega,
+                    x1=f_entrega,
                     y1=len(df_gantt),
                     line=dict(color="red", width=2, dash="dash"),
                     name="Fecha Entrega"
                 )
 
-                # Agregar una línea vertical para la fecha actual
                 fecha_actual = datetime.now().strftime('%Y-%m-%d')
                 fig.add_shape(
                     type="line",
@@ -410,16 +400,16 @@ if st.button("Ejecutar Consulta"):
                     y0=0,
                     x1=fecha_actual,
                     y1=len(df_gantt),
-                    line=dict(color="blue", width=2, dash="dash"),
+                    line=dict(color="black", width=2, dash="dash"),
                     name="Fecha Actual"
                 )
-		# Mostrar el gráfico
+
+                # Mostrar el gráfico
                 st.title(f"Pedido: {df['PEDIDO'].iloc[0]}")
                 st.write(f"Cliente: {df['CLIENTE'].iloc[0]}")
                 st.plotly_chart(fig)
-                
 
         except Exception as e:
-            st.error(f"Error al ejecutar la consulta: {str(e)}")
+            st.error(f"Error al ejecutar la consulta: {e}")
     else:
         st.warning("Por favor ingresa un número de pedido.")
