@@ -342,7 +342,7 @@ if st.button("Ejecutar Consulta"):
 
                 finish_armado = f_emision + timedelta(days=(FACTOR + DARM) * (dias-dtex-dpieza-dprenda))
                 finish_tenido = f_emision + timedelta(days=(2 * FACTOR + DTENID) * (dias-dtex-dpieza-dprenda))
-                finish_telaprob = f_emision + timedelta(days=(3 * FACTOR + DTELAPROB) * dias)
+                finish_telaprob = f_emision + timedelta(days=(3 * FACTOR + DTELAPROB) * (dias-dtex-dpieza-dprenda)+dtex+dpieza+dprenda-(dpieza*dpieza_sw)-(dprenda*dprenda_sw))
                 finish_corte = f_emision + timedelta(days=(4 * FACTOR + DCORTADO) * dias)
                 finish_costura = f_emision + timedelta(days=(6 * FACTOR + DCOSIDO) * dias)
 
