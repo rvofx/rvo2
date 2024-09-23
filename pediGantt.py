@@ -309,7 +309,7 @@ if st.button("Ejecutar Consulta"):
                 })
 
                 # Crear el gráfico de Gantt
-                fig = px.timeline(df_gantt, x_start="Start", x_end="Finish", y="Proceso", text="Avance", color="Avance")
+                fig = px.timeline(df_gantt, x_start="Start", x_end="Finish", y="Proceso", text="Avance", color="Proceso")
 
                 # Mostrar las etiquetas del eje X cada 7 días
                 tick0_date = f_emision.strftime('%Y-%m-%d')
