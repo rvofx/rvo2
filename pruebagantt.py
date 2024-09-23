@@ -257,9 +257,7 @@ DTENID = 0.25
 DTELAPROB = 0.27
 DCORTADO = 0.25
 DCOSIDO = 0.57
-DTEX = 23
-DPIEZA = 7
-DPRENDA = 7
+
 
 # Interfaz de usuario de Streamlit
 st.title("Progreso del Pedido")
