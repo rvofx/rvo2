@@ -415,6 +415,8 @@ if st.button("Ejecutar Consulta"):
                 )
 
                 # Mostrar el gráfico
+		st.title(f"Pedido: {df['PEDIDO'].iloc[0]}")
+                st.write(f"Cliente: {df['CLIENTE'].iloc[0]}")
                 st.plotly_chart(fig)
 
         except Exception as e:
