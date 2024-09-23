@@ -335,13 +335,13 @@ if st.button("Ejecutar Consulta"):
 
                 # Cálculo de las fechas de inicio y fin
                 start_armado = f_emision + timedelta(days=FACTOR * (dias-dtex-dpieza-dprenda))
-                start_tenido = f_emision + timedelta(days=2 * FACTOR * dias)
+                start_tenido = f_emision + timedelta(days=2 * FACTOR * (dias-dtex-dpieza-dprenda))
                 start_telaprob = f_emision + timedelta(days=3 * FACTOR * dias)
                 start_corte = f_emision + timedelta(days=4 * FACTOR * dias)
                 start_costura = f_emision + timedelta(days=6 * FACTOR * dias)
 
-                finish_armado = f_emision + timedelta(days=(FACTOR + DARM) * dias)
-                finish_tenido = f_emision + timedelta(days=(2 * FACTOR + DTENID) * dias)
+                finish_armado = f_emision + timedelta(days=(FACTOR + DARM) * (dias-dtex-dpieza-dprenda))
+                finish_tenido = f_emision + timedelta(days=(2 * FACTOR + DTENID) * (dias-dtex-dpieza-dprenda))
                 finish_telaprob = f_emision + timedelta(days=(3 * FACTOR + DTELAPROB) * dias)
                 finish_corte = f_emision + timedelta(days=(4 * FACTOR + DCORTADO) * dias)
                 finish_costura = f_emision + timedelta(days=(6 * FACTOR + DCOSIDO) * dias)
