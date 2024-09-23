@@ -323,7 +323,8 @@ if st.button("Ejecutar Consulta"):
                     x=df_gantt['Start Real'],
                     y=df_gantt['Proceso'],
                     mode='markers',
-                    marker=dict(color='black', size=10),
+                    #marker=dict(color='black', size=10),
+		    marker=dict(symbol='triangle-up', size=10, color='green'),	
                     name='Start Real'
                 ))
                 fig.add_trace(go.Scatter(
