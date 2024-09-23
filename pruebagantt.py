@@ -337,14 +337,14 @@ if st.button("Ejecutar Consulta"):
                 start_armado = f_emision + timedelta(days=FACTOR * (dias-dtex-dpieza-dprenda))
                 start_tenido = f_emision + timedelta(days=2 * FACTOR * (dias-dtex-dpieza-dprenda))
                 start_telaprob = f_emision + timedelta(days=3 * FACTOR * (dias-dtex-dpieza-dprenda)+dtex+dpieza+dprenda-(dpieza*dpieza_sw)-(dprenda*dprenda_sw))
-                start_corte = f_emision + timedelta(days=4 * FACTOR * dias)
-                start_costura = f_emision + timedelta(days=6 * FACTOR * dias)
+                start_corte = f_emision + timedelta(days=4 * FACTOR * (dias-dtex-dpieza-dprenda)+dtex+dpieza+dprenda-(dprenda*dprenda_sw))
+                start_costura = f_emision + timedelta(days=6 * FACTOR * (dias-dtex-dpieza-dprenda)+dtex+dpieza+dprenda)
 
                 finish_armado = f_emision + timedelta(days=(FACTOR + DARM) * (dias-dtex-dpieza-dprenda))
                 finish_tenido = f_emision + timedelta(days=(2 * FACTOR + DTENID) * (dias-dtex-dpieza-dprenda))
                 finish_telaprob = f_emision + timedelta(days=(3 * FACTOR + DTELAPROB) * (dias-dtex-dpieza-dprenda)+dtex+dpieza+dprenda-(dpieza*dpieza_sw)-(dprenda*dprenda_sw))
-                finish_corte = f_emision + timedelta(days=(4 * FACTOR + DCORTADO) * dias)
-                finish_costura = f_emision + timedelta(days=(6 * FACTOR + DCOSIDO) * dias)
+                finish_corte = f_emision + timedelta(days=(4 * FACTOR + DCORTADO) * (dias-dtex-dpieza-dprenda)+dtex+dpieza+dprenda-(dprenda*dprenda_sw))
+                finish_costura = f_emision + timedelta(days=(6 * FACTOR + DCOSIDO) * (dias-dtex-dpieza-dprenda)+dtex+dpieza+dprenda)
 
                 # Crear DataFrame para el gráfico de Gantt
                 df_gantt = pd.DataFrame({
