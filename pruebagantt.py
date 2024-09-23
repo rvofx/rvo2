@@ -312,21 +312,20 @@ if st.button("Ejecutar Consulta"):
 
 		# Verificar si alguna de las fechas ha sido ingresada
 		if fecha_colocacion_input is not None or fecha_entrega_input is not None:
-    		    if fecha_colocacion_input is not None and fecha_entrega_input is not None:
-        	    	# Si ambas fechas fueron ingresadas, recalcular DIAS
-        	    	dias = (pd.to_datetime(fecha_entrega_input) - pd.to_datetime(fecha_colocacion_input)).days
-    		    elif fecha_colocacion_input is not None:
-        		# Si solo la fecha de colocación fue ingresada, recalcular DIAS a partir de la fecha de colocación y la fecha de entrega original
-        		fecha_entrega_original = pd.to_datetime(df['F_ENTREGA'].iloc[0])
-        		dias = (fecha_entrega_original - pd.to_datetime(fecha_colocacion_input)).days
-    		    elif fecha_entrega_input is not None:
-        		# Si solo la fecha de entrega fue ingresada, recalcular DIAS a partir de la fecha de colocación original y la nueva fecha de entrega
-        		fecha_colocacion_original = pd.to_datetime(df['F_EMISION'].iloc[0])
-        		dias = (pd.to_datetime(fecha_entrega_input) - fecha_colocacion_original).days
+		    if fecha_colocacion_input is not None and fecha_entrega_input is not None:
+		        # Si ambas fechas fueron ingresadas, recalcular DIAS
+		        dias = (pd.to_datetime(fecha_entrega_input) - pd.to_datetime(fecha_colocacion_input)).days
+		    elif fecha_colocacion_input is not None:
+		        # Si solo la fecha de colocación fue ingresada, recalcular DIAS a partir de la fecha de colocación y la fecha de entrega original
+		        fecha_entrega_original = pd.to_datetime(df['F_ENTREGA'].iloc[0])
+		        dias = (fecha_entrega_original - pd.to_datetime(fecha_colocacion_input)).days
+		    elif fecha_entrega_input is not None:
+		        # Si solo la fecha de entrega fue ingresada, recalcular DIAS a partir de la fecha de colocación original y la nueva fecha de entrega
+		        fecha_colocacion_original = pd.to_datetime(df['F_EMISION'].iloc[0])
+		        dias = (pd.to_datetime(fecha_entrega_input) - fecha_colocacion_original).days
 		else:
-    		    # Si ninguna de las fechas fue ingresada, no se modifica DIAS
-    		    dias = df['DIAS'].iloc[0]
-
+		    # Si ninguna de las fechas fue ingresada, no se modifica DIAS
+		    dias = df['DIAS'].iloc[0]
 
                 # Recalcular DIAS si ambas fechas de colocación y entrega han sido ingresadas
                 #if fecha_colocacion_input is not None and fecha_entrega_input is not None:
