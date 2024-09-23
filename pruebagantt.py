@@ -413,11 +413,11 @@ if st.button("Ejecutar Consulta"):
                     line=dict(color="blue", width=2, dash="dash"),
                     name="Fecha Actual"
                 )
-
-                # Mostrar el gráfico
-		st.title(f"Pedido: {df['PEDIDO'].iloc[0]}")
-		st.write(f"Cliente: {df['CLIENTE'].iloc[0]}")   
-		st.plotly_chart(fig)
+		# Mostrar el gráfico
+                st.title(f"Pedido: {df['PEDIDO'].iloc[0]}")
+                st.write(f"Cliente: {df['CLIENTE'].iloc[0]}")
+                st.plotly_chart(fig)
+                
 
         except Exception as e:
             st.error(f"Error al ejecutar la consulta: {str(e)}")
