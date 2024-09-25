@@ -376,15 +376,15 @@ if st.button("Ejecutar Consulta"):
                     avance = max(0, min(avance, 100)) / 100
 
                     gantt_data.append({
-                        'id': row['Proceso'],
-                        'name': row['Proceso'],
-                        'start': row['Start'].strftime('%Y-%m-%d'),
-                        'end': row['Finish'].strftime('%Y-%m-%d'),
-                        'progress': avance,
-                        'start_real': row['Start Real'].strftime('%Y-%m-%d'),
-                        'end_real': row['Finish Real'].strftime('%Y-%m-%d'),
-                        'avance': f"{avance*100:.2f}%"
-                    })
+					    'id': row['Proceso'],
+					    'name': row['Proceso'],
+					    'start': row['Start'].strftime('%Y-%m-%d'),
+					    'end': row['Finish'].strftime('%Y-%m-%d'),
+					    'progress': avance,
+					    '_start_real': row['Start Real'].strftime('%Y-%m-%d'),
+					    '_end_real': row['Finish Real'].strftime('%Y-%m-%d'),
+					    '_avance': f"{avance*100:.2f}%"
+					})
 
                 # Crear el HTML y JavaScript para el gráfico de Gantt interactivo
                 gantt_html = f"""
