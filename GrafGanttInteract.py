@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
+from streamlit_javascript import st_javascript
 
 st.set_page_config(layout="wide")
 
@@ -343,71 +344,54 @@ if st.button("Ejecutar Consulta"):
                                df['CORTADOP'].iloc[0], df['COSIDOP'].iloc[0]]
                 })
 
-                # Crear el gráfico de Gantt
-                fig = px.timeline(df_gantt, x_start="Start", x_end="Finish", y="Proceso", text="Avance")
+                # Crear DataFrame para el gráfico de Gantt
+                df_gantt = pd.DataFrame({
+                    'Proceso': ['ARMADO', 'TEÑIDO', 'TELA_APROB', 'CORTE', 'COSTURA'],
+                    'Start': [start_armado, start_tenido, start_telaprob, start_corte, start_costura],
+                    'Finish': [finish_armado, finish_tenido, finish_telaprob, finish_corte, finish_costura],
+                    'Start Real': [pd.to_datetime(df['FMINARM'].iloc[0]), pd.to_datetime(df['FMINTENID'].iloc[0]), 
+                                   pd.to_datetime(df['FMINTELAPROB'].iloc[0]), pd.to_datetime(df['FMINCORTE'].iloc[0]), 
+                                   pd.to_datetime(df['FMINCOSIDO'].iloc[0])],
+                    'Finish Real': [pd.to_datetime(df['FMAXARM'].iloc[0]), pd.to_datetime(df['FMAXTENID'].iloc[0]), 
+                                    pd.to_datetime(df['FMAXTELAPROB'].iloc[0]), pd.to_datetime(df['FMAXCORTE'].iloc[0]), 
+                                    pd.to_datetime(df['FMAXCOSIDO'].iloc[0])],
+                    'Avance': [df['KG_ARMP'].iloc[0], df['KG_TENIDP'].iloc[0], df['KG_TELAPROBP'].iloc[0], 
+                               df['CORTADOP'].iloc[0], df['COSIDOP'].iloc[0]]
+                })
 
-                # Cambiar el color de las barras
-                for trace in fig.data:
-                    trace.marker.color = 'lightsteelblue'
+                # Convertir el DataFrame a un formato compatible con Frappe Gantt
+                gantt_data = []
+                for _, row in df_gantt.iterrows():
+                    gantt_data.append({
+                        'id': row['Proceso'],
+                        'name': row['Proceso'],
+                        'start': row['Start'].strftime('%Y-%m-%d'),
+                        'end': row['Finish'].strftime('%Y-%m-%d'),
+                        'progress': row['Avance'] / 100  # Asumiendo que Avance es un porcentaje
+                    })
 
-                # Mostrar las etiquetas del eje X cada 7 días
-                tick0_date = f_emision.strftime('%Y-%m-%d')
-                fig.update_xaxes(tickmode='linear', tick0=tick0_date, dtick=7 * 24 * 60 * 60 * 1000)
+                # Crear el HTML y JavaScript para el gráfico de Gantt interactivo
+                gantt_html = f"""
+                <div id="gantt"></div>
+                <script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.5.0/dist/frappe-gantt.min.js"></script>
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt@0.5.0/dist/frappe-gantt.css">
+                <script>
+                var tasks = {gantt_data};
+                var gantt = new Gantt("#gantt", tasks, {{
+                    view_modes: ['Day', 'Week', 'Month'],
+                    view_mode: 'Week',
+                    date_format: 'YYYY-MM-DD',
+                    on_date_change: function(task, start, end) {{
+                        console.log(task.name + ' cambiado a ' + start + ' - ' + end);
+                    }}
+                }});
+                </script>
+                """
 
-                # Ajustar el diseño del gráfico
-                fig.update_yaxes(autorange="reversed")
-
-                # Agregar las barras de las fechas reales
-                fig.add_trace(go.Scatter(
-                    x=df_gantt['Start Real'],
-                    y=df_gantt['Proceso'],
-                    mode='markers',
-                    marker=dict(symbol='triangle-up', size=10, color='black'),	
-                    name='Start Real'
-                ))
-                fig.add_trace(go.Scatter(
-                    x=df_gantt['Finish Real'],
-                    y=df_gantt['Proceso'],
-                    mode='markers',
-                    marker=dict(symbol='triangle-down', size=10, color='red'),
-                    name='Finish Real'
-                ))
-
-                # Agregar líneas verticales para las fechas de colocación, entrega y la fecha actual
-                fig.add_shape(
-                    type="line",
-                    x0=f_emision,
-                    y0=0,
-                    x1=f_emision,
-                    y1=len(df_gantt),
-                    line=dict(color="green", width=2, dash="dash"),
-                    name="Fecha Colocación"
-                )
-                fig.add_shape(
-                    type="line",
-                    x0=f_entrega,
-                    y0=0,
-                    x1=f_entrega,
-                    y1=len(df_gantt),
-                    line=dict(color="red", width=2, dash="dash"),
-                    name="Fecha Entrega"
-                )
-
-                fecha_actual = datetime.now().strftime('%Y-%m-%d')
-                fig.add_shape(
-                    type="line",
-                    x0=fecha_actual,
-                    y0=0,
-                    x1=fecha_actual,
-                    y1=len(df_gantt),
-                    line=dict(color="black", width=2, dash="dash"),
-                    name="Fecha Actual"
-                )
-
-                # Mostrar el gráfico
+                # Mostrar el gráfico de Gantt interactivo
                 st.title(f"Pedido: {df['PEDIDO'].iloc[0]}")
                 st.write(f"Cliente: {df['CLIENTE'].iloc[0]}")
-                st.plotly_chart(fig)
+                st.components.v1.html(gantt_html, height=400)
 
         except Exception as e:
             st.error(f"Error al ejecutar la consulta: {e}")
