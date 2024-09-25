@@ -365,15 +365,13 @@ if st.button("Ejecutar Consulta"):
                     # Asegurarse de que 'Avance' sea un número y convertirlo a float si es necesario
                     avance = row['Avance']
                     if isinstance(avance, str):
-                        # Si 'Avance' es una cadena, intentamos convertirla a float
                         try:
-                            avance = float(avance.replace(',', '.'))  # Reemplazar coma por punto si es necesario
+                            avance = float(avance.replace(',', '.'))
                         except ValueError:
-                            avance = 0  # Si no se puede convertir, asumimos 0% de avance
+                            avance = 0
                     elif not isinstance(avance, (int, float)):
-                        avance = 0  # Si no es str, int o float, asumimos 0% de avance
+                        avance = 0
                     
-                    # Asegurarse de que el avance esté entre 0 y 1
                     avance = max(0, min(avance, 100)) / 100
 
                     gantt_data.append({
@@ -381,7 +379,10 @@ if st.button("Ejecutar Consulta"):
                         'name': row['Proceso'],
                         'start': row['Start'].strftime('%Y-%m-%d'),
                         'end': row['Finish'].strftime('%Y-%m-%d'),
-                        'progress': avance
+                        'progress': avance,
+                        'start_real': row['Start Real'].strftime('%Y-%m-%d'),
+                        'end_real': row['Finish Real'].strftime('%Y-%m-%d'),
+                        'avance': f"{avance*100:.2f}%"
                     })
 
                 # Crear el HTML y JavaScript para el gráfico de Gantt interactivo
@@ -389,15 +390,83 @@ if st.button("Ejecutar Consulta"):
                 <div id="gantt"></div>
                 <script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.5.0/dist/frappe-gantt.min.js"></script>
                 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt@0.5.0/dist/frappe-gantt.css">
+                <style>
+                    .gantt .bar-progress {{
+                        fill: #a3a3ff;
+                    }}
+                    .gantt .bar-invalid {{
+                        fill: #d44556;
+                    }}
+                    .gantt .bar-label {{
+                        fill: #fff;
+                        dominant-baseline: central;
+                        text-anchor: middle;
+                        font-size: 12px;
+                    }}
+                    .gantt .lower-text {{
+                        fill: #fff;
+                        text-anchor: middle;
+                        font-size: 10px;
+                    }}
+                </style>
                 <script>
-                var tasks = {gantt_data};
+                var tasks = {json.dumps(gantt_data)};
                 var gantt = new Gantt("#gantt", tasks, {{
                     view_modes: ['Day', 'Week', 'Month'],
                     view_mode: 'Week',
                     date_format: 'YYYY-MM-DD',
                     on_date_change: function(task, start, end) {{
                         console.log(task.name + ' cambiado a ' + start + ' - ' + end);
+                    }},
+                    custom_popup_html: function(task) {{
+                        return `
+                            <div class="details-container">
+                                <h5>${task.name}</h5>
+                                <p>Inicio Planeado: ${task.start}</p>
+                                <p>Fin Planeado: ${task.end}</p>
+                                <p>Inicio Real: ${task.start_real}</p>
+                                <p>Fin Real: ${task.end_real}</p>
+                                <p>Avance: ${task.avance}</p>
+                            </div>
+                        `;
                     }}
+                }});
+
+                // Añadir marcadores para fechas reales y etiquetas de avance
+                gantt.tasks.forEach(task => {{
+                    const barElement = task.$bar;
+                    const x = barElement.getX();
+                    const y = barElement.getY();
+                    const width = barElement.getWidth();
+                    const height = barElement.getHeight();
+
+                    // Añadir marcador de inicio real
+                    const startReal = gantt.date_utils.parse(task.start_real);
+                    if (startReal >= gantt.gantt_start && startReal <= gantt.gantt_end) {{
+                        const startRealX = gantt.date_utils.diff(gantt.gantt_start, startReal, 'hour') / 24 * gantt.options.column_width;
+                        const startMarker = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        startMarker.setAttribute('d', `M ${startRealX},${y} L ${startRealX},${y+height} L ${startRealX+5},${y+height/2} Z`);
+                        startMarker.setAttribute('fill', 'green');
+                        gantt.layers.bar.appendChild(startMarker);
+                    }}
+
+                    // Añadir marcador de fin real
+                    const endReal = gantt.date_utils.parse(task.end_real);
+                    if (endReal >= gantt.gantt_start && endReal <= gantt.gantt_end) {{
+                        const endRealX = gantt.date_utils.diff(gantt.gantt_start, endReal, 'hour') / 24 * gantt.options.column_width;
+                        const endMarker = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        endMarker.setAttribute('d', `M ${endRealX},${y} L ${endRealX},${y+height} L ${endRealX-5},${y+height/2} Z`);
+                        endMarker.setAttribute('fill', 'red');
+                        gantt.layers.bar.appendChild(endMarker);
+                    }}
+
+                    // Añadir etiqueta de avance
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', x + width / 2);
+                    text.setAttribute('y', y + height / 2);
+                    text.textContent = task.avance;
+                    text.classList.add('bar-label');
+                    gantt.layers.bar.appendChild(text);
                 }});
                 </script>
                 """
