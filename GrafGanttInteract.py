@@ -344,7 +344,7 @@ if st.button("Ejecutar Consulta"):
                                df['CORTADOP'].iloc[0], df['COSIDOP'].iloc[0]]
                 })
 
-                # Crear DataFrame para el gráfico de Gantt
+                         # Crear DataFrame para el gráfico de Gantt
                 df_gantt = pd.DataFrame({
                     'Proceso': ['ARMADO', 'TEÑIDO', 'TELA_APROB', 'CORTE', 'COSTURA'],
                     'Start': [start_armado, start_tenido, start_telaprob, start_corte, start_costura],
@@ -362,12 +362,26 @@ if st.button("Ejecutar Consulta"):
                 # Convertir el DataFrame a un formato compatible con Frappe Gantt
                 gantt_data = []
                 for _, row in df_gantt.iterrows():
+                    # Asegurarse de que 'Avance' sea un número y convertirlo a float si es necesario
+                    avance = row['Avance']
+                    if isinstance(avance, str):
+                        # Si 'Avance' es una cadena, intentamos convertirla a float
+                        try:
+                            avance = float(avance.replace(',', '.'))  # Reemplazar coma por punto si es necesario
+                        except ValueError:
+                            avance = 0  # Si no se puede convertir, asumimos 0% de avance
+                    elif not isinstance(avance, (int, float)):
+                        avance = 0  # Si no es str, int o float, asumimos 0% de avance
+                    
+                    # Asegurarse de que el avance esté entre 0 y 1
+                    avance = max(0, min(avance, 100)) / 100
+
                     gantt_data.append({
                         'id': row['Proceso'],
                         'name': row['Proceso'],
                         'start': row['Start'].strftime('%Y-%m-%d'),
                         'end': row['Finish'].strftime('%Y-%m-%d'),
-                        'progress': row['Avance'] / 100  # Asumiendo que Avance es un porcentaje
+                        'progress': avance
                     })
 
                 # Crear el HTML y JavaScript para el gráfico de Gantt interactivo
