@@ -5,6 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 from streamlit_javascript import st_javascript
+import json
 
 st.set_page_config(layout="wide")
 
