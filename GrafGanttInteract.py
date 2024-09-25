@@ -422,50 +422,50 @@ if st.button("Ejecutar Consulta"):
                     custom_popup_html: function(task) {{
                         return `
                             <div class="details-container">
-                                <h5>${task.name}</h5>
-                                <p>Inicio Planeado: ${task.start}</p>
-                                <p>Fin Planeado: ${task.end}</p>
-                                <p>Inicio Real: ${task.start_real}</p>
-                                <p>Fin Real: ${task.end_real}</p>
-                                <p>Avance: ${task.avance}</p>
+                                <h5>${{task.name}}</h5>
+                                <p>Inicio Planeado: ${{task.start}}</p>
+                                <p>Fin Planeado: ${{task.end}}</p>
+                                <p>Inicio Real: ${{task._start_real}}</p>
+                                <p>Fin Real: ${{task._end_real}}</p>
+                                <p>Avance: ${{task._avance}}</p>
                             </div>
                         `;
                     }}
                 }});
 
                 // Añadir marcadores para fechas reales y etiquetas de avance
-                gantt.tasks.forEach(task => {{
-                    const barElement = task.$bar;
-                    const x = barElement.getX();
-                    const y = barElement.getY();
-                    const width = barElement.getWidth();
-                    const height = barElement.getHeight();
+                gantt.bars.forEach(function(bar) {{
+                    var task = bar.task;
+                    var x = bar.getX();
+                    var y = bar.getY();
+                    var width = bar.getWidth();
+                    var height = bar.getHeight();
 
                     // Añadir marcador de inicio real
-                    const startReal = gantt.date_utils.parse(task.start_real);
+                    var startReal = gantt.date_utils.parse(task._start_real);
                     if (startReal >= gantt.gantt_start && startReal <= gantt.gantt_end) {{
-                        const startRealX = gantt.date_utils.diff(gantt.gantt_start, startReal, 'hour') / 24 * gantt.options.column_width;
-                        const startMarker = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                        startMarker.setAttribute('d', `M ${startRealX},${y} L ${startRealX},${y+height} L ${startRealX+5},${y+height/2} Z`);
+                        var startRealX = gantt.date_utils.diff(gantt.gantt_start, startReal, 'hour') / 24 * gantt.options.column_width;
+                        var startMarker = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        startMarker.setAttribute('d', `M ${{startRealX}},${{y}} L ${{startRealX}},${{y+height}} L ${{startRealX+5}},${{y+height/2}} Z`);
                         startMarker.setAttribute('fill', 'green');
                         gantt.layers.bar.appendChild(startMarker);
                     }}
 
                     // Añadir marcador de fin real
-                    const endReal = gantt.date_utils.parse(task.end_real);
+                    var endReal = gantt.date_utils.parse(task._end_real);
                     if (endReal >= gantt.gantt_start && endReal <= gantt.gantt_end) {{
-                        const endRealX = gantt.date_utils.diff(gantt.gantt_start, endReal, 'hour') / 24 * gantt.options.column_width;
-                        const endMarker = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                        endMarker.setAttribute('d', `M ${endRealX},${y} L ${endRealX},${y+height} L ${endRealX-5},${y+height/2} Z`);
+                        var endRealX = gantt.date_utils.diff(gantt.gantt_start, endReal, 'hour') / 24 * gantt.options.column_width;
+                        var endMarker = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        endMarker.setAttribute('d', `M ${{endRealX}},${{y}} L ${{endRealX}},${{y+height}} L ${{endRealX-5}},${{y+height/2}} Z`);
                         endMarker.setAttribute('fill', 'red');
                         gantt.layers.bar.appendChild(endMarker);
                     }}
 
                     // Añadir etiqueta de avance
-                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                     text.setAttribute('x', x + width / 2);
                     text.setAttribute('y', y + height / 2);
-                    text.textContent = task.avance;
+                    text.textContent = task._avance;
                     text.classList.add('bar-label');
                     gantt.layers.bar.appendChild(text);
                 }});
