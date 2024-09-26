@@ -44,7 +44,7 @@ def get_exchange_rates():
 
 st.title('Tipo de Cambio SBS')
 
-if st.button('Obtener Tipo de Cambio'):
+if st.button('Obtener Tipo de Cambi'):
     with st.spinner('Cargando datos...'):
         df = get_exchange_rates()
     
