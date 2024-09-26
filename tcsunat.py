@@ -1,48 +1,43 @@
 import streamlit as st
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, timedelta
 
-def obtener_tipo_cambio_sunat():
-    url = "https://e-consulta.sunat.gob.pe/cl-at-ittipcam/tcS01Alias"
+def obtener_tipo_cambio(fecha):
+    url = "https://www.sbs.gob.pe/app/pp/sistip_portal/paginas/publicacion/tipocambiopromedio.aspx"
     
-    # Realizar la solicitud HTTP
+    # Obtener el contenido de la página
     response = requests.get(url)
-    response.raise_for_status()  # Verificar que la solicitud fue exitosa
+    soup = BeautifulSoup(response.content, 'html.parser')
     
-    # Parsear el contenido HTML
-    soup = BeautifulSoup(response.text, 'html.parser')
+    # Buscar la tabla con los datos
+    tabla = soup.find('table', {'id': 'ctl00_cphContent_rgTipoCambio_ctl00'})
     
-    # Buscar la tabla que contiene el tipo de cambio
-    table = soup.find("table", {"class": "class=\"form-table\""})
+    if tabla:
+        filas = tabla.find_all('tr')
+        for fila in filas:
+            celdas = fila.find_all('td')
+            if len(celdas) >= 4:
+                fecha_str = celdas[0].text.strip()
+                if fecha_str == fecha.strftime('%d/%m/%Y'):
+                    compra = celdas[1].text.strip()
+                    venta = celdas[2].text.strip()
+                    return compra, venta
     
-    # Extraer los datos de la tabla (compra y venta)
-    if table:
-        rows = table.find_all("tr")
-        
-        # Asumiendo que la tabla tiene las columnas Compra y Venta
-        compra = rows[1].find_all("td")[1].text.strip()
-        venta = rows[1].find_all("td")[2].text.strip()
-        
-        return compra, venta
-    else:
-        return None, None
+    return None, None
 
-# Título de la aplicación
-st.title("Tipo de Cambio Dólar - SUNAT")
+st.title('Tipo de Cambio USD/PEN')
 
-# Mostrar la fecha y hora actual
-st.write(f"Consulta realizada el: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+fecha_ayer = datetime.now() - timedelta(days=1)
+fecha_str = fecha_ayer.strftime('%d/%m/%Y')
 
-# Botón para obtener el tipo de cambio
-if st.button("Obtener tipo de cambio"):
-    compra, venta = obtener_tipo_cambio_sunat()
-    
-    if compra and venta:
-        st.success(f"Compra: {compra} | Venta: {venta}")
-    else:
-        st.error("No se pudo obtener el tipo de cambio. Intenta nuevamente.")
+st.write(f"Obteniendo tipo de cambio para la fecha: {fecha_str}")
 
-# Instrucciones sobre cómo ejecutar la aplicación
-st.write("Esta aplicación muestra el tipo de cambio de compra y venta del dólar en soles de la SUNAT en tiempo real.")
+compra, venta = obtener_tipo_cambio(fecha_ayer)
 
+if compra and venta:
+    st.success(f"Tipo de cambio del {fecha_str}:")
+    st.write(f"Compra: S/ {compra}")
+    st.write(f"Venta: S/ {venta}")
+else:
+    st.error(f"No se pudo obtener el tipo de cambio para la fecha {fecha_str}")
