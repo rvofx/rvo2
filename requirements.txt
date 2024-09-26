@@ -7,3 +7,5 @@ pyodbc==5.0.1
 streamlit==1.32.0
 openpyxl
 streamlit-javascript
+requests
+beautifulsoup4
