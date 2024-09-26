@@ -1,32 +1,37 @@
 import streamlit as st
 import requests
+from bs4 import BeautifulSoup
 import pandas as pd
 
-def get_table_from_url(url):
-    # Obtener el contenido HTML de la página
+def get_exchange_rates():
+    url = "https://www.sbs.gob.pe/app/pp/sistip_portal/paginas/publicacion/tipocambiopromedio.aspx"
     response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
     
-    # Extraer todas las tablas de la página
-    tables = pd.read_html(response.text)
+    table = soup.find('table', {'id': 'ctl00_cphContent_rgTipoCambio_ctl00'})
     
-    # Devolver la primera tabla encontrada
-    # Puedes modificar esto si necesitas una tabla específica
-    return tables[0] if tables else None
+    data = []
+    for row in table.find_all('tr')[1:]:  # Skip header row
+        cols = row.find_all('td')
+        if len(cols) == 3:
+            currency = cols[0].text.strip()
+            buy = cols[1].text.strip()
+            sell = cols[2].text.strip()
+            data.append([currency, buy, sell])
+    
+    return pd.DataFrame(data, columns=['Moneda', 'Compra (S/)', 'Venta (S/)'])
 
-# Interfaz de usuario de Streamlit
-st.title("Extractor de Tablas Web")
+st.title('Tipo de Cambio SBS')
 
-# Campo de entrada para la URL
-url = st.text_input("Ingresa la URL de la página web:")
-
-if url:
-    if st.button("Extraer Tabla"):
-        try:
-            table = get_table_from_url(url)
-            if table is not None:
-                st.success("¡Tabla extraída con éxito!")
-                st.dataframe(table)
-            else:
-                st.warning("No se encontraron tablas en la página.")
-        except Exception as e:
-            st.error(f"Ocurrió un error: {e}")
+if st.button('Obtener Tipo de Cambio'):
+    df = get_exchange_rates()
+    st.dataframe(df)
+    
+    # Opción para descargar como CSV
+    csv = df.to_csv(index=False).encode('utf-8')
+    st.download_button(
+        label="Descargar datos como CSV",
+        data=csv,
+        file_name="tipo_cambio_sbs.csv",
+        mime="text/csv",
+    )
