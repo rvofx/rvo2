@@ -40,7 +40,7 @@ def get_table_data(url):
 def main():
     st.title("Extractor de Datos de Tipo de Cambio SBS")
     
-    url = "https://www.sbs.gob.pe/app/pp/sistip_portal/paginas/publicacion/tipocambiopromedio.aspx"
+    url = "https://e-consulta.sunat.gob.pe/cl-at-ittipcam/tcS01Alias"
     st.write(f"Extrayendo datos de: {url}")
     
     if st.button("Extraer Datos"):
