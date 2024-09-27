@@ -13,3 +13,4 @@ lxml
 html5lib
 selenium 
 webdriver-manager
+cloudscraper
