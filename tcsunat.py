@@ -1,25 +1,15 @@
 import streamlit as st
-import requests
+import cloudscraper
 from bs4 import BeautifulSoup
 import pandas as pd
 
-# Definir los headers fuera de las funciones para que sean accesibles globalmente
-HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-    'Accept-Language': 'en-US,en;q=0.5',
-    'DNT': '1',
-    'Connection': 'keep-alive',
-    'Upgrade-Insecure-Requests': '1',
-}
-
 def get_table_data(url):
     try:
-        response = requests.get(url, headers=HEADERS)
-        response.raise_for_status()
+        scraper = cloudscraper.create_scraper(browser='chrome')
+        response = scraper.get(url)
         st.write(f"Estado de la respuesta: {response.status_code}")
         
-        soup = BeautifulSoup(response.content, 'html.parser')
+        soup = BeautifulSoup(response.text, 'html.parser')
         
         # Buscar la tabla específica por su ID
         table = soup.find('table', id='ctl00_cphContent_rgTipoCambio_ctl00')
@@ -35,9 +25,14 @@ def get_table_data(url):
         all_tables = soup.find_all('table')
         st.write(f"Número total de tablas encontradas: {len(all_tables)}")
         
+        # Buscar elementos específicos que deberían estar en la página
+        specific_element = soup.find('span', id='ctl00_cphContent_lblFecha')
+        if specific_element:
+            st.write(f"Fecha encontrada: {specific_element.text}")
+        else:
+            st.warning("No se encontró la fecha en la página.")
+        
         return []
-    except requests.RequestException as e:
-        st.error(f"Error al obtener la página: {str(e)}")
     except Exception as e:
         st.error(f"Error inesperado: {str(e)}")
     return []
@@ -61,7 +56,8 @@ def main():
 
         # Mostrar el HTML de la página para depuración
         st.subheader("Contenido HTML de la página")
-        response = requests.get(url, headers=HEADERS)
+        scraper = cloudscraper.create_scraper(browser='chrome')
+        response = scraper.get(url)
         st.code(response.text[:1000], language='html')  # Mostrar los primeros 1000 caracteres
 
 if __name__ == "__main__":
