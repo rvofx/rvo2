@@ -1,64 +1,35 @@
 import streamlit as st
-import cloudscraper
-from bs4 import BeautifulSoup
-import pandas as pd
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
+from PIL import Image
+import time
 
-def get_table_data(url):
-    try:
-        scraper = cloudscraper.create_scraper(browser='chrome')
-        response = scraper.get(url)
-        st.write(f"Estado de la respuesta: {response.status_code}")
-        
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Buscar la tabla específica por su ID
-        table = soup.find('table', id='ctl00_cphContent_rgTipoCambio_ctl00')
-        
-        if table:
-            st.write("Tabla encontrada.")
-            df = pd.read_html(str(table))[0]
-            return [("Tipo de Cambio", df)]
-        else:
-            st.warning("No se encontró la tabla específica.")
-            
-        # Mostrar todas las tablas encontradas para depuración
-        all_tables = soup.find_all('table')
-        st.write(f"Número total de tablas encontradas: {len(all_tables)}")
-        
-        # Buscar elementos específicos que deberían estar en la página
-        specific_element = soup.find('span', id='ctl00_cphContent_lblFecha')
-        if specific_element:
-            st.write(f"Fecha encontrada: {specific_element.text}")
-        else:
-            st.warning("No se encontró la fecha en la página.")
-        
-        return []
-    except Exception as e:
-        st.error(f"Error inesperado: {str(e)}")
-    return []
+# Configura el navegador en modo headless (sin ventana gráfica)
+chrome_options = Options()
+chrome_options.add_argument("--headless")  # Ejecución en modo sin ventana
+chrome_options.add_argument("--window-size=1920x1080")  # Tamaño de la ventana
 
-def main():
-    st.title("Extractor de Datos de Tipo de Cambio SBS")
-    
-    url = "https://e-consulta.sunat.gob.pe/cl-at-ittipcam/tcS01Alias"
-    st.write(f"Extrayendo datos de: {url}")
-    
-    if st.button("Extraer Datos"):
-        with st.spinner('Extrayendo datos...'):
-            data = get_table_data(url)
-        
-        if data:
-            for table_name, df in data:
-                st.subheader(table_name)
-                st.dataframe(df)
-        else:
-            st.warning("No se pudieron extraer datos. Por favor, revisa los mensajes de error arriba.")
+# Inicializa el navegador
+st.write("Iniciando navegador...")
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
-        # Mostrar el HTML de la página para depuración
-        st.subheader("Contenido HTML de la página")
-        scraper = cloudscraper.create_scraper(browser='chrome')
-        response = scraper.get(url)
-        st.code(response.text[:1000], language='html')  # Mostrar los primeros 1000 caracteres
+# URL a consultar
+url = "https://e-consulta.sunat.gob.pe/cl-at-ittipcam/tcS01Alias"
 
-if __name__ == "__main__":
-    main()
+# Abre la página
+driver.get(url)
+
+# Espera unos segundos para que la página se cargue completamente
+time.sleep(5)
+
+# Guarda una captura de pantalla
+screenshot_path = "screenshot.png"
+driver.save_screenshot(screenshot_path)
+
+# Muestra la imagen en Streamlit
+st.image(screenshot_path)
+
+# Cierra el navegador
+driver.quit()
