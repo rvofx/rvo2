@@ -3,18 +3,19 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 
-def get_table_data(url):
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'DNT': '1',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-    }
+# Definir los headers fuera de las funciones para que sean accesibles globalmente
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'DNT': '1',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+}
 
+def get_table_data(url):
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=HEADERS)
         response.raise_for_status()
         st.write(f"Estado de la respuesta: {response.status_code}")
         
@@ -60,7 +61,7 @@ def main():
 
         # Mostrar el HTML de la página para depuración
         st.subheader("Contenido HTML de la página")
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=HEADERS)
         st.code(response.text[:1000], language='html')  # Mostrar los primeros 1000 caracteres
 
 if __name__ == "__main__":
