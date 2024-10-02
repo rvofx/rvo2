@@ -37,7 +37,7 @@ FROM
     CONVERT(INT, COALESCE(d.KG, 0)) AS KG_REQ,
     FORMAT(CASE WHEN d.KG = 0 THEN 0 ELSE (COALESCE(t.KG_ARM, 0) / d.KG) END, '0%') AS KG_ARMP,
     FORMAT(CASE WHEN d.KG = 0 THEN 0 ELSE (COALESCE(t.KG_TEÑIDOS, 0) / d.KG) END, '0%') AS KG_TENIDP,
-    FORMAT(CASE WHEN d.KG = 0 THEN 0 ELSE (COALESCE(t.KG_PRODUC, 0) / d.KG) END, '0%') AS KG_TELAPROBP,
+    FORMAT(CASE WHEN d.KG = 0 THEN 0 ELSE (COALESCE(t.KG_APROB_D, 0) / d.KG) END, '0%') AS KG_TELAPROBP,
 
     CONVERT(INT, a.dCantidad) AS UNID,
     FORMAT(CASE WHEN a.dCantidad = 0 THEN 0 ELSE (COALESCE(programado.PROG, 0) / a.dCantidad) END, '0%') AS PROGP,
@@ -58,6 +58,7 @@ LEFT JOIN (
         x.IdDocumento_Referencia AS PEDIDO,
         SUM(y.dCantidadProgramado) AS KG_ARM,
         SUM(z.bcerrado * y.dCantidadRequerido) AS KG_PRODUC,
+	SUM(z.bCierreAprobado * y.dCantidadProgramado*0.9) AS KG_APROB_D,
         SUM(s.bcerrado * y.dCantidadProgramado) AS KG_TEÑIDOS
     FROM docOrdenProduccionItem y
     INNER JOIN docOrdenProduccion z ON y.IdDocumento_OrdenProduccion = z.IdDocumento_OrdenProduccion
