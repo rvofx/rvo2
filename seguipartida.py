@@ -30,8 +30,10 @@ def get_partidas_sin_tenido(dias):
         INNER JOIN maeItemInventario f WITH (NOLOCK) ON f.IdmaeItem_Inventario = a.IdmaeItem
         INNER JOIN maeColor g WITH (NOLOCK) ON g.IdmaeColor = a.IdmaeColor
         INNER JOIN maeAnexoCliente h WITH (NOLOCK) ON h.IdmaeAnexo_Cliente = a.IdmaeAnexo_Cliente
-        INNER JOIN docRecetaOrdenProduccion i ON a.IdDocumento_OrdenProduccion = i.IdDocumento_OrdenProduccion
-        INNER JOIN docReceta j ON i.IdDocumento_Receta = j.IdDocumento_Receta
+        --INNER JOIN docRecetaOrdenProduccion i ON a.IdDocumento_OrdenProduccion = i.IdDocumento_OrdenProduccion
+        --INNER JOIN docReceta j ON i.IdDocumento_Receta = j.IdDocumento_Receta
+        LEFT JOIN docRecetaOrdenProduccion i ON a.IdDocumento_OrdenProduccion = i.IdDocumento_OrdenProduccion  -- LEFT JOIN
+        LEFT JOIN docReceta j ON i.IdDocumento_Receta = j.IdDocumento_Receta
         INNER JOIN maeruta k ON a.IdmaeRuta = k.IdmaeRuta
         WHERE a.IdtdDocumentoForm = 138
         AND j.dtFechaHoraFin IS NULL
