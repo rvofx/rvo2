@@ -50,7 +50,7 @@ def get_partidas_con_tenido_sin_aprob_tela(dias):
                j.dtFechaHoraFin AS F_TENIDO, a.FechaCierreAprobado AS F_APROB_TELA, a.dCantidad AS KG, 
                a.nvDocumentoReferencia AS REF, g.NommaeColor AS COLOR, a.bCierreAprobado AS AP_DES, 
                a.bProduccionAprobado AS DESP, a.bcerrado AS CERR, LEFT(h.NommaeAnexoCliente, 15) AS Cliente, 
-               a.ntEstado AS ESTADO, k.NommaeRuta AS RUTA
+               a.ntEstado AS ESTADO, k.NommaeRuta AS RUTA, DATEDIFF(DAY, j.dtFechaHoraFin, GETDATE()) AS DIAS_DESDE_TENIDO  -- Aquí calculamos los días desde F_TENIDO
         FROM docOrdenProduccion a WITH (NOLOCK)
         INNER JOIN maeItemInventario f WITH (NOLOCK) ON f.IdmaeItem_Inventario = a.IdmaeItem
         INNER JOIN maeColor g WITH (NOLOCK) ON g.IdmaeColor = a.IdmaeColor
