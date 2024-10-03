@@ -21,8 +21,8 @@ def get_partidas_sin_tenido(dias):
     query = f"""
         SELECT a.CoddocOrdenProduccion AS PARTIDA, LEFT(f.NommaeItemInventario, 35) AS TELA, FORMAT(a.dtFechaEmision, 'dd-MM') AS F_EMISION, 
                FORMAT(j.dtFechaHoraFin, 'dd-MM') AS F_TENIDO, 
-               FORMAT(a.FechaCierreAprobado, 'dd-MM') AS F_APROB_TELA, -- Formato DD-MM a.dtFechaEmision AS F_EMISION,
-               --j.dtFechaHoraFin AS F_TENIDO, a.FechaCierreAprobado AS F_APROB_TELA, a.dCantidad AS KG, 
+               FORMAT(a.FechaCierreAprobado, 'dd-MM') AS F_APROB_TELA, 
+               a.dCantidad AS KG, 
                a.nvDocumentoReferencia AS REF, g.NommaeColor AS COLOR, a.bCierreAprobado AS AP_DES, 
                a.bProduccionAprobado AS DESP, a.bcerrado AS CERR, LEFT(h.NommaeAnexoCliente, 15) AS Cliente, 
                a.ntEstado AS ESTADO, k.NommaeRuta AS RUTA, DATEDIFF(DAY, a.dtFechaEmision, GETDATE()) AS DIAS_DESDE_EMISION  -- Aquí calculamos los días
