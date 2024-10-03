@@ -50,10 +50,10 @@ def fetch_data(partida, color, cliente, ref):
 st.title("Búsqueda de Ordenes de Producción")
 
 # Campos de búsqueda
-partida = st.text_input("Buscar por PARTIDA:", "")
-color = st.text_input("Buscar por COLOR:", "")
-cliente = st.text_input("Buscar por CLIENTE:", "")
-ref = st.text_input("Buscar por REF:", "")
+partida = st.text_input("PARTIDA:", "")
+color = st.text_input("COLOR:", "")
+cliente = st.text_input("CLIENTE:", "")
+ref = st.text_input("REF:", "")
 
 # Botón para ejecutar la búsqueda
 if st.button("Buscar"):
