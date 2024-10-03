@@ -19,13 +19,13 @@ def connect_to_db():
 def get_partidas_sin_tenido(dias):
     conn = connect_to_db()
     query = f"""
-        SELECT a.CoddocOrdenProduccion AS PARTIDA, LEFT(f.NommaeItemInventario, 35) AS TELA, FORMAT(a.dtFechaEmision, 'dd-MM') AS F_EMISION, 
+        SELECT a.CoddocOrdenProduccion AS PARTIDA, DATEDIFF(DAY, a.dtFechaEmision, GETDATE()) AS DIAS  , LEFT(f.NommaeItemInventario, 35) AS TELA, FORMAT(a.dtFechaEmision, 'dd-MM') AS F_EMISION, 
                FORMAT(j.dtFechaHoraFin, 'dd-MM') AS F_TENIDO, 
                FORMAT(a.FechaCierreAprobado, 'dd-MM') AS F_APROB_TELA, 
                a.dCantidad AS KG, 
                a.nvDocumentoReferencia AS REF, g.NommaeColor AS COLOR, a.bCierreAprobado AS AP_DES, 
                a.bProduccionAprobado AS DESP, a.bcerrado AS CERR, LEFT(h.NommaeAnexoCliente, 15) AS Cliente, 
-               a.ntEstado AS ESTADO, k.NommaeRuta AS RUTA, DATEDIFF(DAY, a.dtFechaEmision, GETDATE()) AS DIAS_DESDE_EMISION  -- Aquí calculamos los días
+               a.ntEstado AS ESTADO, k.NommaeRuta AS RUTA
         FROM docOrdenProduccion a WITH (NOLOCK)
         INNER JOIN maeItemInventario f WITH (NOLOCK) ON f.IdmaeItem_Inventario = a.IdmaeItem
         INNER JOIN maeColor g WITH (NOLOCK) ON g.IdmaeColor = a.IdmaeColor
