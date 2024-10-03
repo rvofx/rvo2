@@ -32,7 +32,7 @@ def get_partidas_sin_tenido(dias):
         INNER JOIN maeAnexoCliente h WITH (NOLOCK) ON h.IdmaeAnexo_Cliente = a.IdmaeAnexo_Cliente
         --INNER JOIN docRecetaOrdenProduccion i ON a.IdDocumento_OrdenProduccion = i.IdDocumento_OrdenProduccion
         --INNER JOIN docReceta j ON i.IdDocumento_Receta = j.IdDocumento_Receta
-        RIGHT JOIN docRecetaOrdenProduccion i ON a.IdDocumento_OrdenProduccion = i.IdDocumento_OrdenProduccion  -- LEFT JOIN
+        LEFT JOIN docRecetaOrdenProduccion i ON a.IdDocumento_OrdenProduccion = i.IdDocumento_OrdenProduccion  -- LEFT JOIN
         LEFT JOIN docReceta j ON i.IdDocumento_Receta = j.IdDocumento_Receta
         INNER JOIN maeruta k ON a.IdmaeRuta = k.IdmaeRuta
         WHERE a.IdtdDocumentoForm = 138
