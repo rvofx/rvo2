@@ -5,13 +5,14 @@ import pandas as pd
 # Función para conectar a SQL Server usando las credenciales de secrets
 def sql_connection():
     conn = pyodbc.connect(
-        "DRIVER={SQL Server};"
-        f"SERVER={st.secrets['server']};"
-        f"DATABASE={st.secrets['database']};"
-        f"UID={st.secrets['username']};"
-        f"PWD={st.secrets['password']};"
+        "driver={odbc driver 17 for sql server};"
+        "server=" + st.secrets["server"] + ";"
+        "database=" + st.secrets["database"] + ";"
+        "uid=" + st.secrets["username"] + ";"
+        "pwd=" + st.secrets["password"] + ";"
     )
     return conn
+
 
 # Función para ejecutar la consulta SQL con filtros
 def fetch_data(partida, color, cliente, ref):
