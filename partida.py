@@ -19,7 +19,7 @@ def fetch_data(partida, color, cliente, ref):
     conn = sql_connection()
     query = """
         SELECT a.CoddocOrdenProduccion as PARTIDA, 
-               F.ntDescripcion AS DESCRIP, 
+               LEFT (F.ntDescripcion,30) AS DESCRIP, 
                F.dCantidadProgramado AS KG_CRUDO, 
                f.dCantidadRequerido AS KG_PRODUC, 
                a.nvDocumentoReferencia as REF,  
