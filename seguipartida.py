@@ -46,6 +46,8 @@ def get_partidas_sin_tenido(dias):
     """
     df = pd.read_sql(query, conn)
     conn.close()
+    # Convertir la columna KG a numérico (si hay valores no numéricos, los convertirá a NaN)
+    df['KG'] = pd.to_numeric(df['KG'], errors='coerce')
     # Redondear la columna KG a 1 decimal
     df['KG'] = df['KG'].round(1)
     return df
