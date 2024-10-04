@@ -25,7 +25,7 @@ def get_partidas_sin_tenido(dias):
                a.dCantidad AS KG, 
                a.nvDocumentoReferencia AS REF, g.NommaeColor AS COLOR, --a.bCierreAprobado AS AP_DES, 
                --a.bProduccionAprobado AS DESP, a.bcerrado AS CERR, 
-               LEFT(h.NommaeAnexoCliente, 15) AS Cliente, 
+               LEFT(h.NommaeAnexoCliente, 15) AS Cliente 
                --a.ntEstado AS ESTADO, k.NommaeRuta AS RUTA
         FROM docOrdenProduccion a WITH (NOLOCK)
         INNER JOIN maeItemInventario f WITH (NOLOCK) ON f.IdmaeItem_Inventario = a.IdmaeItem
