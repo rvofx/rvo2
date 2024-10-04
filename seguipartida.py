@@ -125,22 +125,12 @@ st.title("Seguimiento de Partidas")
 
 
 # Selección de días para la primera consulta
-
-# Agrupación en columnas para mejor apariencia
-col1, col2, col3 = st.columns([1, 1, 1])
-
-with col1:
-    dias_sin_tenido = st.number_input("Días sin TEÑIR (por defecto 8)", min_value=1, value=8)
-    if st.button("Mostrar partidas no TEÑIDAS"):
-        df_sin_tenido = get_partidas_sin_tenido(dias_sin_tenido)
-        styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1)
-        # Aplicar formato con un decimal a la columna KG
-        styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1).format({"KG": "{:.1f}"})
-
-# Agrupación en columnas para mejor apariencia
-col4 = st.columns([1])
-
-with col4:
+dias_sin_tenido = st.number_input("Días sin TEÑIR (por defecto 8)", min_value=1, value=8)
+if st.button("Mostrar partidas no TEÑIDAS"):
+    df_sin_tenido = get_partidas_sin_tenido(dias_sin_tenido)
+    styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1)
+    # Aplicar formato con un decimal a la columna KG
+    styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1).format({"KG": "{:.1f}"})
     st.write(styled_df, unsafe_allow_html=True)
     
 
