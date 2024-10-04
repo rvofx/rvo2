@@ -136,7 +136,12 @@ with col1:
         styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1)
         # Aplicar formato con un decimal a la columna KG
         styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1).format({"KG": "{:.1f}"})
-st.write(styled_df, unsafe_allow_html=True)
+
+# Agrupación en columnas para mejor apariencia
+col4 = st.columns([1])
+
+with col4:
+    st.write(styled_df, unsafe_allow_html=True)
     
 
 # Selección de días para la segunda consulta
