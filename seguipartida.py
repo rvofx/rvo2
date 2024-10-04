@@ -121,6 +121,24 @@ def highlight_mofijado(row):
 # Interfaz de Streamlit
 st.title("Seguimiento de Partidas")
 
+# Estilo CSS personalizado para reducir el tamaño de la tabla y la fuente
+st.markdown(
+    """
+    <style>
+    .small-font {
+        font-size: 12px;
+    }
+    .dataframe {
+        font-size: 12px;
+        width: 80%; /* Ajusta el tamaño de la tabla en % */
+        margin-left: auto;
+        margin-right: auto;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # Selección de días para la primera consulta
 dias_sin_tenido = st.number_input("Días sin TEÑIR (por defecto 8)", min_value=1, value=8)
 if st.button("Mostrar partidas no TEÑIDAS"):
@@ -129,6 +147,10 @@ if st.button("Mostrar partidas no TEÑIDAS"):
     # Aplicar formato con un decimal a la columna KG
     styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1).format({"KG": "{:.1f}"})
     st.write(styled_df, unsafe_allow_html=True)
+    
+    # Aplicar la clase small-font para hacer la tabla más pequeña
+    st.markdown('<div class="small-font">', unsafe_allow_html=True)
+    
     #st.write(df_sin_tenido)
 
 # Selección de días para la segunda consulta
