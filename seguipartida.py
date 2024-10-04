@@ -3,6 +3,8 @@ import pyodbc
 import pandas as pd
 from datetime import datetime, timedelta
 
+st.set_page_config(layout="wide")
+
 # Función para conectar a SQL Server
 def connect_to_db():
     conn = pyodbc.connect(
