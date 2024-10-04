@@ -88,7 +88,7 @@ if st.button("Mostrar partidas no TEÑIDAS"):
     st.write(df_sin_tenido)
 
 # Selección de días para la segunda consulta
-dias_con_tenido = st.number_input("Días entre TEÑIDO y el día actual (por defecto 5) Partidas no llevan estampado", min_value=1, value=5)
+dias_con_tenido = st.number_input("Días entre TEÑIDO y el día actual (por defecto 5) Partidas que no llevan estampado", min_value=1, value=5)
 if st.button("Mostrar partidas TEÑIDAS pero no APROBADAS"):
     df_con_tenido = get_partidas_con_tenido_sin_aprob_tela(dias_con_tenido)
     st.write(df_con_tenido)
