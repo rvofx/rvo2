@@ -27,7 +27,7 @@ def get_partidas_sin_tenido(dias):
                --a.bProduccionAprobado AS DESP, a.bcerrado AS CERR, 
                LEFT(h.NommaeAnexoCliente, 15) AS Cliente, 
                --a.ntEstado AS ESTADO, k.NommaeRuta AS RUTA,
-               CASE WHEN LOWER(k.NommaeRuta) LIKE '%mofijado%' THEN 1 ELSE 0 END AS MOFIJADO_FLAG
+               CASE WHEN LOWER(k.NommaeRuta) LIKE '%mofijado%' THEN 1 ELSE 0 END AS FLAG
         FROM docOrdenProduccion a WITH (NOLOCK)
         INNER JOIN maeItemInventario f WITH (NOLOCK) ON f.IdmaeItem_Inventario = a.IdmaeItem
         INNER JOIN maeColor g WITH (NOLOCK) ON g.IdmaeColor = a.IdmaeColor
@@ -111,7 +111,7 @@ def get_partidas_con_tenido_sin_aprob_tela_estamp(dias):
     return df
 
 def highlight_mofijado(row):
-    return ['background-color: yellow' if row['MOFIJADO_FLAG'] == 1 else '' for _ in row]
+    return ['background-color: yellow' if row['FLAG'] == 1 else '' for _ in row]
 
 # Interfaz de Streamlit
 st.title("Seguimiento de Partidas")
