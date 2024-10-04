@@ -47,7 +47,7 @@ def fetch_data(partida, color, cliente, ref):
     return df
 
 # Título de la aplicación
-st.title("Búsqueda de Ordenes de Producción")
+st.title("Búsqueda de Partidas")
 
 # Campos de búsqueda
 partida = st.text_input("PARTIDA:", "")
