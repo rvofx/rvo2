@@ -56,8 +56,8 @@ def get_partidas_con_tenido_sin_aprob_tela(dias):
               a.dCantidad AS KG, 
                a.nvDocumentoReferencia AS REF, g.NommaeColor AS COLOR, --a.bCierreAprobado AS AP_DES, 
                --a.bProduccionAprobado AS DESP, --a.bcerrado AS CERR, 
-               LEFT(h.NommaeAnexoCliente, 15) AS Cliente
-               --a.ntEstado AS ESTADO, k.NommaeRuta AS RUTA
+               LEFT(h.NommaeAnexoCliente, 15) AS Cliente,
+               a.ntEstado AS ESTADO --, k.NommaeRuta AS RUTA
         FROM docOrdenProduccion a WITH (NOLOCK)
         INNER JOIN maeItemInventario f WITH (NOLOCK) ON f.IdmaeItem_Inventario = a.IdmaeItem
         INNER JOIN maeColor g WITH (NOLOCK) ON g.IdmaeColor = a.IdmaeColor
