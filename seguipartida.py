@@ -26,7 +26,8 @@ def get_partidas_sin_tenido(dias):
                a.nvDocumentoReferencia AS REF, g.NommaeColor AS COLOR, --a.bCierreAprobado AS AP_DES, 
                --a.bProduccionAprobado AS DESP, a.bcerrado AS CERR, 
                LEFT(h.NommaeAnexoCliente, 15) AS Cliente 
-               --a.ntEstado AS ESTADO, k.NommaeRuta AS RUTA
+               a.ntEstado AS ESTADO, k.NommaeRuta AS RUTA
+               CASE WHEN LOWER(k.NommaeRuta) LIKE '%mofijado%' THEN 1 ELSE 0 END AS MOFIJADO_FLAG
         FROM docOrdenProduccion a WITH (NOLOCK)
         INNER JOIN maeItemInventario f WITH (NOLOCK) ON f.IdmaeItem_Inventario = a.IdmaeItem
         INNER JOIN maeColor g WITH (NOLOCK) ON g.IdmaeColor = a.IdmaeColor
