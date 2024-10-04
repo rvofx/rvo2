@@ -76,7 +76,7 @@ def get_partidas_con_tenido_sin_aprob_tela(dias):
     return df
 
 # Interfaz de Streamlit
-st.title("Consulta de Partidas")
+st.title("Seguimiento de Partidas")
 
 # Selección de días para la primera consulta
 dias_sin_tenido = st.number_input("Días sin F_TENIDO (por defecto 8)", min_value=1, value=8)
