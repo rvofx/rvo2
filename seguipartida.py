@@ -46,6 +46,8 @@ def get_partidas_sin_tenido(dias):
     """
     df = pd.read_sql(query, conn)
     conn.close()
+    # Redondear la columna KG a 1 decimal
+    df['KG'] = df['KG'].round(1)
     return df
 
 # Consulta para obtener PARTIDAS con F_TENIDO pero sin F_APROB_TELA y que RUTA no contenga "ESTAMP"
@@ -77,6 +79,8 @@ def get_partidas_con_tenido_sin_aprob_tela(dias):
     """
     df = pd.read_sql(query, conn)
     conn.close()
+    # Redondear la columna KG a 1 decimal
+    df['KG'] = df['KG'].round(1)
     return df
 
 # Consulta para obtener PARTIDAS con F_TENIDO pero sin F_APROB_TELA y que RUTA contenga "ESTAMP"
@@ -108,6 +112,8 @@ def get_partidas_con_tenido_sin_aprob_tela_estamp(dias):
     """
     df = pd.read_sql(query, conn)
     conn.close()
+    # Redondear la columna KG a 1 decimal
+    df['KG'] = df['KG'].round(1)
     return df
 
 def highlight_mofijado(row):
