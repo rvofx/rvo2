@@ -110,9 +110,8 @@ def get_partidas_con_tenido_sin_aprob_tela_estamp(dias):
     conn.close()
     return df
 
-
-
-
+def highlight_mofijado(row):
+    return ['background-color: yellow' if row['MOFIJADO_FLAG'] == 1 else '' for _ in row]
 
 # Interfaz de Streamlit
 st.title("Seguimiento de Partidas")
@@ -121,7 +120,9 @@ st.title("Seguimiento de Partidas")
 dias_sin_tenido = st.number_input("Días sin TEÑIR (por defecto 8)", min_value=1, value=8)
 if st.button("Mostrar partidas no TEÑIDAS"):
     df_sin_tenido = get_partidas_sin_tenido(dias_sin_tenido)
-    st.write(df_sin_tenido)
+    styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1)
+    st.write(styled_df, unsafe_allow_html=True)
+    --st.write(df_sin_tenido)
 
 # Selección de días para la segunda consulta
 dias_con_tenido = st.number_input("Días entre TEÑIDO y el día actual (por defecto 5) Partidas que no llevan estampado", min_value=1, value=5)
