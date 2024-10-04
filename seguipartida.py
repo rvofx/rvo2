@@ -129,6 +129,8 @@ dias_sin_tenido = st.number_input("Días sin TEÑIR (por defecto 8)", min_value=
 if st.button("Mostrar partidas no TEÑIDAS"):
     df_sin_tenido = get_partidas_sin_tenido(dias_sin_tenido)
     styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1)
+    # Aplicar formato con un decimal a la columna KG
+    styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1).format({"KG": "{:.1f}"})
     st.write(styled_df, unsafe_allow_html=True)
     #st.write(df_sin_tenido)
 
