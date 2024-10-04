@@ -123,9 +123,28 @@ def highlight_mofijado(row):
 # Interfaz de Streamlit
 st.title("Seguimiento de Partidas")
 
+# Aplicar estilos personalizados con CSS
+st.markdown("""
+    <style>
+    .input-number-box {
+        width: 100px !important;  /* Aproximadamente 5 cm */
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 # Selección de días para la primera consulta
 dias_sin_tenido = st.number_input("Días sin TEÑIR (por defecto 8)", min_value=1, value=8)
+
+# Asignar la clase CSS personalizada al input usando Javascript
+st.markdown("""
+    <script>
+    var number_input = window.parent.document.querySelector('input[data-testid="stNumberInput-number_input_dias"]');
+    if (number_input) {
+        number_input.parentElement.classList.add('input-number-box');
+    }
+    </script>
+    """, unsafe_allow_html=True)
+
 if st.button("Mostrar partidas no TEÑIDAS"):
     df_sin_tenido = get_partidas_sin_tenido(dias_sin_tenido)
     styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1)
