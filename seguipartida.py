@@ -126,11 +126,11 @@ st.markdown(
     """
     <style>
     .small-font {
-        font-size: 12px;
+        font-size: 8px;
     }
     .dataframe {
-        font-size: 12px;
-        width: 80%; /* Ajusta el tamaño de la tabla en % */
+        font-size: 8px;
+        width: 60%; /* Ajusta el tamaño de la tabla en % */
         margin-left: auto;
         margin-right: auto;
     }
