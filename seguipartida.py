@@ -174,7 +174,7 @@ if st.button("Mostrar partidas no TEÑIDAS"):
     styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1)
     # Aplicar formato con un decimal a la columna KG
     styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1).format({"KG": "{:.1f}"})
-    st.write(df_sin_tenido.to_html(index=False), unsafe_allow_html=True)
+    st.dataframe(df_sin_tenido.to_html(index=False), unsafe_allow_html=True)
     #st.write(styled_df, unsafe_allow_html=True)
     
 
