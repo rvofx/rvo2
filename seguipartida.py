@@ -55,32 +55,42 @@ def get_partidas_sin_tenido(dias):
 def get_partidas_con_tenido_sin_aprob_tela(dias):
     conn = connect_to_db()
     query = f"""
-        SELECT a.CoddocOrdenProduccion AS PARTIDA,DATEDIFF(DAY, a.dtFechaEmision, GETDATE()) AS DIAS    , 
-                DATEDIFF(DAY,j.dtFechaHoraFin, GETDATE()) AS DIAS_TEN  , 
-                LEFT(f.NommaeItemInventario, 35) AS TELA, FORMAT(a.dtFechaEmision, 'dd-MM') AS F_EMISION,
-              FORMAT(j.dtFechaHoraFin, 'dd-MM') AS F_TENIDO, 
-              --FORMAT(a.FechaCierreAprobado, 'dd-MM') AS F_APROB_TELA, 
-              a.dCantidad AS KG, 
-               a.nvDocumentoReferencia AS REF, g.NommaeColor AS COLOR, --a.bCierreAprobado AS AP_DES, 
-               --a.bProduccionAprobado AS DESP, --a.bcerrado AS CERR, 
-               LEFT(h.NommaeAnexoCliente, 15) AS Cliente,
-               a.ntEstado AS ESTADO --, k.NommaeRuta AS RUTA
-        FROM docOrdenProduccion a WITH (NOLOCK)
-        INNER JOIN maeItemInventario f WITH (NOLOCK) ON f.IdmaeItem_Inventario = a.IdmaeItem
-        INNER JOIN maeColor g WITH (NOLOCK) ON g.IdmaeColor = a.IdmaeColor
-        INNER JOIN maeAnexoCliente h WITH (NOLOCK) ON h.IdmaeAnexo_Cliente = a.IdmaeAnexo_Cliente
-        INNER JOIN docRecetaOrdenProduccion i ON a.IdDocumento_OrdenProduccion = i.IdDocumento_OrdenProduccion
-        INNER JOIN docReceta j ON i.IdDocumento_Receta = j.IdDocumento_Receta
-        INNER JOIN maeruta k ON a.IdmaeRuta = k.IdmaeRuta
-        WHERE a.IdtdDocumentoForm = 138
-        AND NOT a.IdDocumento_OrdenProduccion IN (461444, 452744, 459212, 463325,471285, 471287)
-        AND j.dtFechaHoraFin IS NOT NULL
-        and j.bAnulado =0
-        AND a.FechaCierreAprobado IS NULL
-        AND LOWER(k.NommaeRuta) NOT LIKE '%estamp%'
-        AND DATEDIFF(DAY, j.dtFechaHoraFin, GETDATE()) > {dias}
-        AND a.dtFechaEmision > '01-07-2024'
-        AND a.IdmaeAnexo_Cliente IN (47, 49, 91, 93, 111, 1445, 2533, 2637, 4294, 4323, 4374, 4411, 4413, 4469, 5506, 6577)
+        SELECT a.CoddocOrdenProduccion AS PARTIDA, 
+       DATEDIFF(DAY, a.dtFechaEmision, GETDATE()) AS DIAS,  
+       DATEDIFF(DAY, MAX(j.dtFechaHoraFin), GETDATE()) AS DIAS_TEN,  -- Última fecha de teñido
+       LEFT(f.NommaeItemInventario, 35) AS TELA, 
+       FORMAT(a.dtFechaEmision, 'dd-MM') AS F_EMISION, 
+       FORMAT(MAX(j.dtFechaHoraFin), 'dd-MM') AS F_TENIDO,  -- Última fecha de teñido
+       a.dCantidad AS KG, 
+       a.nvDocumentoReferencia AS REF, 
+       g.NommaeColor AS COLOR, 
+       LEFT(h.NommaeAnexoCliente, 15) AS Cliente,
+       a.ntEstado AS ESTADO
+FROM docOrdenProduccion a WITH (NOLOCK)
+INNER JOIN maeItemInventario f WITH (NOLOCK) ON f.IdmaeItem_Inventario = a.IdmaeItem
+INNER JOIN maeColor g WITH (NOLOCK) ON g.IdmaeColor = a.IdmaeColor
+INNER JOIN maeAnexoCliente h WITH (NOLOCK) ON h.IdmaeAnexo_Cliente = a.IdmaeAnexo_Cliente
+INNER JOIN docRecetaOrdenProduccion i ON a.IdDocumento_OrdenProduccion = i.IdDocumento_OrdenProduccion
+INNER JOIN docReceta j ON i.IdDocumento_Receta = j.IdDocumento_Receta
+INNER JOIN maeruta k ON a.IdmaeRuta = k.IdmaeRuta
+WHERE a.IdtdDocumentoForm = 138
+AND NOT a.IdDocumento_OrdenProduccion IN (461444, 452744, 459212, 463325, 471285, 471287)
+AND j.dtFechaHoraFin IS NOT NULL
+AND j.bAnulado = 0
+AND a.FechaCierreAprobado IS NULL
+AND LOWER(k.NommaeRuta) NOT LIKE '%estamp%'
+AND a.dtFechaEmision > '01-07-2024'
+AND a.IdmaeAnexo_Cliente IN (47, 49, 91, 93, 111, 1445, 2533, 2637, 4294, 4323, 4374, 4411, 4413, 4469, 5506, 6577)
+GROUP BY a.CoddocOrdenProduccion, 
+         a.dtFechaEmision, 
+         f.NommaeItemInventario, 
+         a.dCantidad, 
+         a.nvDocumentoReferencia, 
+         g.NommaeColor, 
+         h.NommaeAnexoCliente, 
+         a.ntEstado
+HAVING DATEDIFF(DAY, MAX(j.dtFechaHoraFin), GETDATE()) > {dias};
+
         
     """
     df = pd.read_sql(query, conn)
