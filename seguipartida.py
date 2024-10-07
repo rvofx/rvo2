@@ -56,9 +56,9 @@ def get_partidas_con_tenido_sin_aprob_tela(dias):
     conn = connect_to_db()
     query = f"""
         SELECT a.CoddocOrdenProduccion AS PARTIDA,DATEDIFF(DAY, a.dtFechaEmision, GETDATE()) AS DIAS    , 
-                DATEDIFF(DAY,MAX (j.dtFechaHoraFin), GETDATE()) AS DIAS_TEN  , 
+                DATEDIFF(DAY,j.dtFechaHoraFin, GETDATE()) AS DIAS_TEN  , 
                 LEFT(f.NommaeItemInventario, 35) AS TELA, FORMAT(a.dtFechaEmision, 'dd-MM') AS F_EMISION,
-              FORMAT(MAX(j.dtFechaHoraFin), 'dd-MM') AS F_TENIDO, 
+              FORMAT(j.dtFechaHoraFin, 'dd-MM') AS F_TENIDO, 
               --FORMAT(a.FechaCierreAprobado, 'dd-MM') AS F_APROB_TELA, 
               a.dCantidad AS KG, 
                a.nvDocumentoReferencia AS REF, g.NommaeColor AS COLOR, --a.bCierreAprobado AS AP_DES, 
@@ -78,17 +78,10 @@ def get_partidas_con_tenido_sin_aprob_tela(dias):
         and j.bAnulado =0
         AND a.FechaCierreAprobado IS NULL
         AND LOWER(k.NommaeRuta) NOT LIKE '%estamp%'
-        AND DATEDIFF(DAY, MAX(j.dtFechaHoraFin), GETDATE()) > {dias}
+        AND DATEDIFF(DAY, j.dtFechaHoraFin, GETDATE()) > {dias}
         AND a.dtFechaEmision > '01-07-2024'
         AND a.IdmaeAnexo_Cliente IN (47, 49, 91, 93, 111, 1445, 2533, 2637, 4294, 4323, 4374, 4411, 4413, 4469, 5506, 6577)
-        GROUP BY a.CoddocOrdenProduccion, 
-         a.dtFechaEmision, 
-         f.NommaeItemInventario, 
-         a.dCantidad, 
-         a.nvDocumentoReferencia, 
-         g.NommaeColor, 
-         h.NommaeAnexoCliente, 
-         a.ntEstado
+        
     """
     df = pd.read_sql(query, conn)
     conn.close()
