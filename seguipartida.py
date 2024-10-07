@@ -70,7 +70,7 @@ def get_partidas_con_tenido_sin_aprob_tela(dias):
         INNER JOIN docReceta j ON i.IdDocumento_Receta = j.IdDocumento_Receta
         INNER JOIN maeruta k ON a.IdmaeRuta = k.IdmaeRuta
         WHERE a.IdtdDocumentoForm = 138
-        AND NOT a.IdDocumento_OrdenProduccion IN (461444)
+        AND NOT a.IdDocumento_OrdenProduccion IN (461444, 452744, 459212, 463325)
         AND j.dtFechaHoraFin IS NOT NULL
         and j.bAnulado =0
         AND a.FechaCierreAprobado IS NULL
