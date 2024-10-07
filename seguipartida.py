@@ -168,8 +168,8 @@ if st.button("Mostrar partidas no TEÑIDAS"):
     total_registros = len(df_sin_tenido)
     total_kg = df_sin_tenido['KG'].sum()
     
-    st.write(f"Total de registros: {total_registros}")
-    st.write(f"Total de KG: {total_kg:.1f}")
+    st.write(f"TOTAL REGISTROS: {total_registros}")
+    st.write(f"TOTAL KG: {total_kg:.0f}")
     
     styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1)
     # Aplicar formato con un decimal a la columna KG
