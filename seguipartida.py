@@ -201,7 +201,7 @@ if st.button("Mostrar partidas TEÑIDAS (estamp) pero no APROBADAS"):
     total_registros = len(df_con_tenido_estamp)
     total_kg = df_con_tenido_estamp['KG'].sum()
     
-    st.write(f"Total de registros: {total_registros}")
+    st.write(f"Total de registros:  {total_registros}")
     st.write(df_con_tenido_estamp.style.hide(axis='index'))
     #st.write(f"Total de KG: {total_kg:.1f}")
     
