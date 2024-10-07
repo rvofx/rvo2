@@ -174,7 +174,8 @@ if st.button("Mostrar partidas no TEÑIDAS"):
     styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1)
     # Aplicar formato con un decimal a la columna KG
     styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1).format({"KG": "{:.1f}"})
-    st.write(styled_df, unsafe_allow_html=True)
+    st.write(styled_df.hide(axis='index'), unsafe_allow_html=True)  # Aquí ocultamos el índice
+    #st.write(styled_df, unsafe_allow_html=True)
     
 
 # Selección de días para la segunda consulta
@@ -188,8 +189,8 @@ if st.button("Mostrar partidas TEÑIDAS pero no APROBADAS"):
     
     st.write(f"Total de registros: {total_registros}")
     st.write(f"Total de KG: {total_kg:.1f}")
-    
-    st.write(df_con_tenido)
+    st.write(df_con_tenido.style.hide(axis='index'))
+    #st.write(df_con_tenido)
 
 # Selección de días para la tercera consulta
 dias_con_tenido_estamp = st.number_input("Días entre TEÑIDO y el día actual (por defecto 5) Partidas que llevan estampado", min_value=1, value=20)
@@ -201,6 +202,7 @@ if st.button("Mostrar partidas TEÑIDAS (estamp) pero no APROBADAS"):
     total_kg = df_con_tenido_estamp['KG'].sum()
     
     st.write(f"Total de registros: {total_registros}")
-    st.write(f"Total de KG: {total_kg:.1f}")
+    st.write(df_con_tenido_estamp.style.hide(axis='index'))
+    #st.write(f"Total de KG: {total_kg:.1f}")
     
     st.write(df_con_tenido_estamp)
