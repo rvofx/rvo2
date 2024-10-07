@@ -181,10 +181,26 @@ if st.button("Mostrar partidas no TEÑIDAS"):
 dias_con_tenido = st.number_input("Días entre TEÑIDO y el día actual (por defecto 5) Partidas que no llevan estampado", min_value=1, value=5)
 if st.button("Mostrar partidas TEÑIDAS pero no APROBADAS"):
     df_con_tenido = get_partidas_con_tenido_sin_aprob_tela(dias_con_tenido)
+
+    # Contar los registros y sumar los KG
+    total_registros = len(df_con_tenido)
+    total_kg = df_con_tenido['KG'].sum()
+    
+    st.write(f"Total de registros: {total_registros}")
+    st.write(f"Total de KG: {total_kg:.1f}")
+    
     st.write(df_con_tenido)
 
 # Selección de días para la tercera consulta
 dias_con_tenido_estamp = st.number_input("Días entre TEÑIDO y el día actual (por defecto 5) Partidas que llevan estampado", min_value=1, value=20)
 if st.button("Mostrar partidas TEÑIDAS (estamp) pero no APROBADAS"):
     df_con_tenido_estamp = get_partidas_con_tenido_sin_aprob_tela_estamp(dias_con_tenido_estamp)
+
+    # Contar los registros y sumar los KG
+    total_registros = len(df_con_tenido_estamp)
+    total_kg = df_con_tenido_estamp['KG'].sum()
+    
+    st.write(f"Total de registros: {total_registros}")
+    st.write(f"Total de KG: {total_kg:.1f}")
+    
     st.write(df_con_tenido_estamp)
