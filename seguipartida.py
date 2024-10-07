@@ -152,14 +152,14 @@ st.markdown("""
 dias_sin_tenido = st.number_input("Días sin TEÑIR (por defecto 8)", min_value=1, value=8)
 
 # Asignar la clase CSS personalizada al input usando Javascript
-st.markdown("""
-    <script>
-    var number_input = window.parent.document.querySelector('input[data-testid="stNumberInput-number_input_dias"]');
-    if (number_input) {
-        number_input.parentElement.classList.add('input-number-box');
-    }
-    </script>
-    """, unsafe_allow_html=True)
+#st.markdown("""
+   # <script>
+    #var number_input = window.parent.document.querySelector('input[data-testid="stNumberInput-number_input_dias"]');
+    #if (number_input) {
+     #   number_input.parentElement.classList.add('input-number-box');
+    #}
+    #</script>
+    #""", unsafe_allow_html=True)
 
 if st.button("Mostrar partidas no TEÑIDAS"):
     df_sin_tenido = get_partidas_sin_tenido(dias_sin_tenido)
