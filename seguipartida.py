@@ -168,7 +168,7 @@ if st.button("Mostrar partidas no TEÑIDAS"):
     total_registros = len(df_sin_tenido)
     total_kg = df_sin_tenido['KG'].sum()
     
-    st.write(f"TOTAL REGISTROS:   {total_registros}")
+    st.write(f"TOTAL REGISTROS -->   {total_registros}")
     st.write(f"TOTAL KG:   {total_kg:.0f}")
     
     styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1)
@@ -187,7 +187,7 @@ if st.button("Mostrar partidas TEÑIDAS pero no APROBADAS"):
     total_registros = len(df_con_tenido)
     total_kg = df_con_tenido['KG'].sum()
     
-    st.write(f"Total REGISTROS:   {total_registros}")
+    st.write(f"TOTAL REGISTROS:   {total_registros}")
     st.write(f"TOTAL KG:   {total_kg:.0f}")
     
     st.write(df_con_tenido)
