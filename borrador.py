@@ -79,7 +79,6 @@ AND j.dtFechaHoraFin IS NOT NULL
 AND j.bAnulado = 0
 AND a.FechaCierreAprobado IS NULL
 AND LOWER(k.NommaeRuta) NOT LIKE '%estamp%'
-AND DATEDIFF(DAY, MAX(j.dtFechaHoraFin), GETDATE()) > {dias}
 AND a.dtFechaEmision > '01-07-2024'
 AND a.IdmaeAnexo_Cliente IN (47, 49, 91, 93, 111, 1445, 2533, 2637, 4294, 4323, 4374, 4411, 4413, 4469, 5506, 6577)
 GROUP BY a.CoddocOrdenProduccion, 
@@ -90,6 +89,8 @@ GROUP BY a.CoddocOrdenProduccion,
          g.NommaeColor, 
          h.NommaeAnexoCliente, 
          a.ntEstado
+HAVING DATEDIFF(DAY, MAX(j.dtFechaHoraFin), GETDATE()) > {dias};
+
 
         
     """
