@@ -203,6 +203,6 @@ if st.button("Mostrar partidas TEÑIDAS (estamp) pero no APROBADAS"):
     
     st.write(f"TOTAL REGISTROS  :    {total_registros}")
     
-    st.write(f"TOTAL KG  :   {total_kg:.1f}")
+    st.write(f"TOTAL KG  :   {total_kg:.0f}")
     
     st.write(df_con_tenido_estamp)
