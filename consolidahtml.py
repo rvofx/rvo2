@@ -1,10 +1,17 @@
 import streamlit as st
 from bs4 import BeautifulSoup
 import pandas as pd
-import io
 
 def extract_software_table(html_content, machine_name):
     soup = BeautifulSoup(html_content, 'html.parser')
+    
+    # Extraer la fecha de generación (después del último <br>)
+    generation_info = ''
+    br_tags = soup.find_all('br')
+    if br_tags:
+        last_br = br_tags[-1]
+        if last_br.next_sibling:
+            generation_info = last_br.next_sibling.strip()
     
     # Encontrar todas las tablas
     tables = soup.find_all('table')
@@ -29,7 +36,8 @@ def extract_software_table(html_content, machine_name):
                         'Machine Name': machine_name,
                         'Program Name': program_name,
                         'Size': size,
-                        'Installed On': installed_on
+                        'Installed On': installed_on,
+                        'Generation Info': generation_info
                     })
     
     return data
@@ -80,34 +88,19 @@ def main():
                     "Machine Name": "Nombre de Máquina",
                     "Program Name": "Nombre del Programa",
                     "Size": "Tamaño",
-                    "Installed On": "Fecha de Instalación"
+                    "Installed On": "Fecha de Instalación",
+                    "Generation Info": "Información de Generación"
                 },
                 hide_index=True
             )
             
-            # Opciones de descarga
-            col1, col2 = st.columns(2)
-            
             # CSV completo
             csv = df.to_csv(index=False).encode('utf-8')
-            col1.download_button(
+            st.download_button(
                 label="Descargar CSV completo",
                 data=csv,
                 file_name="inventario_software_completo.csv",
                 mime="text/csv"
-            )
-            
-            # Excel
-            excel_buffer = io.BytesIO()
-            with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
-                df.to_excel(writer, sheet_name='Inventario', index=False)
-            excel_data = excel_buffer.getvalue()
-            
-            col2.download_button(
-                label="Descargar Excel",
-                data=excel_data,
-                file_name="inventario_software_completo.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
 if __name__ == "__main__":
