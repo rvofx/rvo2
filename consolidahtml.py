@@ -85,11 +85,11 @@ def main():
             st.dataframe(
                 df,
                 column_config={
-                    "Machine Name": "Nombre de Máquina",
+                    "Machine Name": "Usuario",
                     "Program Name": "Nombre del Programa",
                     "Size": "Tamaño",
                     "Installed On": "Fecha de Instalación",
-                    "Generation Info": "Información de Generación"
+                    "Generation Info": "Equipo"
                 },
                 hide_index=True
             )
