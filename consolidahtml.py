@@ -34,10 +34,11 @@ def extract_software_table(html_content, machine_name):
                     
                     data.append({
                         'Machine Name': machine_name,
+                        'Generation Info': generation_info,
                         'Program Name': program_name,
                         'Size': size,
-                        'Installed On': installed_on,
-                        'Generation Info': generation_info
+                        'Installed On': installed_on
+                        
                     })
     
     return data
