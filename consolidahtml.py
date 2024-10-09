@@ -1,6 +1,7 @@
 import streamlit as st
 from bs4 import BeautifulSoup
 import pandas as pd
+import io
 
 def extract_software_table(html_content, machine_name):
     soup = BeautifulSoup(html_content, 'html.parser')
