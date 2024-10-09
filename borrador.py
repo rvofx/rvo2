@@ -47,11 +47,11 @@ def get_partidas_sin_tenido(dias):
     LEFT JOIN docReceta j ON i.IdDocumento_Receta = j.IdDocumento_Receta
     INNER JOIN maeruta k ON a.IdmaeRuta = k.IdmaeRuta
     WHERE a.IdtdDocumentoForm = 138
-    AND DATEDIFF(DAY, a.dtFechaEmision, GETDATE()) > 8
+    AND DATEDIFF(DAY, a.dtFechaEmision, GETDATE()) > {dias}
     AND a.dtFechaEmision > '01-07-2024'
     AND j.bAnulado = 0
     AND a.IdmaeAnexo_Cliente IN (47, 49, 91, 93, 111, 1445, 2533, 2637, 4294, 4323, 4374, 4411, 4413, 4469, 5506, 6577)
-    AND a.IdDocumento_OrdenProduccion = 477601
+    --AND a.IdDocumento_OrdenProduccion = 477601
 )
 SELECT 
     CoddocOrdenProduccion AS PARTIDA, 
