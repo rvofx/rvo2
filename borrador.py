@@ -91,7 +91,6 @@ GROUP BY a.CoddocOrdenProduccion,
          a.ntEstado
 HAVING DATEDIFF(DAY, MAX(j.dtFechaHoraFin), GETDATE()) > {dias};
 
-
         
     """
     df = pd.read_sql(query, conn)
@@ -153,20 +152,29 @@ st.markdown("""
 dias_sin_tenido = st.number_input("Días sin TEÑIR (por defecto 8)", min_value=1, value=8)
 
 # Asignar la clase CSS personalizada al input usando Javascript
-st.markdown("""
-    <script>
-    var number_input = window.parent.document.querySelector('input[data-testid="stNumberInput-number_input_dias"]');
-    if (number_input) {
-        number_input.parentElement.classList.add('input-number-box');
-    }
-    </script>
-    """, unsafe_allow_html=True)
+#st.markdown("""
+   # <script>
+    #var number_input = window.parent.document.querySelector('input[data-testid="stNumberInput-number_input_dias"]');
+    #if (number_input) {
+     #   number_input.parentElement.classList.add('input-number-box');
+    #}
+    #</script>
+    #""", unsafe_allow_html=True)
 
 if st.button("Mostrar partidas no TEÑIDAS"):
     df_sin_tenido = get_partidas_sin_tenido(dias_sin_tenido)
+
+    # Contar los registros y sumar los KG
+    total_registros = len(df_sin_tenido)
+    total_kg = df_sin_tenido['KG'].sum()
+    
+    st.write(f"TOTAL REGISTROS  :   {total_registros}")
+    st.write(f"TOTAL KG  :   {total_kg:.0f}")
+    
     styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1)
     # Aplicar formato con un decimal a la columna KG
     styled_df = df_sin_tenido.style.apply(highlight_mofijado, axis=1).format({"KG": "{:.1f}"})
+    
     st.write(styled_df, unsafe_allow_html=True)
     
 
@@ -174,10 +182,27 @@ if st.button("Mostrar partidas no TEÑIDAS"):
 dias_con_tenido = st.number_input("Días entre TEÑIDO y el día actual (por defecto 5) Partidas que no llevan estampado", min_value=1, value=5)
 if st.button("Mostrar partidas TEÑIDAS pero no APROBADAS"):
     df_con_tenido = get_partidas_con_tenido_sin_aprob_tela(dias_con_tenido)
+
+    # Contar los registros y sumar los KG
+    total_registros = len(df_con_tenido)
+    total_kg = df_con_tenido['KG'].sum()
+    
+    st.write(f"TOTAL REGISTROS  :   {total_registros}")
+    st.write(f"TOTAL KG  :   {total_kg:.0f}")
+    
     st.write(df_con_tenido)
 
 # Selección de días para la tercera consulta
 dias_con_tenido_estamp = st.number_input("Días entre TEÑIDO y el día actual (por defecto 5) Partidas que llevan estampado", min_value=1, value=20)
 if st.button("Mostrar partidas TEÑIDAS (estamp) pero no APROBADAS"):
     df_con_tenido_estamp = get_partidas_con_tenido_sin_aprob_tela_estamp(dias_con_tenido_estamp)
+
+    # Contar los registros y sumar los KG
+    total_registros = len(df_con_tenido_estamp)
+    total_kg = df_con_tenido_estamp['KG'].sum()
+    
+    st.write(f"TOTAL REGISTROS  :    {total_registros}")
+    
+    st.write(f"TOTAL KG  :   {total_kg:.0f}")
+    
     st.write(df_con_tenido_estamp)
