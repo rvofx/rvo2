@@ -86,10 +86,11 @@ def main():
                 df,
                 column_config={
                     "Machine Name": "Usuario",
+                    "Generation Info": "Equipo",
                     "Program Name": "Nombre del Programa",
                     "Size": "Tamaño",
-                    "Installed On": "Fecha de Instalación",
-                    "Generation Info": "Equipo"
+                    "Installed On": "Fecha de Instalación"
+                    
                 },
                 hide_index=True
             )
