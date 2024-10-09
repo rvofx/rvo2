@@ -1,72 +1,90 @@
 import streamlit as st
 from bs4 import BeautifulSoup
 import pandas as pd
-import re
 
-def extract_software_list(html_content):
+def extract_software_table(html_content, machine_name):
     soup = BeautifulSoup(html_content, 'html.parser')
-    # Removemos scripts y estilos
-    for script in soup(["script", "style"]):
-        script.decompose()
     
-    # Obtenemos el texto y lo dividimos en líneas
-    text = soup.get_text(separator='\n')
+    # Encontrar todas las tablas
+    tables = soup.find_all('table')
     
-    # Limpiamos las líneas y eliminamos líneas vacías
-    lines = [line.strip() for line in text.split('\n') if line.strip()]
+    data = []
+    for table in tables:
+        # Encontrar todas las filas
+        rows = table.find_all('tr')
+        
+        # Verificar si es la tabla correcta buscando los encabezados
+        headers = [th.text.strip() for th in rows[0].find_all(['th', 'td'])]
+        if 'Program Name' in headers and 'Size' in headers and 'Installed On' in headers:
+            # Procesar cada fila de la tabla
+            for row in rows[1:]:  # Saltamos la fila de encabezados
+                cols = row.find_all(['td', 'th'])
+                if len(cols) >= 3:
+                    program_name = cols[0].text.strip()
+                    size = cols[1].text.strip()
+                    installed_on = cols[2].text.strip()
+                    
+                    data.append({
+                        'Machine Name': machine_name,
+                        'Program Name': program_name,
+                        'Size': size,
+                        'Installed On': installed_on
+                    })
     
-    # Eliminamos líneas duplicadas manteniendo el orden
-    unique_lines = []
-    seen = set()
-    for line in lines:
-        if line not in seen:
-            unique_lines.append(line)
-            seen.add(line)
-    
-    return unique_lines
+    return data
 
 def main():
-    st.title("Procesador de Inventario de Software")
-    st.write("Sube los archivos HTML con las listas de software instalado en cada máquina.")
+    st.title("Consolidador de Inventario de Software")
+    st.write("Sube los archivos HTML que contienen las tablas de software instalado.")
 
     # Subida de archivos
-    uploaded_files = st.file_uploader("Sube tus archivos HTML", 
-                                    type=['html', 'htm'],
-                                    accept_multiple_files=True)
+    uploaded_files = st.file_uploader(
+        "Sube tus archivos HTML", 
+        type=['html', 'htm'],
+        accept_multiple_files=True
+    )
 
     if uploaded_files:
         all_data = []
         
-        for file in uploaded_files:
-            try:
-                content = file.read().decode('utf-8')
-                software_list = extract_software_list(content)
-                
-                # Agregamos cada software como una fila separada
-                for software in software_list:
-                    all_data.append({
-                        'Máquina': file.name.replace('.html', '').replace('.htm', ''),
-                        'Software Instalado': software
-                    })
-            except Exception as e:
-                st.error(f"Error procesando {file.name}: {str(e)}")
+        with st.spinner('Procesando archivos...'):
+            for file in uploaded_files:
+                try:
+                    # Obtener el nombre de la máquina del nombre del archivo
+                    machine_name = file.name.replace('.html', '').replace('.htm', '')
+                    
+                    # Leer y procesar el contenido
+                    content = file.read().decode('utf-8')
+                    table_data = extract_software_table(content, machine_name)
+                    all_data.extend(table_data)
+                except Exception as e:
+                    st.error(f"Error procesando {file.name}: {str(e)}")
 
         if all_data:
             # Crear DataFrame
             df = pd.DataFrame(all_data)
             
-            # Mostrar datos
-            st.subheader("Software por máquina")
-            st.dataframe(df)
+            # Mostrar estadísticas
+            st.subheader("Estadísticas del procesamiento")
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Total de máquinas", len(df['Machine Name'].unique()))
+            col2.metric("Total de programas", len(df))
+            col3.metric("Archivos procesados", len(uploaded_files))
             
-            # Estadísticas básicas
-            st.subheader("Estadísticas")
-            total_machines = len(df['Máquina'].unique())
-            total_software = len(df)
-            st.write(f"Total de máquinas procesadas: {total_machines}")
-            st.write(f"Total de software encontrado: {total_software}")
+            # Mostrar tabla consolidada
+            st.subheader("Tabla Consolidada de Software")
+            st.dataframe(
+                df,
+                column_config={
+                    "Machine Name": "Nombre de Máquina",
+                    "Program Name": "Nombre del Programa",
+                    "Size": "Tamaño",
+                    "Installed On": "Fecha de Instalación"
+                },
+                hide_index=True
+            )
             
-            # Botones de descarga
+            # Opciones de descarga
             col1, col2 = st.columns(2)
             
             # CSV completo
@@ -78,15 +96,17 @@ def main():
                 mime="text/csv"
             )
             
-            # Lista única de software
-            unique_software = pd.DataFrame(df['Software Instalado'].unique(), 
-                                         columns=['Software'])
-            csv_unique = unique_software.to_csv(index=False).encode('utf-8')
+            # Excel
+            excel_buffer = io.BytesIO()
+            with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
+                df.to_excel(writer, sheet_name='Inventario', index=False)
+            excel_data = excel_buffer.getvalue()
+            
             col2.download_button(
-                label="Descargar lista única de software",
-                data=csv_unique,
-                file_name="lista_software_unico.csv",
-                mime="text/csv"
+                label="Descargar Excel",
+                data=excel_data,
+                file_name="inventario_software_completo.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
 if __name__ == "__main__":
