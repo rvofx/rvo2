@@ -101,7 +101,7 @@ def main():
             col3.metric("Files Processed", len(uploaded_files))
             
             # Mostrar tabla consolidada
-            st.subheader("Consolidated Software Table")
+            st.subheader("Consolidat Software Table")
             st.dataframe(
                 df,
                 hide_index=True
