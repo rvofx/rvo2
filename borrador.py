@@ -22,12 +22,23 @@ def get_partidas_sin_tenido(dias):
     conn = connect_to_db()
     query = f"""
         WITH RecetasOrdenadas AS (
-    SELECT *,
-           ROW_NUMBER() OVER (
-               PARTITION BY a.IdDocumento_OrdenProduccion 
-               ORDER BY CASE WHEN j.dtFechaHoraFin IS NOT NULL THEN 0 ELSE 1 END,
-                        j.dtFechaHoraFin
-           ) AS RowNum
+    SELECT 
+        a.CoddocOrdenProduccion,
+        a.IdDocumento_OrdenProduccion,
+        a.dtFechaEmision,
+        f.NommaeItemInventario,
+        j.IdDocumento_Receta,
+        j.dtFechaHoraFin,
+        a.dCantidad,
+        a.nvDocumentoReferencia,
+        g.NommaeColor,
+        h.NommaeAnexoCliente,
+        k.NommaeRuta,
+        ROW_NUMBER() OVER (
+            PARTITION BY a.IdDocumento_OrdenProduccion 
+            ORDER BY CASE WHEN j.dtFechaHoraFin IS NOT NULL THEN 0 ELSE 1 END,
+                     j.dtFechaHoraFin
+        ) AS RowNum
     FROM docOrdenProduccion a WITH (NOLOCK)
     INNER JOIN maeItemInventario f WITH (NOLOCK) ON f.IdmaeItem_Inventario = a.IdmaeItem
     INNER JOIN maeColor g WITH (NOLOCK) ON g.IdmaeColor = a.IdmaeColor
@@ -36,7 +47,7 @@ def get_partidas_sin_tenido(dias):
     LEFT JOIN docReceta j ON i.IdDocumento_Receta = j.IdDocumento_Receta
     INNER JOIN maeruta k ON a.IdmaeRuta = k.IdmaeRuta
     WHERE a.IdtdDocumentoForm = 138
-    AND DATEDIFF(DAY, a.dtFechaEmision, GETDATE()) > 5
+    AND DATEDIFF(DAY, a.dtFechaEmision, GETDATE()) > 8
     AND a.dtFechaEmision > '01-07-2024'
     AND j.bAnulado = 0
     AND a.IdmaeAnexo_Cliente IN (47, 49, 91, 93, 111, 1445, 2533, 2637, 4294, 4323, 4374, 4411, 4413, 4469, 5506, 6577)
@@ -57,6 +68,7 @@ SELECT
     CASE WHEN LOWER(NommaeRuta) LIKE '%mofijado%' THEN 1 ELSE 0 END AS FLAG
 FROM RecetasOrdenadas
 WHERE RowNum = 1
+AND dtFechaHoraFin IS NULL
     """
     df = pd.read_sql(query, conn)
     conn.close()
