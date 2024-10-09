@@ -21,30 +21,42 @@ def connect_to_db():
 def get_partidas_sin_tenido(dias):
     conn = connect_to_db()
     query = f"""
-        SELECT a.CoddocOrdenProduccion AS PARTIDA, DATEDIFF(DAY, a.dtFechaEmision, GETDATE()) AS DIAS  , LEFT(f.NommaeItemInventario, 35) AS TELA, FORMAT(a.dtFechaEmision, 'dd-MM') AS F_EMISION, 
-               --FORMAT(j.dtFechaHoraFin, 'dd-MM') AS F_TENIDO, 
-               --FORMAT(a.FechaCierreAprobado, 'dd-MM') AS F_APROB_TELA, 
-               a.dCantidad AS KG, 
-               a.nvDocumentoReferencia AS REF, g.NommaeColor AS COLOR, --a.bCierreAprobado AS AP_DES, 
-               --a.bProduccionAprobado AS DESP, a.bcerrado AS CERR, 
-               LEFT(h.NommaeAnexoCliente, 15) AS Cliente, 
-               --a.ntEstado AS ESTADO, k.NommaeRuta AS RUTA,
-               CASE WHEN LOWER(k.NommaeRuta) LIKE '%mofijado%' THEN 1 ELSE 0 END AS FLAG
-        FROM docOrdenProduccion a WITH (NOLOCK)
-        INNER JOIN maeItemInventario f WITH (NOLOCK) ON f.IdmaeItem_Inventario = a.IdmaeItem
-        INNER JOIN maeColor g WITH (NOLOCK) ON g.IdmaeColor = a.IdmaeColor
-        INNER JOIN maeAnexoCliente h WITH (NOLOCK) ON h.IdmaeAnexo_Cliente = a.IdmaeAnexo_Cliente
-        --INNER JOIN docRecetaOrdenProduccion i ON a.IdDocumento_OrdenProduccion = i.IdDocumento_OrdenProduccion
-        --INNER JOIN docReceta j ON i.IdDocumento_Receta = j.IdDocumento_Receta
-        LEFT JOIN docRecetaOrdenProduccion i ON a.IdDocumento_OrdenProduccion = i.IdDocumento_OrdenProduccion  -- LEFT JOIN
-        LEFT JOIN docReceta j ON i.IdDocumento_Receta = j.IdDocumento_Receta
-        INNER JOIN maeruta k ON a.IdmaeRuta = k.IdmaeRuta
-        WHERE a.IdtdDocumentoForm = 138
-        AND j.dtFechaHoraFin IS NULL
-        AND DATEDIFF(DAY, a.dtFechaEmision, GETDATE()) > {dias}
-        AND a.dtFechaEmision > '01-07-2024'
-        and j.bAnulado =0
-        AND a.IdmaeAnexo_Cliente IN (47, 49, 91, 93, 111, 1445, 2533, 2637, 4294, 4323, 4374, 4411, 4413, 4469, 5506, 6577)
+        WITH RecetasOrdenadas AS (
+    SELECT *,
+           ROW_NUMBER() OVER (
+               PARTITION BY a.IdDocumento_OrdenProduccion 
+               ORDER BY CASE WHEN j.dtFechaHoraFin IS NOT NULL THEN 0 ELSE 1 END,
+                        j.dtFechaHoraFin
+           ) AS RowNum
+    FROM docOrdenProduccion a WITH (NOLOCK)
+    INNER JOIN maeItemInventario f WITH (NOLOCK) ON f.IdmaeItem_Inventario = a.IdmaeItem
+    INNER JOIN maeColor g WITH (NOLOCK) ON g.IdmaeColor = a.IdmaeColor
+    INNER JOIN maeAnexoCliente h WITH (NOLOCK) ON h.IdmaeAnexo_Cliente = a.IdmaeAnexo_Cliente
+    LEFT JOIN docRecetaOrdenProduccion i ON a.IdDocumento_OrdenProduccion = i.IdDocumento_OrdenProduccion
+    LEFT JOIN docReceta j ON i.IdDocumento_Receta = j.IdDocumento_Receta
+    INNER JOIN maeruta k ON a.IdmaeRuta = k.IdmaeRuta
+    WHERE a.IdtdDocumentoForm = 138
+    AND DATEDIFF(DAY, a.dtFechaEmision, GETDATE()) > 5
+    AND a.dtFechaEmision > '01-07-2024'
+    AND j.bAnulado = 0
+    AND a.IdmaeAnexo_Cliente IN (47, 49, 91, 93, 111, 1445, 2533, 2637, 4294, 4323, 4374, 4411, 4413, 4469, 5506, 6577)
+    AND a.IdDocumento_OrdenProduccion = 477601
+)
+SELECT 
+    CoddocOrdenProduccion AS PARTIDA, 
+    IdDocumento_OrdenProduccion AS IDOP, 
+    DATEDIFF(DAY, dtFechaEmision, GETDATE()) AS DIAS,
+    LEFT(NommaeItemInventario, 35) AS TELA, 
+    FORMAT(dtFechaEmision, 'dd-MM') AS F_EMISION, 
+    IdDocumento_Receta,
+    dtFechaHoraFin,
+    dCantidad AS KG,
+    nvDocumentoReferencia AS REF, 
+    NommaeColor AS COLOR,
+    LEFT(NommaeAnexoCliente, 15) AS Cliente,
+    CASE WHEN LOWER(NommaeRuta) LIKE '%mofijado%' THEN 1 ELSE 0 END AS FLAG
+FROM RecetasOrdenadas
+WHERE RowNum = 1
     """
     df = pd.read_sql(query, conn)
     conn.close()
