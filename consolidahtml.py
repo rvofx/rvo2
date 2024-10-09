@@ -1,18 +1,33 @@
 import streamlit as st
 from bs4 import BeautifulSoup
 import pandas as pd
-import io
+import re
 
-def extract_text_from_html(html_content):
+def extract_software_list(html_content):
     soup = BeautifulSoup(html_content, 'html.parser')
     # Removemos scripts y estilos
     for script in soup(["script", "style"]):
         script.decompose()
-    return soup.get_text(separator=' ').strip()
+    
+    # Obtenemos el texto y lo dividimos en líneas
+    text = soup.get_text(separator='\n')
+    
+    # Limpiamos las líneas y eliminamos líneas vacías
+    lines = [line.strip() for line in text.split('\n') if line.strip()]
+    
+    # Eliminamos líneas duplicadas manteniendo el orden
+    unique_lines = []
+    seen = set()
+    for line in lines:
+        if line not in seen:
+            unique_lines.append(line)
+            seen.add(line)
+    
+    return unique_lines
 
 def main():
-    st.title("Consolidador de Archivos HTML")
-    st.write("Esta aplicación te permite subir múltiples archivos HTML y consolidar su contenido en una lista.")
+    st.title("Procesador de Inventario de Software")
+    st.write("Sube los archivos HTML con las listas de software instalado en cada máquina.")
 
     # Subida de archivos
     uploaded_files = st.file_uploader("Sube tus archivos HTML", 
@@ -20,30 +35,57 @@ def main():
                                     accept_multiple_files=True)
 
     if uploaded_files:
-        consolidated_data = []
+        all_data = []
         
         for file in uploaded_files:
-            content = file.read().decode('utf-8')
-            extracted_text = extract_text_from_html(content)
-            consolidated_data.append({
-                'Nombre del archivo': file.name,
-                'Contenido': extracted_text
-            })
+            try:
+                content = file.read().decode('utf-8')
+                software_list = extract_software_list(content)
+                
+                # Agregamos cada software como una fila separada
+                for software in software_list:
+                    all_data.append({
+                        'Máquina': file.name.replace('.html', '').replace('.htm', ''),
+                        'Software Instalado': software
+                    })
+            except Exception as e:
+                st.error(f"Error procesando {file.name}: {str(e)}")
 
-        if consolidated_data:
+        if all_data:
             # Crear DataFrame
-            df = pd.DataFrame(consolidated_data)
+            df = pd.DataFrame(all_data)
             
             # Mostrar datos
-            st.subheader("Contenido consolidado")
+            st.subheader("Software por máquina")
             st.dataframe(df)
             
-            # Botón para descargar
+            # Estadísticas básicas
+            st.subheader("Estadísticas")
+            total_machines = len(df['Máquina'].unique())
+            total_software = len(df)
+            st.write(f"Total de máquinas procesadas: {total_machines}")
+            st.write(f"Total de software encontrado: {total_software}")
+            
+            # Botones de descarga
+            col1, col2 = st.columns(2)
+            
+            # CSV completo
             csv = df.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="Descargar como CSV",
+            col1.download_button(
+                label="Descargar CSV completo",
                 data=csv,
-                file_name="contenido_consolidado.csv",
+                file_name="inventario_software_completo.csv",
+                mime="text/csv"
+            )
+            
+            # Lista única de software
+            unique_software = pd.DataFrame(df['Software Instalado'].unique(), 
+                                         columns=['Software'])
+            csv_unique = unique_software.to_csv(index=False).encode('utf-8')
+            col2.download_button(
+                label="Descargar lista única de software",
+                data=csv_unique,
+                file_name="lista_software_unico.csv",
                 mime="text/csv"
             )
 
