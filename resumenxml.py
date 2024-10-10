@@ -19,33 +19,36 @@ def procesar_xml(xml_file, file_name):
         "Audio": None
     }
 
-    # Buscar la sección 'Summary' y extraer la información básica
+    # Buscar la sección 'Summary' y extraer la información básica, teniendo en cuenta las traducciones
     for main_section in root.findall("mainsection"):
-        if main_section.attrib.get('title') == 'Summary':
+        if main_section.attrib.get('title') in ['Summary', 'Resumen']:
             for section in main_section.findall("section"):
                 section_title = section.attrib.get('title')
                 for entry in section.findall('entry'):
                     title = entry.attrib.get('title')
-                    if section_title == "Operating System" and title == "Windows 11 Home 64-bit":
-                        info["Operating System"] = "Windows 11 Home 64-bit"
-                    elif section_title == "CPU":
+
+                    # Agrupamos por posibles traducciones
+                    if section_title in ["Operating System", "Sistema Operativo"]:
+                        if title in ["Windows 11 Home 64-bit", "Windows 11 Home 64-bit"]:  # Puede haber traducciones aquí
+                            info["Operating System"] = title
+                    elif section_title in ["CPU", "Procesador"]:
                         info["CPU"] = entry.attrib.get('title')
-                    elif section_title == "RAM":
+                    elif section_title in ["RAM", "Memoria RAM"]:
                         info["RAM"] = entry.attrib.get('title')
-                    elif section_title == "Motherboard":
+                    elif section_title in ["Motherboard", "Placa Madre"]:
                         info["Motherboard"] = entry.attrib.get('title')
-                    elif section_title == "Graphics":
+                    elif section_title in ["Graphics", "Gráficos"]:
                         info["Graphics"] = entry.attrib.get('title')
-                    elif section_title == "Storage":
+                    elif section_title in ["Storage", "Almacenamiento"]:
                         info["Storage"] = entry.attrib.get('title')
-                    elif section_title == "Audio":
+                    elif section_title in ["Audio", "Sonido"]:
                         info["Audio"] = entry.attrib.get('title')
 
     return info
 
 # Configuración de la aplicación Streamlit
 st.title("Visor de Información de Archivos XML")
-st.write("Sube tus archivos XML para extraer y visualizar la información en una tabla.")
+st.write("Sube tus archivos XML para extraer y visualizar la información básica en una tabla consolidada.")
 
 # Subir múltiples archivos XML
 uploaded_files = st.file_uploader("Sube los archivos XML", type="xml", accept_multiple_files=True)
@@ -68,4 +71,3 @@ if uploaded_files:
 
 else:
     st.write("No se han subido archivos todavía.")
-
