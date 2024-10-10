@@ -4,21 +4,41 @@ import plotly.express as px
 from datetime import datetime
 from playwright.sync_api import sync_playwright
 import time
+import subprocess
+import sys
+import os
+
+def install_playwright_browsers():
+    try:
+        st.info("Instalando navegadores necesarios... Por favor espere.")
+        subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"], check=True)
+        st.success("Navegadores instalados correctamente.")
+        return True
+    except Exception as e:
+        st.error(f"Error al instalar navegadores: {str(e)}")
+        return False
 
 def scrape_sunat_exchange_rate():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        # Configuración específica para Windows
+        browser_type = p.chromium
+        browser = browser_type.launch(
+            headless=True,
+            args=['--disable-gpu']
+        )
+        
         try:
             page = browser.new_page()
             
-            # Navegar a la página
-            page.goto("https://e-consulta.sunat.gob.pe/cl-at-ittipcam/tcS01Alias")
+            # Navegar a la página con timeout extendido
+            page.goto("https://e-consulta.sunat.gob.pe/cl-at-ittipcam/tcS01Alias", 
+                     timeout=30000)  # 30 segundos de timeout
             
             # Esperar a que la tabla se cargue
-            page.wait_for_selector('.form-table', timeout=15000)
+            page.wait_for_selector('.form-table', timeout=30000)
             
-            # Dar un pequeño tiempo adicional para asegurar la carga completa
-            time.sleep(2)
+            # Dar un tiempo adicional para asegurar la carga completa
+            time.sleep(3)
             
             # Extraer datos de la tabla
             rows = page.query_selector_all('.form-table tr')
@@ -38,11 +58,18 @@ def scrape_sunat_exchange_rate():
                             'Compra': buy,
                             'Venta': sell
                         })
-                    except (ValueError, TypeError):
+                    except (ValueError, TypeError) as e:
+                        st.warning(f"Error al procesar fila: {str(e)}")
                         continue
             
+            if not data:
+                raise Exception("No se pudieron extraer datos de la tabla")
+                
             return pd.DataFrame(data)
             
+        except Exception as e:
+            st.error(f"Error durante el scraping: {str(e)}")
+            raise
         finally:
             browser.close()
 
@@ -55,6 +82,14 @@ def main():
     Esta aplicación muestra el tipo de cambio oficial de SUNAT en tiempo real.
     Los datos son extraídos directamente de la página web de SUNAT.
     """)
+    
+    # Verificar si los navegadores están instalados
+    if 'browsers_installed' not in st.session_state:
+        st.session_state['browsers_installed'] = install_playwright_browsers()
+    
+    if not st.session_state['browsers_installed']:
+        st.error("No se pudieron instalar los navegadores necesarios. Por favor, ejecute 'playwright install' manualmente.")
+        st.stop()
     
     # Intentar cargar datos al inicio si no existen
     if 'data' not in st.session_state:
