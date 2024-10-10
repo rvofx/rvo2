@@ -2,48 +2,68 @@ import streamlit as st
 import xml.etree.ElementTree as ET
 import pandas as pd
 
-# Función para extraer toda la información de la primera sección del XML
-def extract_first_section_data(xml_file):
+# Función para procesar cada archivo XML
+def procesar_xml(xml_file):
     tree = ET.parse(xml_file)
     root = tree.getroot()
 
-    # Diccionario para almacenar la información
-    data = {}
+    # Diccionario para almacenar la información básica
+    info = {
+        "Operating System": None,
+        "CPU": None,
+        "RAM": None,
+        "Motherboard": None,
+        "Graphics": None,
+        "Storage": None,
+        "Audio": None
+    }
 
-    # Extraer el primer 'mainsection'
-    first_section = root.find('mainsection')
-    if first_section is not None:
-        # Recorrer cada subsección dentro del primer 'mainsection'
-        for section in first_section.findall('section'):
-            section_title = section.attrib.get('title', 'Unknown Section')
-            entries = section.findall('entry')
+    # Buscar la sección 'Summary' y extraer la información básica
+    for main_section in root.findall("mainsection"):
+        if main_section.attrib.get('title') == 'Summary':
+            for section in main_section.findall("section"):
+                section_title = section.attrib.get('title')
+                for entry in section.findall('entry'):
+                    title = entry.attrib.get('title')
+                    if section_title == "Operating System" and title == "Windows 11 Home 64-bit":
+                        info["Operating System"] = "Windows 11 Home 64-bit"
+                    elif section_title == "CPU":
+                        info["CPU"] = entry.attrib.get('title')
+                    elif section_title == "RAM":
+                        info["RAM"] = entry.attrib.get('title')
+                    elif section_title == "Motherboard":
+                        info["Motherboard"] = entry.attrib.get('title')
+                    elif section_title == "Graphics":
+                        info["Graphics"] = entry.attrib.get('title')
+                    elif section_title == "Storage":
+                        info["Storage"] = entry.attrib.get('title')
+                    elif section_title == "Audio":
+                        info["Audio"] = entry.attrib.get('title')
 
-            # Recorrer cada entrada dentro de la subsección
-            for entry in entries:
-                entry_title = entry.attrib.get('title', 'Unknown Entry')
-                entry_value = entry.attrib.get('value', 'No data')
+    return info
 
-                # Guardar el título de la entrada y su valor
-                data[f"{section_title} - {entry_title}"] = entry_value
+# Configuración de la aplicación Streamlit
+st.title("Visor de Información de Archivos XML")
+st.write("Sube tus archivos XML para extraer y visualizar la información básica en una tabla consolidada.")
 
-    return data
-
-# Streamlit app
-st.title("XML Uploader and First Section Extractor")
-
+# Subir múltiples archivos XML
 uploaded_files = st.file_uploader("Sube los archivos XML", type="xml", accept_multiple_files=True)
 
-if uploaded_files:
-    all_data = []
-    
-    for file in uploaded_files:
-        data = extract_first_section_data(file)
-        all_data.append(data)
+# Lista donde se almacenará la información procesada de todos los archivos
+datos = []
 
-    # Convertir en DataFrame
-    if all_data:
-        df = pd.DataFrame(all_data)
-        st.write("Tabla con la información de la primera página de cada archivo XML:")
-        st.dataframe(df)
-    else:
-        st.write("No se encontró información relevante en los archivos XML.")
+if uploaded_files:
+    for file in uploaded_files:
+        # Procesar cada archivo XML y agregar la información a la lista
+        datos.append(procesar_xml(file))
+
+    # Convertir la lista en un DataFrame de pandas para visualizarla como tabla
+    df = pd.DataFrame(datos)
+
+    # Mostrar la tabla consolidada
+    st.write("### Tabla Consolidada de Información Básica")
+    st.dataframe(df)
+
+else:
+    st.write("No se han subido archivos todavía.")
+
