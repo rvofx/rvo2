@@ -1,64 +1,50 @@
 import streamlit as st
 import pandas as pd
-import undetected_chromedriver as uc
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import plotly.express as px
 from datetime import datetime
-import os
+from playwright.sync_api import sync_playwright
+import time
 
 def scrape_sunat_exchange_rate():
-    options = uc.ChromeOptions()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--disable-setuid-sandbox')
-    options.add_argument('--disable-software-rasterizer')
-    
-    try:
-        driver = uc.Chrome(options=options)
-        
-        # Cargar la página
-        url = "https://e-consulta.sunat.gob.pe/cl-at-ittipcam/tcS01Alias"
-        driver.get(url)
-        
-        # Esperar que la tabla esté presente
-        wait = WebDriverWait(driver, 15)
-        table = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "form-table")))
-        
-        # Extraer datos
-        rows = table.find_elements(By.TAG_NAME, "tr")
-        data = []
-        
-        for row in rows[1:]:  # Ignorar encabezados
-            cols = row.find_elements(By.TAG_NAME, "td")
-            if len(cols) == 3:
-                date_str = cols[0].text.strip()
-                try:
-                    buy = float(cols[1].text.strip())
-                    sell = float(cols[2].text.strip())
-                    date = datetime.strptime(date_str, '%d/%m/%Y').date()
-                    data.append({
-                        'Fecha': date,
-                        'Compra': buy,
-                        'Venta': sell
-                    })
-                except (ValueError, TypeError):
-                    continue
-        
-        return pd.DataFrame(data)
-    
-    except Exception as e:
-        st.error(f"Error específico: {str(e)}")
-        raise
-        
-    finally:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
         try:
-            driver.quit()
-        except:
-            pass
+            page = browser.new_page()
+            
+            # Navegar a la página
+            page.goto("https://e-consulta.sunat.gob.pe/cl-at-ittipcam/tcS01Alias")
+            
+            # Esperar a que la tabla se cargue
+            page.wait_for_selector('.form-table', timeout=15000)
+            
+            # Dar un pequeño tiempo adicional para asegurar la carga completa
+            time.sleep(2)
+            
+            # Extraer datos de la tabla
+            rows = page.query_selector_all('.form-table tr')
+            
+            data = []
+            # Ignorar la primera fila (encabezados)
+            for row in rows[1:]:
+                cols = row.query_selector_all('td')
+                if len(cols) == 3:
+                    try:
+                        date_str = cols[0].inner_text().strip()
+                        buy = float(cols[1].inner_text().strip())
+                        sell = float(cols[2].inner_text().strip())
+                        date = datetime.strptime(date_str, '%d/%m/%Y').date()
+                        data.append({
+                            'Fecha': date,
+                            'Compra': buy,
+                            'Venta': sell
+                        })
+                    except (ValueError, TypeError):
+                        continue
+            
+            return pd.DataFrame(data)
+            
+        finally:
+            browser.close()
 
 def main():
     st.set_page_config(page_title="Tipo de Cambio SUNAT", layout="wide")
