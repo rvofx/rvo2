@@ -10,21 +10,18 @@ def extract_xml_data(xml_file):
     # Diccionario para almacenar la información relevante
     data = {}
     
-    # Extraer información de Sistema Operativo, CPU, RAM y Almacenamiento
-    os_info = root.find(".//section[@title='Operating System']/entry[@title='Model']")
-    cpu_info = root.find(".//section[@title='CPU']/entry[@title='Intel Processor @ 2.40GHz']")
-    ram_info = root.find(".//section[@title='RAM']/entry[@title='8.00GB']")
-    storage_info = root.find(".//section[@title='Storage']/entry[@title='238GB NVMe']")
+    # Buscar la sección "Summary" donde están las principales categorías
+    summary_section = root.find(".//mainsection[@title='Summary']")
     
-    if os_info is not None:
-        data['Operating System'] = os_info.get('value')
-    if cpu_info is not None:
-        data['CPU'] = cpu_info.get('value')
-    if ram_info is not None:
-        data['RAM'] = ram_info.get('value')
-    if storage_info is not None:
-        data['Storage'] = storage_info.get('value')
-
+    if summary_section is not None:
+        # Extraer información de cada subsección relevante
+        for section in summary_section.findall('section'):
+            section_title = section.attrib.get('title', 'Unknown')
+            entry = section.find('entry')
+            if entry is not None:
+                # Capturar el valor del atributo 'title' y el atributo 'value'
+                data[section_title] = entry.attrib.get('value', 'No data')
+    
     return data
 
 # Streamlit app
@@ -40,6 +37,9 @@ if uploaded_files:
         all_data.append(data)
 
     # Convertir en DataFrame
-    df = pd.DataFrame(all_data)
-    st.write("Tabla consolidada de todos los archivos XML subidos:")
-    st.dataframe(df)
+    if all_data:
+        df = pd.DataFrame(all_data)
+        st.write("Tabla consolidada de todos los archivos XML subidos:")
+        st.dataframe(df)
+    else:
+        st.write("No se encontró información relevante en los archivos XML.")
