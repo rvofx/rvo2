@@ -5,6 +5,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 import plotly.express as px
 from datetime import datetime
 
@@ -13,11 +15,15 @@ def configure_chrome_options():
     chrome_options.add_argument("--headless")  # Ejecutar en modo headless
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
     return chrome_options
 
 def scrape_sunat_exchange_rate():
     chrome_options = configure_chrome_options()
-    driver = webdriver.Chrome(options=chrome_options)
+    
+    # Usar webdriver_manager para gestionar el ChromeDriver
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=chrome_options)
     
     try:
         # Cargar la página
