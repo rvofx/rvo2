@@ -15,3 +15,4 @@ webdriver-manager
 cloudscraper
 xlsxwriter
 undetected-chromedriver
+playwright
