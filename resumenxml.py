@@ -3,12 +3,13 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 
 # Función para procesar cada archivo XML
-def procesar_xml(xml_file):
+def procesar_xml(xml_file, file_name):
     tree = ET.parse(xml_file)
     root = tree.getroot()
 
     # Diccionario para almacenar la información básica
     info = {
+        "File Name": file_name,
         "Operating System": None,
         "CPU": None,
         "RAM": None,
@@ -54,8 +55,9 @@ datos = []
 
 if uploaded_files:
     for file in uploaded_files:
-        # Procesar cada archivo XML y agregar la información a la lista
-        datos.append(procesar_xml(file))
+        # Procesar cada archivo XML y agregar la información a la lista (incluyendo el nombre del archivo)
+        file_name = file.name
+        datos.append(procesar_xml(file, file_name))
 
     # Convertir la lista en un DataFrame de pandas para visualizarla como tabla
     df = pd.DataFrame(datos)
@@ -66,3 +68,4 @@ if uploaded_files:
 
 else:
     st.write("No se han subido archivos todavía.")
+
