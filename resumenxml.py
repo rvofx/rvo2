@@ -45,7 +45,7 @@ def procesar_xml(xml_file, file_name):
 
 # Configuración de la aplicación Streamlit
 st.title("Visor de Información de Archivos XML")
-st.write("Sube tus archivos XML para extraer y visualizar la información básica en una tabla.")
+st.write("Sube tus archivos XML para extraer y visualizar la información en una tabla.")
 
 # Subir múltiples archivos XML
 uploaded_files = st.file_uploader("Sube los archivos XML", type="xml", accept_multiple_files=True)
