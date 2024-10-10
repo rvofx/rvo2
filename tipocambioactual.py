@@ -1,31 +1,25 @@
 import streamlit as st
 import pandas as pd
-from selenium import webdriver
+import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 import plotly.express as px
 from datetime import datetime
-
-def configure_chrome_options():
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Ejecutar en modo headless
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-gpu")
-    return chrome_options
+import os
 
 def scrape_sunat_exchange_rate():
-    chrome_options = configure_chrome_options()
-    
-    # Usar webdriver_manager para gestionar el ChromeDriver
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+    options = uc.ChromeOptions()
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--disable-setuid-sandbox')
+    options.add_argument('--disable-software-rasterizer')
     
     try:
+        driver = uc.Chrome(options=options)
+        
         # Cargar la página
         url = "https://e-consulta.sunat.gob.pe/cl-at-ittipcam/tcS01Alias"
         driver.get(url)
@@ -42,22 +36,29 @@ def scrape_sunat_exchange_rate():
             cols = row.find_elements(By.TAG_NAME, "td")
             if len(cols) == 3:
                 date_str = cols[0].text.strip()
-                buy = float(cols[1].text.strip())
-                sell = float(cols[2].text.strip())
                 try:
+                    buy = float(cols[1].text.strip())
+                    sell = float(cols[2].text.strip())
                     date = datetime.strptime(date_str, '%d/%m/%Y').date()
                     data.append({
                         'Fecha': date,
                         'Compra': buy,
                         'Venta': sell
                     })
-                except ValueError:
+                except (ValueError, TypeError):
                     continue
-                
+        
         return pd.DataFrame(data)
+    
+    except Exception as e:
+        st.error(f"Error específico: {str(e)}")
+        raise
         
     finally:
-        driver.quit()
+        try:
+            driver.quit()
+        except:
+            pass
 
 def main():
     st.set_page_config(page_title="Tipo de Cambio SUNAT", layout="wide")
@@ -68,6 +69,15 @@ def main():
     Esta aplicación muestra el tipo de cambio oficial de SUNAT en tiempo real.
     Los datos son extraídos directamente de la página web de SUNAT.
     """)
+    
+    # Intentar cargar datos al inicio si no existen
+    if 'data' not in st.session_state:
+        with st.spinner('Cargando datos iniciales...'):
+            try:
+                df = scrape_sunat_exchange_rate()
+                st.session_state['data'] = df
+            except Exception as e:
+                st.error(f'Error al cargar datos iniciales: {str(e)}')
     
     if st.button("🔄 Actualizar Datos"):
         with st.spinner('Obteniendo datos de SUNAT...'):
