@@ -28,7 +28,7 @@ def obtener_tipo_cambio(fecha, moneda):
     """
     Obtiene el tipo de cambio de la SBS para una fecha y moneda específica
     """
-    url = 'https://www.sbs.gob.pe/app/pp/SISTIP_PORTAL/Paginas/Publicacion/TipoCambioPromedio.aspx'
+    url = 'https://www.sbs.gob.pe/app/stats/TC-CV-Historico.asp'
     
     # Formatear la fecha correctamente
     fecha_str = fecha.strftime('%d/%m/%Y')
@@ -38,61 +38,58 @@ def obtener_tipo_cambio(fecha, moneda):
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
         'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
-        'Origin': 'https://www.sbs.gob.pe',
-        'Referer': 'https://www.sbs.gob.pe/app/pp/SISTIP_PORTAL/Paginas/Publicacion/TipoCambioPromedio.aspx'
     }
     
     # Parámetros del formulario
     payload = {
-        'ctl00$cphContent$ctl00$rgTipoCambio$ctl00$ctl02$ctl00$txtFecha': fecha_str,
-        'ctl00$cphContent$ctl00$rgTipoCambio$ctl00$ctl02$ctl00$ddlMoneda': moneda
+        'FECHA_INICIO': fecha_str,
+        'FECHA_FIN': fecha_str,
+        'MONEDA': moneda,
+        'button1': 'Consultar'
     }
     
     try:
-        # Mostrar información de depuración
-        st.write("Consultando con los siguientes parámetros:")
-        st.write(f"- Fecha: {fecha_str}")
-        st.write(f"- Código de moneda: {moneda}")
-        
-        # Realizar la solicitud GET inicial para obtener tokens
+        # Realizar la solicitud POST
         session = requests.Session()
-        response = session.get(url)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Obtener tokens del formulario
-        viewstate = soup.find('input', {'name': '__VIEWSTATE'})['value']
-        viewstategenerator = soup.find('input', {'name': '__VIEWSTATEGENERATOR'})['value']
-        eventvalidation = soup.find('input', {'name': '__EVENTVALIDATION'})['value']
-        
-        # Añadir tokens al payload
-        payload.update({
-            '__VIEWSTATE': viewstate,
-            '__VIEWSTATEGENERATOR': viewstategenerator,
-            '__EVENTVALIDATION': eventvalidation,
-            '__ASYNCPOST': 'true',
-            'ctl00$cphContent$ctl00$btnConsultar': 'Consultar'
-        })
-        
-        # Realizar la consulta POST
         response = session.post(url, data=payload, headers=headers)
-        response.raise_for_status()
         
-        # Parsear respuesta
+        if response.status_code != 200:
+            st.error(f"Error en la solicitud: {response.status_code}")
+            return None
+            
+        # Parsear el HTML
         soup = BeautifulSoup(response.text, 'html.parser')
-        tabla = soup.find('table', {'class': 'APLI_grid'})
+        
+        # Buscar la tabla específica que contiene los tipos de cambio
+        tabla = soup.find('table', {'id': 'ctl00_cphContent_rgTipoCambio_ctl00'})
         
         if tabla:
-            df = pd.read_html(str(tabla))[0]
-            return df
-        else:
-            st.error("No se encontró la tabla de tipos de cambio en la respuesta")
-            return None
+            # Encontrar todas las filas de datos
+            filas = tabla.find_all('tr')[1:]  # Ignorar la fila de encabezado
+            
+            if filas:
+                # Extraer los datos de la primera fila (la más reciente)
+                fila = filas[0]
+                celdas = fila.find_all('td')
+                
+                if len(celdas) >= 3:
+                    fecha = celdas[0].text.strip()
+                    compra = float(celdas[1].text.strip())
+                    venta = float(celdas[2].text.strip())
+                    
+                    # Crear DataFrame
+                    df = pd.DataFrame({
+                        'Fecha': [fecha],
+                        'Compra': [compra],
+                        'Venta': [venta]
+                    })
+                    return df
+        
+        st.warning("No se encontraron datos para la fecha seleccionada")
+        return None
             
     except Exception as e:
         st.error(f'Error en la consulta: {str(e)}')
-        if 'response' in locals():
-            st.write("Código de respuesta:", response.status_code)
-            st.write("Contenido de respuesta:", response.text[:500])
         return None
 
 # Crear el formulario
@@ -128,12 +125,11 @@ if st.button("Consultar", type="primary"):
             st.dataframe(df, use_container_width=True)
             
             # Mostrar los valores específicos
-            if 'Compra' in df.columns and 'Venta' in df.columns:
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.metric("Tipo de Cambio Compra", f"S/ {df['Compra'].iloc[0]:.3f}")
-                with col2:
-                    st.metric("Tipo de Cambio Venta", f"S/ {df['Venta'].iloc[0]:.3f}")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Tipo de Cambio Compra", f"S/ {df['Compra'].iloc[0]:.3f}")
+            with col2:
+                st.metric("Tipo de Cambio Venta", f"S/ {df['Venta'].iloc[0]:.3f}")
             
             # Opción para descargar los datos
             csv = df.to_csv(index=False).encode('utf-8')
@@ -144,22 +140,13 @@ if st.button("Consultar", type="primary"):
                 "text/csv",
                 key='download-csv'
             )
-        else:
-            st.warning("""
-            No se encontraron datos para la fecha y moneda seleccionadas. 
-            Esto puede deberse a:
-            - La fecha seleccionada es un fin de semana o feriado
-            - La fecha es muy reciente y los datos aún no han sido publicados
-            - La fecha es muy antigua
-            
-            Por favor, intente con otra fecha.
-            """)
 
 # Información adicional
 with st.expander("ℹ️ Información importante"):
     st.markdown("""
     - Los tipos de cambio son publicados solo en días hábiles
     - Los datos del día actual pueden no estar disponibles hasta cierta hora
+    - Para obtener el tipo de cambio del día, consultar después de las 5:00 PM
     - Se recomienda consultar días anteriores para obtener datos históricos
     - Fuente: Superintendencia de Banca, Seguros y AFP (SBS)
     """)
