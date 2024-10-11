@@ -16,130 +16,95 @@ st.set_page_config(
 st.title("📊 Consulta de Tipo de Cambio SBS")
 st.markdown("Consulta el tipo de cambio histórico de diferentes monedas según la SBS")
 
-# Diccionario de monedas disponibles (actualizado con los nombres exactos)
-MONEDAS = {
-    "Dólar de N. A.": "02",
-    "Euro": "03",
-    "Yen Japonés": "04",
-    "Libra Esterlina": "05"
-}
-
-def obtener_tipo_cambio(fecha_inicio, fecha_fin, moneda='02'):
+def obtener_tipo_cambio(fecha):
     """
-    Obtiene el tipo de cambio de la SBS para un rango de fechas y moneda específica
+    Obtiene el tipo de cambio de la SBS para una fecha específica
     """
     url = 'https://www.sbs.gob.pe/app/stats/TC-CV-Historico.asp'
     
-    # Asegurarnos de que las fechas estén en el formato correcto
-    fecha_inicio_str = fecha_inicio.strftime('%d/%m/%Y')
-    fecha_fin_str = fecha_fin.strftime('%d/%m/%Y')
+    # Formatear la fecha correctamente
+    fecha_str = fecha.strftime('%d/%m/%Y')
     
     payload = {
-        'FECHA_INICIO': fecha_inicio_str,
-        'FECHA_FIN': fecha_fin_str,
-        'MONEDA': moneda,
+        'FECHA_INICIO': fecha_str,
+        'FECHA_FIN': fecha_str,
+        'MONEDA': '02',  # Dólar de N.A.
         'button1': 'Consultar'
     }
     
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
     }
     
     try:
-        # Realizar la solicitud POST con headers
+        # Mostrar los datos que se están enviando para depuración
+        st.write("Consultando fecha:", fecha_str)
+        
+        # Realizar la solicitud POST
         response = requests.post(url, data=payload, headers=headers)
         response.raise_for_status()
         
+        # Parsear el HTML
         soup = BeautifulSoup(response.text, 'html.parser')
         tabla = soup.find('table', {'id': 'ctl00_cphContent_rgTipoCambio_ctl00'})
         
         if tabla:
             df = pd.read_html(str(tabla))[0]
+            # Limpiar y formatear los datos
             df.columns = ['Fecha', 'Compra', 'Venta']
             return df
         else:
-            st.error(f"No se encontraron datos para el período {fecha_inicio_str} - {fecha_fin_str}")
             return None
             
     except Exception as e:
-        st.error(f'Error al consultar el tipo de cambio: {str(e)}')
+        st.error(f'Error en la consulta: {str(e)}')
         return None
 
-# Crear el formulario en la barra lateral
-with st.sidebar:
-    st.header("Parámetros de consulta")
-    
-    # Selector de moneda
-    moneda_seleccionada = st.selectbox(
-        "Seleccione la moneda:",
-        options=list(MONEDAS.keys()),
-        index=0  # Seleccionar Dólar por defecto
-    )
-    
-    # Selector de fechas
-    col1, col2 = st.columns(2)
-    with col1:
-        fecha_inicio = st.date_input(
-            "Fecha inicio",
-            datetime.now()
-        )
-    with col2:
-        fecha_fin = st.date_input(
-            "Fecha fin",
-            datetime.now()
-        )
-    
-    # Botón de consulta
-    consultar = st.button("Consultar", type="primary")
+# Crear el formulario
+st.subheader("Seleccione la fecha a consultar")
 
-# Realizar la consulta cuando se presione el botón
-if consultar:
+# Selector de fecha único
+fecha_consulta = st.date_input(
+    "Fecha de consulta",
+    datetime.now(),
+    format="DD/MM/YYYY"
+)
+
+# Botón de consulta
+if st.button("Consultar", type="primary"):
     with st.spinner('Consultando datos...'):
-        # Obtener el código de la moneda seleccionada
-        codigo_moneda = MONEDAS[moneda_seleccionada]
-        
-        # Realizar la consulta
-        df = obtener_tipo_cambio(fecha_inicio, fecha_fin, codigo_moneda)
+        df = obtener_tipo_cambio(fecha_consulta)
         
         if df is not None and not df.empty:
             # Mostrar los datos en una tabla
-            st.subheader("Datos del tipo de cambio")
+            st.subheader("Resultado de la consulta")
             st.dataframe(df, use_container_width=True)
             
-            # Crear gráfico
-            st.subheader("Gráfico histórico")
-            fig = px.line(df, x='Fecha', y=['Compra', 'Venta'],
-                         title=f'Tipo de Cambio - {moneda_seleccionada}',
-                         labels={'value': 'Tipo de cambio', 'variable': 'Tipo'},
-                         template='plotly_white')
-            st.plotly_chart(fig, use_container_width=True)
-            
-            # Estadísticas básicas
-            st.subheader("Estadísticas")
-            col1, col2, col3 = st.columns(3)
+            # Mostrar los valores específicos
+            col1, col2 = st.columns(2)
             with col1:
-                st.metric("Promedio Compra", f"S/ {df['Compra'].mean():.3f}")
+                st.metric("Tipo de Cambio Compra", f"S/ {df['Compra'].iloc[0]:.3f}")
             with col2:
-                st.metric("Promedio Venta", f"S/ {df['Venta'].mean():.3f}")
-            with col3:
-                st.metric("Diferencial promedio", 
-                         f"S/ {(df['Venta'] - df['Compra']).mean():.3f}")
+                st.metric("Tipo de Cambio Venta", f"S/ {df['Venta'].iloc[0]:.3f}")
             
-            # Opción para descargar los datos
-            csv = df.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                "Descargar datos en CSV",
-                csv,
-                "tipo_cambio.csv",
-                "text/csv",
-                key='download-csv'
-            )
+        else:
+            st.warning("""
+            No se encontraron datos para la fecha seleccionada. 
+            Esto puede deberse a:
+            - La fecha seleccionada es un fin de semana o feriado
+            - La fecha es muy reciente y los datos aún no han sido publicados
+            - La fecha es muy antigua
+            
+            Por favor, intente con otra fecha.
+            """)
 
 # Información adicional
-with st.expander("ℹ️ Información"):
+with st.expander("ℹ️ Información importante"):
     st.markdown("""
-    - Los datos son obtenidos directamente de la SBS (Superintendencia de Banca, Seguros y AFP)
-    - Las consultas están limitadas a un período máximo de 90 días
-    - Los tipos de cambio mostrados son los oficiales publicados por la SBS
-    - La información se actualiza diariamente en días hábiles
+    - Los tipos de cambio son publicados solo en días hábiles
+    - Los datos del día actual pueden no estar disponibles hasta cierta hora
+    - Se recomienda consultar días anteriores para obtener datos históricos
+    - Fuente: Superintendencia de Banca, Seguros y AFP (SBS)
     """)
