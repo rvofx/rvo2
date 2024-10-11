@@ -16,12 +16,12 @@ st.set_page_config(
 st.title("📊 Consulta de Tipo de Cambio SBS")
 st.markdown("Consulta el tipo de cambio histórico de diferentes monedas según la SBS")
 
-# Diccionario de monedas disponibles
+# Diccionario de monedas disponibles (actualizado con los nombres exactos)
 MONEDAS = {
-    "Dólar Americano (USD)": "02",
-    "Euro (EUR)": "03",
-    "Yen Japonés (JPY)": "04",
-    "Libra Esterlina (GBP)": "05"
+    "Dólar de N. A.": "02",
+    "Euro": "03",
+    "Yen Japonés": "04",
+    "Libra Esterlina": "05"
 }
 
 def obtener_tipo_cambio(fecha_inicio, fecha_fin, moneda='02'):
@@ -30,15 +30,24 @@ def obtener_tipo_cambio(fecha_inicio, fecha_fin, moneda='02'):
     """
     url = 'https://www.sbs.gob.pe/app/stats/TC-CV-Historico.asp'
     
+    # Asegurarnos de que las fechas estén en el formato correcto
+    fecha_inicio_str = fecha_inicio.strftime('%d/%m/%Y')
+    fecha_fin_str = fecha_fin.strftime('%d/%m/%Y')
+    
     payload = {
-        'FECHA_INICIO': fecha_inicio.strftime('%d/%m/%Y'),
-        'FECHA_FIN': fecha_fin.strftime('%d/%m/%Y'),
+        'FECHA_INICIO': fecha_inicio_str,
+        'FECHA_FIN': fecha_fin_str,
         'MONEDA': moneda,
         'button1': 'Consultar'
     }
     
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
+    
     try:
-        response = requests.post(url, data=payload)
+        # Realizar la solicitud POST con headers
+        response = requests.post(url, data=payload, headers=headers)
         response.raise_for_status()
         
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -49,6 +58,7 @@ def obtener_tipo_cambio(fecha_inicio, fecha_fin, moneda='02'):
             df.columns = ['Fecha', 'Compra', 'Venta']
             return df
         else:
+            st.error(f"No se encontraron datos para el período {fecha_inicio_str} - {fecha_fin_str}")
             return None
             
     except Exception as e:
@@ -62,7 +72,8 @@ with st.sidebar:
     # Selector de moneda
     moneda_seleccionada = st.selectbox(
         "Seleccione la moneda:",
-        options=list(MONEDAS.keys())
+        options=list(MONEDAS.keys()),
+        index=0  # Seleccionar Dólar por defecto
     )
     
     # Selector de fechas
@@ -70,7 +81,7 @@ with st.sidebar:
     with col1:
         fecha_inicio = st.date_input(
             "Fecha inicio",
-            datetime.now() - timedelta(days=30)
+            datetime.now()
         )
     with col2:
         fecha_fin = st.date_input(
@@ -90,7 +101,7 @@ if consultar:
         # Realizar la consulta
         df = obtener_tipo_cambio(fecha_inicio, fecha_fin, codigo_moneda)
         
-        if df is not None:
+        if df is not None and not df.empty:
             # Mostrar los datos en una tabla
             st.subheader("Datos del tipo de cambio")
             st.dataframe(df, use_container_width=True)
@@ -123,8 +134,6 @@ if consultar:
                 "text/csv",
                 key='download-csv'
             )
-        else:
-            st.error("No se encontraron datos para el período seleccionado")
 
 # Información adicional
 with st.expander("ℹ️ Información"):
