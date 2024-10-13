@@ -5,14 +5,16 @@ import pandas as pd
 # Conexión a la base de datos usando secrets
 def get_db_connection():
     connection = pyodbc.connect(
-        f"DRIVER={st.secrets['database']['driver']};"
-        f"SERVER={st.secrets['database']['server']};"
-        f"DATABASE={st.secrets['database']['database']};"
-        f"UID={st.secrets['database']['username']};"
-        f"PWD={st.secrets['database']['password']}"
+        "DRIVER={ODBC Driver 17 for SQL Server};"
+        "SERVER=" + st.secrets["server"] + ";"
+        "DATABASE=" + st.secrets["database"] + ";"
+        "UID=" + st.secrets["username"] + ";"
+        "PWD=" + st.secrets["password"] + ";"
     )
     return connection
 
+
+    
 # Función para ejecutar la consulta y obtener los resultados
 def load_data():
     query = """
