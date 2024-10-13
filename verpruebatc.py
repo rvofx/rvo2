@@ -30,7 +30,7 @@ def load_data():
            [IdSistemaUsuarioModificacion] AS U_MO,
            [FechaUltimaModificacion] AS F_MOD
     FROM [GarmentData].[dbo].[thTipoCambio]
-    WHERE FechaCreacion > '2024-10-01'
+    WHERE FechaCreacion > '01-10-2024'
     """
     
     conn = get_db_connection()
