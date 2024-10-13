@@ -47,5 +47,6 @@ st.title('Tabla TC nubeprueba')
 #df = load_data()
     
 # Mostrar los resultados en una tabla
-st.write('Resultados de la consulta:')
+#st.write('Resultados de la consulta:')
+df = load_data()
 st.dataframe(df)
