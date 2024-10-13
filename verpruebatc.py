@@ -40,12 +40,12 @@ def load_data():
     return data
 
 # Interfaz de la aplicación
-st.title('Consulta de Tipos de Cambio')
+st.title('Tabla TC nubeprueba')
 
 # Botón para cargar datos
-if st.button('Cargar datos'):
-    df = load_data()
+#if st.button('Cargar datos'):
+#df = load_data()
     
-    # Mostrar los resultados en una tabla
-    st.write('Resultados de la consulta:')
-    st.dataframe(df)
+# Mostrar los resultados en una tabla
+st.write('Resultados de la consulta:')
+st.dataframe(df)
