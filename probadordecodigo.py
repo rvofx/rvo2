@@ -20,16 +20,21 @@ def create_gantt(df, pedido):
     
     fig = ff.create_gantt(gantt_data, index_col='Task', show_colorbar=True, group_tasks=True)
     fig.update_layout(title=f'Diagrama de Gantt para Pedido {pedido}')
-
-     # Agregar líneas verticales tenues cada 2 días
+    
+    # Calcular las fechas mínima y máxima
+    min_date = min(task['Start'] for task in gantt_data)
+    max_date = max(task['Finish'] for task in gantt_data)
+    
+    # Agregar líneas verticales tenues cada 2 días
     current_date = min_date
     while current_date <= max_date:
         fig.add_vline(x=current_date, line_width=1, line_dash="dash", line_color="lightgray")
         current_date += timedelta(days=2)
-
+    
     # Agregar línea roja en el día actual
     today = datetime.now().date()
     fig.add_vline(x=today, line_width=2, line_color="red")
+    
     return fig
 
 def main():
