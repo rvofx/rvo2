@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import plotly.figure_factory as ff
 from datetime import datetime, timedelta
-import plotly.graph_objects as go
 
 def load_data(file):
     df = pd.read_excel(file)
@@ -24,22 +23,22 @@ def create_gantt(df, pedido_column, procesos):
     
     fig = ff.create_gantt(gantt_data, index_col='Task', show_colorbar=True, group_tasks=True)
     fig.update_layout(title=f'Diagrama de Gantt para Pedido {pedido}')
-    
+
     # Obtener el rango de fechas del diagrama
     all_dates = [task['Start'] for task in gantt_data] + [task['Finish'] for task in gantt_data]
     min_date = min(all_dates)
     max_date = max(all_dates)
-    
+
     # Agregar líneas verticales tenues cada 2 días
     current_date = min_date
     while current_date <= max_date:
-        fig.add_vline(x=current_date, line_width=1, line_dash="dash", line_color="gray")
+        fig.add_vline(x=current_date, line_width=1, line_dash="dash", line_color="lightgray")
         current_date += timedelta(days=2)
-    
+
     # Agregar línea roja en el día actual
     today = datetime.now().date()
     fig.add_vline(x=today, line_width=2, line_color="red")
-    
+
     return fig
 
 def main():
