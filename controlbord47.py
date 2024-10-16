@@ -92,7 +92,7 @@ try:
     
     col1, col2 = st.columns(2)
     col1.metric("Total de Unidades", f"{total_unidades:,.0f}")
-    col2.metric("Promedio de Unidades por Proveedor", f"{promedio_unidades:,.2f}")
+    #col2.metric("Promedio de Unidades por Proveedor", f"{promedio_unidades:,.2f}")
 
 except Exception as e:
     st.error(f"Ocurrió un error al cargar los datos: {str(e)}")
