@@ -70,13 +70,20 @@ try:
     st.table(total_por_proveedor)
     
     # Mostrar datos en una tabla
+    
     st.subheader("Datos de Unidades por Proveedor")
     st.dataframe(df)
     
     # Crear gráfico de barras
+
     st.subheader("Gráfico de Unidades por Proveedor")
-    fig = px.bar(df, x='PROVEEDOR', y='TOTAL_UNIDADES', title='Total de Unidades por Proveedor')
+    fig = px.bar(total_por_proveedor, x='PROVEEDOR', y='TOTAL_UNIDADES', title='Total de Unidades por Proveedor')
     st.plotly_chart(fig, use_container_width=True)
+
+    
+    #st.subheader("Gráfico de Unidades por Proveedor")
+    #fig = px.bar(df, x='PROVEEDOR', y='TOTAL_UNIDADES', title='Total de Unidades por Proveedor')
+    #st.plotly_chart(fig, use_container_width=True)
     
     # Mostrar estadísticas
     st.subheader("Estadísticas")
