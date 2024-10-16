@@ -76,9 +76,9 @@ try:
     
     # Crear gráfico de barras
 
-    st.subheader("Gráfico de Unidades por Proveedor")
-    fig = px.bar(total_por_proveedor, x='PROVEEDOR', y='TOTAL_UNIDADES', title='Total de Unidades por Proveedor')
-    st.plotly_chart(fig, use_container_width=True)
+    #st.subheader("Gráfico de Unidades por Proveedor")
+    #fig = px.bar(total_por_proveedor, x='PROVEEDOR', y='TOTAL_UNIDADES', title='Total de Unidades por Proveedor')
+    #st.plotly_chart(fig, use_container_width=True)
 
     
     #st.subheader("Gráfico de Unidades por Proveedor")
@@ -88,7 +88,7 @@ try:
     # Mostrar estadísticas
     st.subheader("Estadísticas")
     total_unidades = df['TOTAL_UNIDADES'].sum()
-    promedio_unidades = df['TOTAL_UNIDADES'].mean()
+    #promedio_unidades = df['TOTAL_UNIDADES'].mean()
     
     col1, col2 = st.columns(2)
     col1.metric("Total de Unidades", f"{total_unidades:,.0f}")
