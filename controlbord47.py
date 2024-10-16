@@ -74,10 +74,15 @@ try:
 
      # Agregar esta nueva sección justo después de cargar los datos
     # Tabla de total de unidades por proveedor
+
+    # Tabla de total de unidades por proveedor
     st.subheader("Total de Unidades por Proveedor")
     total_por_proveedor = df.groupby('PROVEEDOR')['TOTAL_UNIDADES'].sum().reset_index()
+    total_por_proveedor['TOTAL_UNIDADES'] = total_por_proveedor['TOTAL_UNIDADES'].astype(int)
     total_por_proveedor = total_por_proveedor.sort_values('TOTAL_UNIDADES', ascending=False)
     st.table(total_por_proveedor)
+    
+    
     
     # Mostrar datos en una tabla
     
