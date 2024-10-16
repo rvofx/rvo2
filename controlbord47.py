@@ -8,15 +8,25 @@ from sqlalchemy import create_engine
 st.set_page_config(page_title="Dashboard de Unidades por Proveedor", layout="wide")
 
 # Función para conectar a la base de datos
-def connect_to_db():
-    server = st.secrets["server"]
-    database = st.secrets["database"]
-    username = st.secrets["username"]
-    password = st.secrets["password"]
-    driver = st.secrets["driver"]
+#def connect_to_db():
+    #server = st.secrets["server"]
+    #database = st.secrets["database"]
+    #username = st.secrets["username"]
+    #password = st.secrets["password"]
+    #driver = st.secrets["driver"]
     
-    connection_string = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
-    return pyodbc.connect(connection_string)
+    #connection_string = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+    #return pyodbc.connect(connection_string)
+    
+def connect_to_db():
+    connection = pyodbc.connect(
+        "driver={odbc driver 17 for sql server};"
+        "server=" + st.secrets["server"] + ";"
+        "database=" + st.secrets["database"] + ";"
+        "uid=" + st.secrets["username"] + ";"
+        "pwd=" + st.secrets["password"] + ";"
+    )
+    return connection
 
 # Función para ejecutar la consulta
 def run_query():
