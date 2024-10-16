@@ -63,7 +63,7 @@ try:
     df = run_query()
 
     # Mostrar estadísticas
-    st.subheader("Estadísticas")
+    #st.subheader("Estadísticas")
     total_unidades = df['TOTAL_UNIDADES'].sum()
     #promedio_unidades = df['TOTAL_UNIDADES'].mean()
     
