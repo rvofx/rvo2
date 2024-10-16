@@ -61,6 +61,13 @@ st.title("Dashboard de Unidades por Proveedor")
 # Cargar datos
 try:
     df = run_query()
+
+     # Agregar esta nueva sección justo después de cargar los datos
+    # Tabla de total de unidades por proveedor
+    st.subheader("Total de Unidades por Proveedor")
+    total_por_proveedor = df.groupby('PROVEEDOR')['TOTAL_UNIDADES'].sum().reset_index()
+    total_por_proveedor = total_por_proveedor.sort_values('TOTAL_UNIDADES', ascending=False)
+    st.table(total_por_proveedor)
     
     # Mostrar datos en una tabla
     st.subheader("Datos de Unidades por Proveedor")
