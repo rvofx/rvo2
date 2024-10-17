@@ -74,7 +74,7 @@ INNER JOIN docRecetaOrdenProduccion i ON a.IdDocumento_OrdenProduccion = i.IdDoc
 INNER JOIN docReceta j ON i.IdDocumento_Receta = j.IdDocumento_Receta
 INNER JOIN maeruta k ON a.IdmaeRuta = k.IdmaeRuta
 WHERE a.IdtdDocumentoForm = 138
-AND NOT a.IdDocumento_OrdenProduccion IN (461444, 452744, 459212, 463325, 471285, 471287)
+AND NOT a.IdDocumento_OrdenProduccion IN (461444, 452744, 459212, 463325, 471285, 471287, 471290)
 AND j.dtFechaHoraFin IS NOT NULL
 AND j.bAnulado = 0
 AND a.FechaCierreAprobado IS NULL
