@@ -85,7 +85,7 @@ def safe_date_format(date):
     return str(date)
 
 # Título de la aplicación
-st.title("Control de bordado 47")
+st.title("Control de bordados 47")
 
 # Cargar datos
 try:
@@ -130,7 +130,7 @@ try:
     # Gráfico de barras apiladas
     st.subheader("Distribución de Unidades por Proveedor")
     fig = px.bar(df_resumen, x='PROVEEDOR', y=['UNIDADES_REGRESADAS', 'SALDO'],
-                 title="Unidades Regresadas vs Saldo por Proveedor",
+                 title="Retorno vs Saldo",
                  labels={'value': 'Unidades', 'variable': 'Tipo'},
                  color_discrete_map={'UNIDADES_REGRESADAS': 'green', 'SALDO': 'blue'})
     st.plotly_chart(fig)
