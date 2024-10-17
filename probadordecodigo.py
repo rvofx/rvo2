@@ -110,14 +110,14 @@ try:
 
     # Mostrar estadísticas
     col1, col2, col3 = st.columns(3)
-    col1.metric("Total de Unidades Enviadas", f"{total_enviadas:,.0f}")
-    col2.metric("Total de Unidades Regresadas", f"{total_regresadas:,.0f}")
+    col1.metric("Total Envio", f"{total_enviadas:,.0f}")
+    col2.metric("Total Retorno", f"{total_regresadas:,.0f}")
     col3.metric("Saldo Total", f"{saldo_total:,.0f}")
 
     # Tabla de resumen por proveedor
     st.subheader("Resumen por Proveedor")
     df_resumen = df_detallado.groupby('PROVEEDOR').agg({
-        'UNIDADES_ENVIADAS': 'sum',
+        'ENVIADO': 'sum',
         'UNIDADES_REGRESADAS': 'sum',
         'SALDO': 'sum'
     }).reset_index()
