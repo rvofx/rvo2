@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import pyodbc
+from datetime import datetime
 
 # Configuración de la página
 st.set_page_config(page_title="Dashboard de Unidades por Proveedor", layout="wide")
@@ -73,15 +74,13 @@ try:
     df_enviadas = run_query_enviadas()
     df_regresadas = run_query_regresadas()
 
+    # Asegurar que las fechas sean del tipo correcto
+    df_enviadas['FECHA_ENVIO'] = pd.to_datetime(df_enviadas['FECHA_ENVIO'], errors='coerce')
+    df_regresadas['FECHA_REGRESO'] = pd.to_datetime(df_regresadas['FECHA_REGRESO'], errors='coerce')
+
     # Combinar datos detallados
     df_detallado = pd.merge(df_enviadas, df_regresadas, on=['OP', 'PROVEEDOR'], how='outer').fillna(0)
     df_detallado['SALDO'] = df_detallado['UNIDADES_ENVIADAS'] - df_detallado['UNIDADES_REGRESADAS']
-    
-    # Asegurar que las columnas de fecha existan
-    if 'FECHA_ENVIO' not in df_detallado.columns:
-        df_detallado['FECHA_ENVIO'] = pd.NaT
-    if 'FECHA_REGRESO' not in df_detallado.columns:
-        df_detallado['FECHA_REGRESO'] = pd.NaT
     
     # Ordenar por OP
     df_detallado = df_detallado.sort_values('OP')
@@ -120,13 +119,22 @@ try:
 
     # Mostrar datos detallados combinados
     st.subheader("Datos Detallados por OP")
+    
+    # Función para formatear fechas
+    def format_date(date):
+        return date.strftime('%Y-%m-%d') if pd.notnull(date) else ''
+
+    # Aplicar el formato personalizado
+    df_detallado['FECHA_ENVIO_FORMATTED'] = df_detallado['FECHA_ENVIO'].apply(format_date)
+    df_detallado['FECHA_REGRESO_FORMATTED'] = df_detallado['FECHA_REGRESO'].apply(format_date)
+
     st.dataframe(df_detallado.style.format({
         'UNIDADES_ENVIADAS': '{:,.0f}',
         'UNIDADES_REGRESADAS': '{:,.0f}',
         'SALDO': '{:,.0f}',
-        'FECHA_ENVIO': '{:%Y-%m-%d}',
-        'FECHA_REGRESO': '{:%Y-%m-%d}'
-    }))
+        'FECHA_ENVIO_FORMATTED': '{}',
+        'FECHA_REGRESO_FORMATTED': '{}'
+    }).hide_columns(['FECHA_ENVIO', 'FECHA_REGRESO']))
 
 except Exception as e:
     st.error(f"Ocurrió un error al cargar los datos: {str(e)}")
