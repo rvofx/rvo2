@@ -66,6 +66,24 @@ def run_query_regresadas():
     conn.close()
     return df
 
+# Función para formatear fechas de manera segura
+def safe_date_format(date):
+    if pd.isnull(date):
+        return ''
+    if isinstance(date, (int, float)):
+        try:
+            return datetime.fromtimestamp(date).strftime('%Y-%m-%d')
+        except:
+            return str(date)
+    if isinstance(date, str):
+        try:
+            return datetime.strptime(date, '%Y-%m-%d').strftime('%Y-%m-%d')
+        except:
+            return date
+    if isinstance(date, datetime):
+        return date.strftime('%Y-%m-%d')
+    return str(date)
+
 # Título de la aplicación
 st.title("Dashboard de Unidades por Proveedor")
 
@@ -74,7 +92,7 @@ try:
     df_enviadas = run_query_enviadas()
     df_regresadas = run_query_regresadas()
 
-    # Asegurar que las fechas sean del tipo correcto
+    # Convertir fechas de manera segura
     df_enviadas['FECHA_ENVIO'] = pd.to_datetime(df_enviadas['FECHA_ENVIO'], errors='coerce')
     df_regresadas['FECHA_REGRESO'] = pd.to_datetime(df_regresadas['FECHA_REGRESO'], errors='coerce')
 
@@ -120,13 +138,9 @@ try:
     # Mostrar datos detallados combinados
     st.subheader("Datos Detallados por OP")
     
-    # Función para formatear fechas
-    def format_date(date):
-        return date.strftime('%Y-%m-%d') if pd.notnull(date) else ''
-
     # Aplicar el formato personalizado
-    df_detallado['FECHA_ENVIO_FORMATTED'] = df_detallado['FECHA_ENVIO'].apply(format_date)
-    df_detallado['FECHA_REGRESO_FORMATTED'] = df_detallado['FECHA_REGRESO'].apply(format_date)
+    df_detallado['FECHA_ENVIO_FORMATTED'] = df_detallado['FECHA_ENVIO'].apply(safe_date_format)
+    df_detallado['FECHA_REGRESO_FORMATTED'] = df_detallado['FECHA_REGRESO'].apply(safe_date_format)
 
     st.dataframe(df_detallado.style.format({
         'UNIDADES_ENVIADAS': '{:,.0f}',
@@ -138,3 +152,5 @@ try:
 
 except Exception as e:
     st.error(f"Ocurrió un error al cargar los datos: {str(e)}")
+    st.error("Detalles del error:")
+    st.exception(e)
