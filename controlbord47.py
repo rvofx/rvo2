@@ -158,13 +158,30 @@ try:
                           'UNIDADES_ENVIADAS', 'UNIDADES_REGRESADAS', 'SALDO']
     df_display = df_detallado[columns_to_display]
 
+    # Renombrar las columnas para la visualización
+    df_display = df_display.rename(columns={
+        'FECHA_ENVIO_FORMATTED': 'F_ENVIO',
+        'FECHA_REGRESO_FORMATTED': 'F_REGRESO',
+        'UNIDADES_ENVIADAS': 'U_ENV',
+        'UNIDADES_REGRESADAS': 'U_REG',
+        'PROVEEDOR': 'PROV'
+    })
+
     st.dataframe(df_display.style.format({
-        'UNIDADES_ENVIADAS': '{:,.0f}',
-        'UNIDADES_REGRESADAS': '{:,.0f}',
+        'U_ENV': '{:,.0f}',
+        'U_REG': '{:,.0f}',
         'SALDO': '{:,.0f}',
-        'FECHA_ENVIO_FORMATTED': '{}',
-        'FECHA_REGRESO_FORMATTED': '{}'
+        'F_ENVIO': '{}',
+        'F_REGRESO': '{}'
     }))
+
+    #st.dataframe(df_display.style.format({
+        #'UNIDADES_ENVIADAS': '{:,.0f}',
+        #'UNIDADES_REGRESADAS': '{:,.0f}',
+        #'SALDO': '{:,.0f}',
+        #'FECHA_ENVIO_FORMATTED': '{}',
+        #'FECHA_REGRESO_FORMATTED': '{}'
+    #}))
 
 except Exception as e:
     st.error(f"Ocurrió un error al cargar los datos: {str(e)}")
