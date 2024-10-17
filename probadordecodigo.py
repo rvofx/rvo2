@@ -5,7 +5,7 @@ import pyodbc
 from datetime import datetime
 
 # Configuración de la página
-st.set_page_config(page_title="Dashboard de Unidades por Proveedor", layout="wide")
+st.set_page_config(page_title="Control de bordados 47", layout="wide")
 
 # Función para conectar a la base de datos
 def connect_to_db():
@@ -85,7 +85,7 @@ def safe_date_format(date):
     return str(date)
 
 # Título de la aplicación
-st.title("Dashboard de Unidades por Proveedor")
+st.title("Control de bordado 47")
 
 # Cargar datos
 try:
@@ -122,7 +122,7 @@ try:
         'SALDO': 'sum'
     }).reset_index()
     st.dataframe(df_resumen.style.format({
-        'UNIDADES_ENVIADAS': '{:,.0f}',
+        'ENVIADO': '{:,.0f}',
         'UNIDADES_REGRESADAS': '{:,.0f}',
         'SALDO': '{:,.0f}'
     }))
