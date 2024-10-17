@@ -101,7 +101,7 @@ df_detalle = df_detalle.rename(columns={
 df_detalle = df_detalle[['OP', 'FECHA_ENVIO', 'FECHA_RETORNO', 'PROVEEDOR', 'ENVIADO', 'RETORNADO', 'SALDO']]
 
 # Mostrar resultados en Streamlit
-st.title("Confeccion OP, 47 B")
+st.title("47 B: Confección OP")
 
 st.header("Resumen por Proveedor")
 st.dataframe(df_resumen)
