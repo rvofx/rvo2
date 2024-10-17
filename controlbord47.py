@@ -63,18 +63,16 @@ try:
     df = run_query()
 
     # Mostrar estadísticas
-    #st.subheader("Estadísticas")
+    
     total_unidades = df['TOTAL_UNIDADES'].sum()
-    #promedio_unidades = df['TOTAL_UNIDADES'].mean()
+    
     
     col1, col2 = st.columns(2)
     col1.metric("Total de Unidades", f"{total_unidades:,.0f}")
-    #col2.metric("Promedio de Unidades por Proveedor", f"{promedio_unidades:,.2f}")
+    
 
 
-     # Agregar esta nueva sección justo después de cargar los datos
-    # Tabla de total de unidades por proveedor
-
+   
     # Tabla de total de unidades por proveedor
     st.subheader("Total de Unidades por Proveedor")
     total_por_proveedor = df.groupby('PROVEEDOR')['TOTAL_UNIDADES'].sum().reset_index()
@@ -89,16 +87,6 @@ try:
     st.subheader("Datos de Unidades por Proveedor")
     st.dataframe(df)
     
-    # Crear gráfico de barras
-
-    #st.subheader("Gráfico de Unidades por Proveedor")
-    #fig = px.bar(total_por_proveedor, x='PROVEEDOR', y='TOTAL_UNIDADES', title='Total de Unidades por Proveedor')
-    #st.plotly_chart(fig, use_container_width=True)
-
-    
-    #st.subheader("Gráfico de Unidades por Proveedor")
-    #fig = px.bar(df, x='PROVEEDOR', y='TOTAL_UNIDADES', title='Total de Unidades por Proveedor')
-    #st.plotly_chart(fig, use_container_width=True)
     
     
 except Exception as e:
