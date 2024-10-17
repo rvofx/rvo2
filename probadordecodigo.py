@@ -123,7 +123,7 @@ try:
     }).reset_index()
     st.dataframe(df_resumen.style.format({
         'ENVIADO': '{:,.0f}',
-        'UNIDADES_REGRESADAS': '{:,.0f}',
+        'RETORNO': '{:,.0f}',
         'SALDO': '{:,.0f}'
     }))
 
