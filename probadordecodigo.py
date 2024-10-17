@@ -3,8 +3,6 @@ import pandas as pd
 import pyodbc
 
 # Configuración de la conexión a la base de datos
-
-
 def get_connection():
     conn = pyodbc.connect(
         "driver={odbc driver 17 for sql server};"
@@ -14,7 +12,6 @@ def get_connection():
         "pwd=" + st.secrets["password"] + ";"
     )
     return conn        
-
 
 # Consultas SQL
 query_enviado = """
@@ -57,9 +54,19 @@ def get_dataframe(query):
     conn.close()
     return df
 
+# Función para formatear fechas
+def format_date(date):
+    if pd.isnull(date):
+        return ''
+    return datetime.strptime(str(date), '%Y-%m-%d %H:%M:%S').strftime('%d-%b').upper()
+
 # Obtener DataFrames
 df_enviado = get_dataframe(query_enviado)
 df_retornado = get_dataframe(query_retornado)
+
+# Formatear fechas
+df_enviado['FECHA'] = df_enviado['FECHA'].apply(format_date)
+df_retornado['FECHA'] = df_retornado['FECHA'].apply(format_date)
 
 # Crear tabla resumen por proveedor
 df_resumen = df_enviado.groupby('PROVEEDOR')['UNIDADES'].sum().reset_index()
@@ -71,12 +78,26 @@ df_resumen_retorno = df_resumen_retorno.rename(columns={'TOTAL_UNIDADES': 'RETOR
 df_resumen = pd.merge(df_resumen, df_resumen_retorno, on='PROVEEDOR', how='outer').fillna(0)
 df_resumen['SALDO'] = df_resumen['ENVIADO'] - df_resumen['RETORNADO']
 
+# Agregar totales
+totales = pd.DataFrame({
+    'PROVEEDOR': ['TOTAL'],
+    'ENVIADO': [df_resumen['ENVIADO'].sum()],
+    'RETORNADO': [df_resumen['RETORNADO'].sum()],
+    'SALDO': [df_resumen['SALDO'].sum()]
+})
+df_resumen = pd.concat([df_resumen, totales], ignore_index=True)
+
 # Crear tabla detallada por OP
 df_detalle = pd.merge(df_enviado, df_retornado, on=['OP', 'PROVEEDOR'], how='outer', suffixes=('_enviado', '_retornado'))
-df_detalle = df_detalle.fillna(0)
+df_detalle = df_detalle.fillna({'UNIDADES': 0, 'TOTAL_UNIDADES': 0})
 df_detalle['SALDO'] = df_detalle['UNIDADES'] - df_detalle['TOTAL_UNIDADES']
-df_detalle = df_detalle.rename(columns={'UNIDADES': 'ENVIADO', 'TOTAL_UNIDADES': 'RETORNADO'})
-df_detalle = df_detalle[['OP', 'FECHA_enviado', 'PROVEEDOR', 'ENVIADO', 'RETORNADO', 'SALDO']]
+df_detalle = df_detalle.rename(columns={
+    'FECHA_enviado': 'FECHA_ENVIO',
+    'FECHA_retornado': 'FECHA_RETORNO',
+    'UNIDADES': 'ENVIADO',
+    'TOTAL_UNIDADES': 'RETORNADO'
+})
+df_detalle = df_detalle[['OP', 'FECHA_ENVIO', 'FECHA_RETORNO', 'PROVEEDOR', 'ENVIADO', 'RETORNADO', 'SALDO']]
 
 # Mostrar resultados en Streamlit
 st.title("Análisis de Órdenes de Producción")
