@@ -1,161 +1,100 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import pyodbc
-from datetime import datetime
 
-# Configuración de la página
-st.set_page_config(page_title="Control de bordados 47", layout="wide")
-
-# Función para conectar a la base de datos
-def connect_to_db():
-    connection = pyodbc.connect(
-        "driver={odbc driver 17 for sql server};"
-        "server=" + st.secrets["server"] + ";"
-        "database=" + st.secrets["database"] + ";"
-        "uid=" + st.secrets["username"] + ";"
-        "pwd=" + st.secrets["password"] + ";"
+# Configuración de la conexión a la base de datos
+def get_connection():
+    conn = pyodbc.connect(
+        f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+        f"SERVER={st.secrets['server']};"
+        f"DATABASE={st.secrets['database']};"
+        f"UID={st.secrets['username']};"
+        f"PWD={st.secrets['password']}"
     )
-    return connection
+    return conn
 
-# Función para ejecutar la consulta de unidades enviadas
-def run_query_enviadas():
-    conn = connect_to_db()
-    query = """
-    SELECT 
-        e.CoddocOrdenProduccion AS OP,
-        MIN(d.dtFechaEmision) AS FECHA_ENVIO,
-        MIN(f.NommaeAnexoProveedor) AS PROVEEDOR,
-        SUM(b.dCantidadSal) AS UNIDADES_ENVIADAS
-    FROM docNotaInventarioItem b
-    INNER JOIN docGuiaRemisionDetalle c ON b.IdDocumento_NotaInventario = c.IdDocumento_NotaInventario
-    INNER JOIN docGuiaRemision d ON c.IdDocumento_GuiaRemision = d.IdDocumento_GuiaRemision
-    INNER JOIN docNotaInventario a ON a.IdDocumento_NotaInventario = b.IdDocumento_NotaInventario
-    INNER JOIN docOrdenProduccion e ON a.IdDocumento_OrdenProduccion = e.IdDocumento_OrdenProduccion
-    INNER JOIN maeAnexoProveedor f ON f.IdmaeAnexo_Proveedor = d.IdmaeAnexo_Destino
-    WHERE d.IdmaeAnexo_Destino IN (6536, 4251, 6546)
-        AND b.dCantidadSal > 0
-        AND c.IdtdDocumentoForm_NotaInventario = 130
-        AND d.dtFechaEmision > '01-09-2024'
-        AND a.bAnulado = 0
-        AND d.bAnulado = 0
-    GROUP BY e.CoddocOrdenProduccion
-    """
+# Consultas SQL
+query_enviado = """
+select c.CoddocOrdenProduccion AS OP, min(A.dtFechaRegistro) as FECHA,
+    min(d.NommaeAnexoProveedor) AS PROVEEDOR, sum(b.dCantidadSal) AS UNIDADES
+from docNotaInventario a 
+inner join docNotaInventarioItem b on a.IdDocumento_NotaInventario = b.IdDocumento_NotaInventario
+inner join docOrdenProduccion c on a.IdDocumento_OrdenProduccion = c.IdDocumento_OrdenProduccion
+inner join maeAnexoProveedor d on a.IdmaeAnexo = d.IdmaeAnexo_Proveedor
+where a.IdmaeAnexo IN (248,5526)
+    and a.dtFechaRegistro > '01-10-2024'
+    and a.IdtdDocumentoForm = 130
+    and a.bAnulado= 0
+    and c.IdmaeAnexo_Cliente = 2533
+    and b.dCantidadSal > 0
+    and a.IdmaeTransaccionNota = 17
+GROUP BY c.CoddocOrdenProduccion
+"""
+
+query_retornado = """
+select c.CoddocOrdenProduccion AS OP, MIN(A.dtFechaRegistro) as FECHA,
+    MIN(d.NommaeAnexoProveedor) AS PROVEEDOR, SUM(b.dCantidadIng) AS TOTAL_UNIDADES
+from docNotaInventario a 
+inner join docNotaInventarioItem b on a.IdDocumento_NotaInventario = b.IdDocumento_NotaInventario
+inner join docOrdenProduccion c on a.IdDocumento_OrdenProduccion = c.IdDocumento_OrdenProduccion
+inner join maeAnexoProveedor d on a.IdmaeAnexo = d.IdmaeAnexo_Proveedor
+where a.IdmaeAnexo IN (248,5526)
+    and a.dtFechaRegistro > '01-10-2024'
+    and a.IdtdDocumentoForm = 131
+    and a.bAnulado= 0
+    and a.IdmaeSunatCTipoComprobantePago = 10
+    and c.IdmaeAnexo_Cliente = 2533
+GROUP BY c.CoddocOrdenProduccion
+"""
+
+# Función para ejecutar consultas y obtener DataFrames
+def get_dataframe(query):
+    conn = get_connection()
     df = pd.read_sql(query, conn)
     conn.close()
     return df
 
-# Función para ejecutar la consulta de unidades regresadas
-def run_query_regresadas():
-    conn = connect_to_db()
-    query = """
-    SELECT c.CoddocOrdenProduccion AS OP, MIN(A.dtFechaRegistro) as FECHA_REGRESO,
-        MIN(d.NommaeAnexoProveedor) AS PROVEEDOR, SUM(b.dCantidadIng) AS UNIDADES_REGRESADAS
-    FROM docNotaInventario a 
-    INNER JOIN docNotaInventarioItem b ON a.IdDocumento_NotaInventario = b.IdDocumento_NotaInventario
-    INNER JOIN docOrdenProduccion c ON a.IdDocumento_OrdenProduccion = c.IdDocumento_OrdenProduccion
-    INNER JOIN maeAnexoProveedor d ON a.IdmaeAnexo = d.IdmaeAnexo_Proveedor
-    WHERE a.IdmaeAnexo IN (6536,4251, 6546)
-        AND a.dtFechaRegistro > '01-09-2024'
-        AND a.IdtdDocumentoForm = 131
-        AND a.bAnulado = 0
-        AND a.IdmaeSunatCTipoComprobantePago = 10
-    GROUP BY c.CoddocOrdenProduccion
-    """
-    df = pd.read_sql(query, conn)
-    conn.close()
-    return df
+# Obtener DataFrames
+df_enviado = get_dataframe(query_enviado)
+df_retornado = get_dataframe(query_retornado)
 
-# Función para formatear fechas de manera segura
-def safe_date_format(date):
-    if pd.isnull(date):
-        return ''
-    if isinstance(date, (int, float)):
-        try:
-            return datetime.fromtimestamp(date).strftime('%Y-%m-%d')
-        except:
-            return str(date)
-    if isinstance(date, str):
-        try:
-            return datetime.strptime(date, '%Y-%m-%d').strftime('%Y-%m-%d')
-        except:
-            return date
-    if isinstance(date, datetime):
-        return date.strftime('%Y-%m-%d')
-    return str(date)
+# Crear tabla resumen por proveedor
+df_resumen = df_enviado.groupby('PROVEEDOR')['UNIDADES'].sum().reset_index()
+df_resumen = df_resumen.rename(columns={'UNIDADES': 'ENVIADO'})
 
-# Título de la aplicación
-st.title("Control de bordados 47")
+df_resumen_retorno = df_retornado.groupby('PROVEEDOR')['TOTAL_UNIDADES'].sum().reset_index()
+df_resumen_retorno = df_resumen_retorno.rename(columns={'TOTAL_UNIDADES': 'RETORNADO'})
 
-# Cargar datos
-try:
-    df_enviadas = run_query_enviadas()
-    df_regresadas = run_query_regresadas()
+df_resumen = pd.merge(df_resumen, df_resumen_retorno, on='PROVEEDOR', how='outer').fillna(0)
+df_resumen['SALDO'] = df_resumen['ENVIADO'] - df_resumen['RETORNADO']
 
-    # Convertir fechas de manera segura
-    df_enviadas['FECHA_ENVIO'] = pd.to_datetime(df_enviadas['FECHA_ENVIO'], errors='coerce')
-    df_regresadas['FECHA_REGRESO'] = pd.to_datetime(df_regresadas['FECHA_REGRESO'], errors='coerce')
+# Crear tabla detallada por OP
+df_detalle = pd.merge(df_enviado, df_retornado, on=['OP', 'PROVEEDOR'], how='outer', suffixes=('_enviado', '_retornado'))
+df_detalle = df_detalle.fillna(0)
+df_detalle['SALDO'] = df_detalle['UNIDADES'] - df_detalle['TOTAL_UNIDADES']
+df_detalle = df_detalle.rename(columns={'UNIDADES': 'ENVIADO', 'TOTAL_UNIDADES': 'RETORNADO'})
+df_detalle = df_detalle[['OP', 'FECHA_enviado', 'PROVEEDOR', 'ENVIADO', 'RETORNADO', 'SALDO']]
 
-    # Combinar datos detallados
-    df_detallado = pd.merge(df_enviadas, df_regresadas, on=['OP', 'PROVEEDOR'], how='outer').fillna(0)
-    df_detallado['SALDO'] = df_detallado['UNIDADES_ENVIADAS'] - df_detallado['UNIDADES_REGRESADAS']
-    
-    # Ordenar por OP
-    df_detallado = df_detallado.sort_values('OP')
+# Mostrar resultados en Streamlit
+st.title("Análisis de Órdenes de Producción")
 
-    # Calcular totales
-    total_enviadas = df_detallado['UNIDADES_ENVIADAS'].sum()
-    total_regresadas = df_detallado['UNIDADES_REGRESADAS'].sum()
-    saldo_total = total_enviadas - total_regresadas
+st.header("Resumen por Proveedor")
+st.dataframe(df_resumen)
 
-    # Mostrar estadísticas
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Total Envio", f"{total_enviadas:,.0f}")
-    col2.metric("Total Retorno", f"{total_regresadas:,.0f}")
-    col3.metric("Saldo Total", f"{saldo_total:,.0f}")
+st.header("Detalle por OP")
+st.dataframe(df_detalle)
 
-    # Tabla de resumen por proveedor
-    st.subheader("Resumen por Proveedor")
-    df_resumen = df_detallado.groupby('PROVEEDOR').agg({
-        'UNIDADES_ENVIADAS': 'sum',
-        'UNIDADES_REGRESADAS': 'sum',
-        'SALDO': 'sum'
-    }).reset_index()
-    st.dataframe(df_resumen.style.format({
-        'ENVIADO': '{:,.0f}',
-        'RETORNO': '{:,.0f}',
-        'SALDO': '{:,.0f}'
-    }))
+# Opción para descargar los datos
+st.download_button(
+    label="Descargar resumen por proveedor (CSV)",
+    data=df_resumen.to_csv(index=False).encode('utf-8'),
+    file_name="resumen_proveedor.csv",
+    mime="text/csv",
+)
 
-    # Gráfico de barras apiladas
-    st.subheader("Distribución de Unidades por Proveedor")
-    fig = px.bar(df_resumen, x='PROVEEDOR', y=['UNIDADES_REGRESADAS', 'SALDO'],
-                 title="Retorno vs Saldo",
-                 labels={'value': 'Unidades', 'variable': 'Tipo'},
-                 color_discrete_map={'UNIDADES_REGRESADAS': 'green', 'SALDO': 'blue'})
-    st.plotly_chart(fig)
-
-    # Mostrar datos detallados combinados
-    st.subheader("Datos Detallados por OP")
-    
-    # Aplicar el formato personalizado
-    df_detallado['FECHA_ENVIO_FORMATTED'] = df_detallado['FECHA_ENVIO'].apply(safe_date_format)
-    df_detallado['FECHA_REGRESO_FORMATTED'] = df_detallado['FECHA_REGRESO'].apply(safe_date_format)
-
-    # Seleccionar solo las columnas que queremos mostrar
-    columns_to_display = ['OP', 'PROVEEDOR', 'FECHA_ENVIO_FORMATTED', 'FECHA_REGRESO_FORMATTED', 
-                          'UNIDADES_ENVIADAS', 'UNIDADES_REGRESADAS', 'SALDO']
-    df_display = df_detallado[columns_to_display]
-
-    st.dataframe(df_display.style.format({
-        'UNIDADES_ENVIADAS': '{:,.0f}',
-        'UNIDADES_REGRESADAS': '{:,.0f}',
-        'SALDO': '{:,.0f}',
-        'FECHA_ENVIO_FORMATTED': '{}',
-        'FECHA_REGRESO_FORMATTED': '{}'
-    }))
-
-except Exception as e:
-    st.error(f"Ocurrió un error al cargar los datos: {str(e)}")
-    st.error("Detalles del error:")
-    st.exception(e)
+st.download_button(
+    label="Descargar detalle por OP (CSV)",
+    data=df_detalle.to_csv(index=False).encode('utf-8'),
+    file_name="detalle_op.csv",
+    mime="text/csv",
+)
