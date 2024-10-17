@@ -142,13 +142,18 @@ try:
     df_detallado['FECHA_ENVIO_FORMATTED'] = df_detallado['FECHA_ENVIO'].apply(safe_date_format)
     df_detallado['FECHA_REGRESO_FORMATTED'] = df_detallado['FECHA_REGRESO'].apply(safe_date_format)
 
-    st.dataframe(df_detallado.style.format({
+    # Seleccionar solo las columnas que queremos mostrar
+    columns_to_display = ['OP', 'PROVEEDOR', 'FECHA_ENVIO_FORMATTED', 'FECHA_REGRESO_FORMATTED', 
+                          'UNIDADES_ENVIADAS', 'UNIDADES_REGRESADAS', 'SALDO']
+    df_display = df_detallado[columns_to_display]
+
+    st.dataframe(df_display.style.format({
         'UNIDADES_ENVIADAS': '{:,.0f}',
         'UNIDADES_REGRESADAS': '{:,.0f}',
         'SALDO': '{:,.0f}',
         'FECHA_ENVIO_FORMATTED': '{}',
         'FECHA_REGRESO_FORMATTED': '{}'
-    }).hide_columns(['FECHA_ENVIO', 'FECHA_REGRESO']))
+    }))
 
 except Exception as e:
     st.error(f"Ocurrió un error al cargar los datos: {str(e)}")
