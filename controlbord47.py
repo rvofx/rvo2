@@ -128,7 +128,7 @@ try:
     }))
 
     # Gráfico de barras apiladas
-    st.subheader("Distribución de Unidades por Proveedor")
+    st.subheader("Distribución de Unid. por Proveedor")
     fig = px.bar(df_resumen, x='PROVEEDOR', y=['UNIDADES_REGRESADAS', 'SALDO'],
                  title="Retorno vs Saldo",
                  labels={'value': 'Unidades', 'variable': 'Tipo'},
