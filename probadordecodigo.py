@@ -117,7 +117,7 @@ try:
     # Tabla de resumen por proveedor
     st.subheader("Resumen por Proveedor")
     df_resumen = df_detallado.groupby('PROVEEDOR').agg({
-        'ENVIADO': 'sum',
+        'UNIDADES_ENVIADAS': 'sum',
         'UNIDADES_REGRESADAS': 'sum',
         'SALDO': 'sum'
     }).reset_index()
