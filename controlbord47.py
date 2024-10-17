@@ -122,8 +122,8 @@ try:
         'SALDO': 'sum'
     }).reset_index()
     st.dataframe(df_resumen.style.format({
-        'ENVIADO': '{:,.0f}',
-        'RETORNO': '{:,.0f}',
+        'UNIDADES_ENVIADAS': '{:,.0f}',
+        'UNIDADES_REGRESADAS': '{:,.0f}',
         'SALDO': '{:,.0f}'
     }))
 
