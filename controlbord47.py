@@ -97,8 +97,17 @@ try:
     df_regresadas['FECHA_REGRESO'] = pd.to_datetime(df_regresadas['FECHA_REGRESO'], errors='coerce')
 
     # Combinar datos detallados
-    df_detallado = pd.merge(df_enviadas, df_regresadas, on=['OP', 'PROVEEDOR'], how='outer').fillna(0)
+    #df_detallado = pd.merge(df_enviadas, df_regresadas, on=['OP', 'PROVEEDOR'], how='outer').fillna(0)
+    
+    df_detallado = pd.merge(df_enviadas, df_regresadas, on=['OP', 'PROVEEDOR'], how='outer')
+
+    # Llenar NaN con 0 solo para las columnas numéricas
+    df_detallado['UNIDADES_ENVIADAS'] = df_detallado['UNIDADES_ENVIADAS'].fillna(0)
+    df_detallado['UNIDADES_REGRESADAS'] = df_detallado['UNIDADES_REGRESADAS'].fillna(0)
+
     df_detallado['SALDO'] = df_detallado['UNIDADES_ENVIADAS'] - df_detallado['UNIDADES_REGRESADAS']
+
+    
     
     # Ordenar por OP
     df_detallado = df_detallado.sort_values('OP')
@@ -140,7 +149,9 @@ try:
     
     # Aplicar el formato personalizado
     df_detallado['FECHA_ENVIO_FORMATTED'] = df_detallado['FECHA_ENVIO'].apply(safe_date_format)
-    df_detallado['FECHA_REGRESO_FORMATTED'] = df_detallado['FECHA_REGRESO'].apply(safe_date_format)
+    #df_detallado['FECHA_REGRESO_FORMATTED'] = df_detallado['FECHA_REGRESO'].apply(safe_date_format)
+
+    df_detallado['FECHA_REGRESO_FORMATTED'] = df_detallado['FECHA_REGRESO'].apply(lambda x: safe_date_format(x) if pd.notnull(x) else '')
 
     # Seleccionar solo las columnas que queremos mostrar
     columns_to_display = ['OP', 'PROVEEDOR', 'FECHA_ENVIO_FORMATTED', 'FECHA_REGRESO_FORMATTED', 
