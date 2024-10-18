@@ -1,125 +1,94 @@
 import streamlit as st
-import pandas as pd
 import pyodbc
-from datetime import datetime
+import pandas as pd
+from datetime import datetime, timedelta
 
-# Configuración de la conexión a la base de datos
-def get_connection():
-    conn = pyodbc.connect(
-        "driver={odbc driver 17 for sql server};"
-        "server=" + st.secrets["server"] + ";"
-        "database=" + st.secrets["database"] + ";"
-        "uid=" + st.secrets["username"] + ";"
-        "pwd=" + st.secrets["password"] + ";"
-    )
-    return conn        
+st.set_page_config(layout="wide")
 
-# Consultas SQL
-query_enviado = """
-select c.CoddocOrdenProduccion AS OP, min(A.dtFechaRegistro) as FECHA,
-    min(d.NommaeAnexoProveedor) AS PROVEEDOR, sum(b.dCantidadSal) AS UNIDADES
-from docNotaInventario a 
-inner join docNotaInventarioItem b on a.IdDocumento_NotaInventario = b.IdDocumento_NotaInventario
-inner join docOrdenProduccion c on a.IdDocumento_OrdenProduccion = c.IdDocumento_OrdenProduccion
-inner join maeAnexoProveedor d on a.IdmaeAnexo = d.IdmaeAnexo_Proveedor
-where a.IdmaeAnexo IN (248,5526)
-    and a.dtFechaRegistro > '01-10-2024'
-    and a.IdtdDocumentoForm = 130
-    and a.bAnulado= 0
-    and c.IdmaeAnexo_Cliente = 2533
-    and b.dCantidadSal > 0
-    and a.IdmaeTransaccionNota = 17
-GROUP BY c.CoddocOrdenProduccion
-"""
+# Funciones existentes (connect_to_db, get_partidas_sin_tenido, get_partidas_con_tenido_sin_aprob_tela, get_partidas_con_tenido_sin_aprob_tela_estamp, highlight_mofijado)
+# ... (mantén estas funciones tal como están)
 
-query_retornado = """
-select c.CoddocOrdenProduccion AS OP, MIN(A.dtFechaRegistro) as FECHA,
-    MIN(d.NommaeAnexoProveedor) AS PROVEEDOR, SUM(b.dCantidadIng) AS TOTAL_UNIDADES
-from docNotaInventario a 
-inner join docNotaInventarioItem b on a.IdDocumento_NotaInventario = b.IdDocumento_NotaInventario
-inner join docOrdenProduccion c on a.IdDocumento_OrdenProduccion = c.IdDocumento_OrdenProduccion
-inner join maeAnexoProveedor d on a.IdmaeAnexo = d.IdmaeAnexo_Proveedor
-where a.IdmaeAnexo IN (248,5526)
-    and a.dtFechaRegistro > '01-10-2024'
-    and a.IdtdDocumentoForm = 131
-    and a.bAnulado= 0
-    and a.IdmaeSunatCTipoComprobantePago = 10
-    and c.IdmaeAnexo_Cliente = 2533
-GROUP BY c.CoddocOrdenProduccion
-"""
+# Nueva función para filtrar por cliente
+def filter_by_client(df, client):
+    if client == "Todos":
+        return df
+    return df[df['Cliente'] == client]
 
-# Función para ejecutar consultas y obtener DataFrames
-def get_dataframe(query):
-    conn = get_connection()
-    df = pd.read_sql(query, conn)
-    conn.close()
-    return df
+# Interfaz de Streamlit
+st.title("Seguimiento de Partidas")
 
-# Función para formatear fechas
-def format_date(date):
-    if pd.isnull(date):
-        return ''
-    return datetime.strptime(str(date), '%Y-%m-%d %H:%M:%S').strftime('%d-%b').upper()
+# Estilos personalizados
+st.markdown("""
+    <style>
+    .input-number-box {
+        width: 100px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-# Obtener DataFrames
-df_enviado = get_dataframe(query_enviado)
-df_retornado = get_dataframe(query_retornado)
+# Sección 1: Partidas no TEÑIDAS
+dias_sin_tenido = st.number_input("Días sin TEÑIR (por defecto 8)", min_value=1, value=8)
 
-# Formatear fechas
-df_enviado['FECHA'] = df_enviado['FECHA'].apply(format_date)
-df_retornado['FECHA'] = df_retornado['FECHA'].apply(format_date)
+if st.button("Mostrar partidas no TEÑIDAS"):
+    df_sin_tenido = get_partidas_sin_tenido(dias_sin_tenido)
+    
+    # Selector de cliente
+    clientes = ["Todos"] + sorted(df_sin_tenido['Cliente'].unique().tolist())
+    cliente_seleccionado = st.selectbox("Filtrar por cliente (Partidas no TEÑIDAS):", clientes)
+    
+    # Filtrar por cliente
+    df_filtrado = filter_by_client(df_sin_tenido, cliente_seleccionado)
+    
+    # Mostrar estadísticas y tabla filtrada
+    total_registros = len(df_filtrado)
+    total_kg = df_filtrado['KG'].sum()
+    
+    st.write(f"TOTAL REGISTROS: {total_registros}")
+    st.write(f"TOTAL KG: {total_kg:.0f}")
+    
+    styled_df = df_filtrado.style.apply(highlight_mofijado, axis=1).format({"KG": "{:.1f}"})
+    st.write(styled_df, unsafe_allow_html=True)
 
-# Crear tabla resumen por proveedor
-df_resumen = df_enviado.groupby('PROVEEDOR')['UNIDADES'].sum().reset_index()
-df_resumen = df_resumen.rename(columns={'UNIDADES': 'ENVIADO'})
+# Sección 2: Partidas TEÑIDAS pero no APROBADAS
+dias_con_tenido = st.number_input("Días entre TEÑIDO y el día actual (por defecto 5) Partidas que no llevan estampado", min_value=1, value=5)
 
-df_resumen_retorno = df_retornado.groupby('PROVEEDOR')['TOTAL_UNIDADES'].sum().reset_index()
-df_resumen_retorno = df_resumen_retorno.rename(columns={'TOTAL_UNIDADES': 'RETORNADO'})
+if st.button("Mostrar partidas TEÑIDAS pero no APROBADAS"):
+    df_con_tenido = get_partidas_con_tenido_sin_aprob_tela(dias_con_tenido)
+    
+    # Selector de cliente
+    clientes = ["Todos"] + sorted(df_con_tenido['Cliente'].unique().tolist())
+    cliente_seleccionado = st.selectbox("Filtrar por cliente (Partidas TEÑIDAS pero no APROBADAS):", clientes)
+    
+    # Filtrar por cliente
+    df_filtrado = filter_by_client(df_con_tenido, cliente_seleccionado)
+    
+    # Mostrar estadísticas y tabla filtrada
+    total_registros = len(df_filtrado)
+    total_kg = df_filtrado['KG'].sum()
+    
+    st.write(f"TOTAL REGISTROS: {total_registros}")
+    st.write(f"TOTAL KG: {total_kg:.0f}")
+    
+    st.write(df_filtrado)
 
-df_resumen = pd.merge(df_resumen, df_resumen_retorno, on='PROVEEDOR', how='outer').fillna(0)
-df_resumen['SALDO'] = df_resumen['ENVIADO'] - df_resumen['RETORNADO']
+# Sección 3: Partidas TEÑIDAS (estamp) pero no APROBADAS
+dias_con_tenido_estamp = st.number_input("Días entre TEÑIDO y el día actual (por defecto 5) Partidas que llevan estampado", min_value=1, value=20)
 
-# Agregar totales
-totales = pd.DataFrame({
-    'PROVEEDOR': ['TOTAL'],
-    'ENVIADO': [df_resumen['ENVIADO'].sum()],
-    'RETORNADO': [df_resumen['RETORNADO'].sum()],
-    'SALDO': [df_resumen['SALDO'].sum()]
-})
-df_resumen = pd.concat([df_resumen, totales], ignore_index=True)
-
-# Crear tabla detallada por OP
-df_detalle = pd.merge(df_enviado, df_retornado, on=['OP', 'PROVEEDOR'], how='outer', suffixes=('_enviado', '_retornado'))
-df_detalle = df_detalle.fillna({'UNIDADES': 0, 'TOTAL_UNIDADES': 0})
-df_detalle['SALDO'] = df_detalle['UNIDADES'] - df_detalle['TOTAL_UNIDADES']
-df_detalle = df_detalle.rename(columns={
-    'FECHA_enviado': 'FECHA_ENVIO',
-    'FECHA_retornado': 'FECHA_RETORNO',
-    'UNIDADES': 'ENVIADO',
-    'TOTAL_UNIDADES': 'RETORNADO'
-})
-df_detalle = df_detalle[['OP', 'FECHA_ENVIO', 'FECHA_RETORNO', 'PROVEEDOR', 'ENVIADO', 'RETORNADO', 'SALDO']]
-
-# Mostrar resultados en Streamlit
-st.title("47 B: Confección OP")
-
-st.header("Resumen por Proveedor")
-st.dataframe(df_resumen)
-
-st.header("Detalle por OP")
-st.dataframe(df_detalle)
-
-# Opción para descargar los datos
-st.download_button(
-    label="Descargar resumen por proveedor (CSV)",
-    data=df_resumen.to_csv(index=False).encode('utf-8'),
-    file_name="resumen_proveedor.csv",
-    mime="text/csv",
-)
-
-st.download_button(
-    label="Descargar detalle por OP (CSV)",
-    data=df_detalle.to_csv(index=False).encode('utf-8'),
-    file_name="detalle_op.csv",
-    mime="text/csv",
-)
+if st.button("Mostrar partidas TEÑIDAS (estamp) pero no APROBADAS"):
+    df_con_tenido_estamp = get_partidas_con_tenido_sin_aprob_tela_estamp(dias_con_tenido_estamp)
+    
+    # Selector de cliente
+    clientes = ["Todos"] + sorted(df_con_tenido_estamp['Cliente'].unique().tolist())
+    cliente_seleccionado = st.selectbox("Filtrar por cliente (Partidas TEÑIDAS (estamp) pero no APROBADAS):", clientes)
+    
+    # Filtrar por cliente
+    df_filtrado = filter_by_client(df_con_tenido_estamp, cliente_seleccionado)
+    
+    # Mostrar estadísticas y tabla filtrada
+    total_registros = len(df_filtrado)
+    total_kg = df_filtrado['KG'].sum()
+    
+    st.write(f"TOTAL REGISTROS: {total_registros}")
+    st.write(f"TOTAL KG: {total_kg:.0f}")
+    
+    st.write(df_filtrado)
