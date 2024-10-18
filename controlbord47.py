@@ -5,7 +5,8 @@ import pyodbc
 from datetime import datetime
 
 # Configuración de la página
-st.set_page_config(page_title="Control de bordados 47", layout="wide")
+#st.set_page_config(page_title="Control de bordados 47", layout="wide")
+st.set_page_config(page_title="Control de bordados 47")
 
 # Función para conectar a la base de datos
 def connect_to_db():
