@@ -3,6 +3,9 @@ import pandas as pd
 import pyodbc
 from datetime import datetime
 
+st.set_page_config(page_title="Confeccion 47")
+
+
 # Configuración de la conexión a la base de datos
 def get_connection():
     conn = pyodbc.connect(
