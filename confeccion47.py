@@ -31,6 +31,7 @@ where a.IdmaeAnexo IN (248,5526)
     and a.bAnulado= 0
     and c.IdmaeAnexo_Cliente = 2533
     and b.dCantidadSal > 0
+    and a.IdmaeSunatCTipoComprobantePago = 10
     and a.IdmaeTransaccionNota = 17
 GROUP BY c.CoddocOrdenProduccion
 """
