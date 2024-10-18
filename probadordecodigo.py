@@ -6,15 +6,16 @@ from datetime import datetime, timedelta
 st.set_page_config(layout="wide")
 
 # Database connection function
+
 def connect_to_db():
-    # Replace with your actual connection string
-    conn_str = (
-        r'DRIVER={SQL Server};'
-        r'SERVER=your_server;'
-        r'DATABASE=your_database;'
-        r'Trusted_Connection=yes;'
+    conn = pyodbc.connect(
+        "driver={odbc driver 17 for sql server};"
+        "server=" + st.secrets["server"] + ";"
+        "database=" + st.secrets["database"] + ";"
+        "uid=" + st.secrets["username"] + ";"
+        "pwd=" + st.secrets["password"] + ";"
     )
-    return pyodbc.connect(conn_str)
+    return conn
 
 # Function to get partidas sin tenido
 def get_partidas_sin_tenido(dias):
