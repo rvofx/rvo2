@@ -6,13 +6,16 @@ from io import BytesIO
 # Función para conectar a la base de datos
 def conectar_bd():
     conn = pyodbc.connect(
-        "DRIVER={ODBC Driver 17 for SQL Server};"
-        "SERVER=tu_servidor;"
-        "DATABASE=tu_base_de_datos;"
-        "UID=tu_usuario;"
-        "PWD=tu_contraseña;"
+        "driver={odbc driver 17 for sql server};"
+        "server=" + st.secrets["server"] + ";"
+        "database=" + st.secrets["database"] + ";"
+        "uid=" + st.secrets["username"] + ";"
+        "pwd=" + st.secrets["password"] + ";"
     )
     return conn
+
+
+
 
 # Función para ejecutar la consulta
 def ejecutar_consulta(pedido):
