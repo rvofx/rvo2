@@ -79,12 +79,12 @@ if archivo_excel:
             df_repetido["data2"] = datas2
 
         # Mostrar el dataframe con las filas repetidas y las nuevas columnas
-        st.write("Datos repetidos con nuevas columnas Talla2 y data2:")
+        st.write("Datos con nuevas columnas Talla2 y data2:")
         st.dataframe(df_repetido)
         
         # Botón para descargar el archivo filtrado con las repeticiones y nuevas columnas
         st.download_button(
-            label="Descargar Excel con filas repetidas y nuevas columnas",
+            label="Descargar Excel",
             data=descargar_excel(df_repetido),
             file_name="archivo_repetido_y_nuevas_columnas.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
