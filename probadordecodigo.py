@@ -10,7 +10,7 @@ def descargar_excel(df):
     return output.getvalue()
 
 # Título de la aplicación
-st.title("Aplicación para selección de columnas y repetición por tallas")
+st.title("Aplicación para selección de columnas")
 
 # Subir el archivo Excel
 archivo_excel = st.file_uploader("Sube tu archivo Excel", type=["xlsx"])
@@ -42,7 +42,8 @@ if archivo_excel:
     columnas_tallas_grupo1 = st.multiselect("Selecciona el primer grupo de columnas de tallas para calcular repeticiones", columnas)
     
     # Segunda selección de tallas (generará nuevas columnas Talla2 y Cantidad2)
-    columnas_tallas_grupo2 = st.multiselect("Selecciona el segundo grupo de columnas de tallas para generar nuevas columnas Talla2 y Cantidad2", columnas)
+    #columnas_tallas_grupo2 = st.multiselect("Selecciona el segundo grupo de columnas de tallas para generar nuevas columnas Talla2 y Cantidad2", columnas)
+    columnas_tallas_grupo2 = st.multiselect("Selecciona el segundo grupo de columnas de tallas para generar nuevas columnas Talla2 y Data2", columnas)
 
     # Repetir filas en función del primer grupo de tallas
     if columnas_tallas_grupo1:
@@ -62,20 +63,23 @@ if archivo_excel:
         if columnas_tallas_grupo2:
             # Crear listas para almacenar los valores de Talla2 y Cantidad2 para cada fila
             tallas2 = []
-            cantidades2 = []
+            #cantidades2 = []
+            datas2 = []
             
             for _, row in df.iterrows():
                 for talla2 in columnas_tallas_grupo2:
                     # Añadir las tallas y cantidades correspondientes del segundo grupo
                     tallas2.append(talla2)
-                    cantidades2.append(row[talla2])
+                    #cantidades2.append(row[talla2])
+                    datas2.append(row[talla2])
             
             # Crear nuevas columnas en el dataframe original
             df_repetido["Talla2"] = tallas2
-            df_repetido["Cantidad2"] = cantidades2
+            #df_repetido["Cantidad2"] = cantidades2
+            df_repetido["data2"] = datas2
 
         # Mostrar el dataframe con las filas repetidas y las nuevas columnas
-        st.write("Datos repetidos con nuevas columnas Talla2 y Cantidad2:")
+        st.write("Datos repetidos con nuevas columnas Talla2 y data2:")
         st.dataframe(df_repetido)
         
         # Botón para descargar el archivo filtrado con las repeticiones y nuevas columnas
