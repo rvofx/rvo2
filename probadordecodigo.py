@@ -79,7 +79,7 @@ if archivo_excel:
             df_repetido["data2"] = datas2
 
         # Mostrar el dataframe con las filas repetidas y las nuevas columnas
-        st.write("Datos con nuevas columnas Talla2 y data2:")
+        st.write("Tabla final:")
         st.dataframe(df_repetido)
         
         # Botón para descargar el archivo filtrado con las repeticiones y nuevas columnas
