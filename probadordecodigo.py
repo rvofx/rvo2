@@ -22,24 +22,14 @@ def process_excel(df, pattern_columns, repeat_columns, transpose_columns):
                 st.error(f"Column '{col}' not found in the input data.")
                 return None
         
-        # Add pattern columns
-        for j, col in enumerate(pattern_columns):
-            if col in group.columns:
-                new_df[col] = group[col].values
-            else:
-                st.error(f"Column '{col}' not found in the input data.")
-                return None
-        
         # Add transposed columns
         for k, col in enumerate(transpose_columns):
             if col in group.columns:
-                transposed = group[col].values
-                new_df[f"{col}_{k+1}"] = transposed
+                transposed = group[col].tolist()
+                new_df = pd.concat([new_df, pd.DataFrame({f"{col}_{i+1}": [value] for i, value in enumerate(transposed)})], axis=1)
             else:
                 st.error(f"Column '{col}' not found in the input data.")
                 return None
-        
-        new_df = pd.concat([new_df, pd.DataFrame([{}])], ignore_index=True)
     
     return new_df
 
@@ -70,7 +60,7 @@ if uploaded_file is not None:
     )
 
     if st.button("Process Excel"):
-        if pattern_columns and repeat_columns:
+        if pattern_columns and repeat_columns and transpose_columns:
             result_df = process_excel(df, pattern_columns, repeat_columns, transpose_columns)
             if result_df is not None:
                 st.write("Processed Data:")
@@ -89,4 +79,4 @@ if uploaded_file is not None:
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
         else:
-            st.error("Please select at least one pattern column and one repeat column.")
+            st.error("Please select at least one pattern column, one repeat column, and one column to transpose.")
