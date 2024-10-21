@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import io
 
 def process_excel(df, pattern_columns, repeat_columns, transpose_columns):
     # Determine pattern length
@@ -23,16 +22,14 @@ def process_excel(df, pattern_columns, repeat_columns, transpose_columns):
             new_df[f"{col}_{j+1}"] = group[col].values
         
         # Add transposed columns
-        for col in transpose_columns:
+        for k, col in enumerate(transpose_columns):
             transposed = group[col].values
-            for k, value in enumerate(transposed):
-                new_df[f"{col}_{k+1}"] = value
+            new_df[f"Transposed_{k+1}"] = transposed
         
         new_df = pd.concat([new_df, pd.DataFrame([{}])], ignore_index=True)
     
     return new_df
 
-# Main Streamlit app
 st.title("Excel Processor")
 
 uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
@@ -42,40 +39,24 @@ if uploaded_file is not None:
     st.write("Original Data:")
     st.dataframe(df)
 
-    columns = df.columns.tolist()
-
-    pattern_columns = st.multiselect(
-        "Select columns that form the repeating pattern:",
-        columns
-    )
-
-    repeat_columns = st.multiselect(
-        "Select columns to repeat in all lines:",
-        columns
-    )
-
-    transpose_columns = st.multiselect(
-        "Select columns to transpose:",
-        columns
-    )
+    pattern_columns = ["x-Small", "Small", "Medium", "Large", "X-Large", "XX-Large", "3X-Large", "4X-Large"]
+    repeat_columns = ["ORDEN", "OP", "Garment Color"]
+    transpose_columns = ["XS", "S", "M", "L", "XL", "2X", "3X", "4XL"]
 
     if st.button("Process Excel"):
-        if pattern_columns and repeat_columns:
-            result_df = process_excel(df, pattern_columns, repeat_columns, transpose_columns)
-            st.write("Processed Data:")
-            st.dataframe(result_df)
+        result_df = process_excel(df, pattern_columns, repeat_columns, transpose_columns)
+        st.write("Processed Data:")
+        st.dataframe(result_df)
 
-            # Create a download button for the processed Excel
-            output = io.BytesIO()
-            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                result_df.to_excel(writer, index=False, sheet_name='Processed Data')
-            output.seek(0)
-            
-            st.download_button(
-                label="Download processed Excel file",
-                data=output,
-                file_name="processed_data.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-        else:
-            st.error("Please select at least one pattern column and one repeat column.")
+        # Create a download button for the processed Excel
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            result_df.to_excel(writer, index=False, sheet_name='Processed Data')
+        output.seek(0)
+        
+        st.download_button(
+            label="Download processed Excel file",
+            data=output,
+            file_name="processed_data.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
