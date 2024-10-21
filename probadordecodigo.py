@@ -10,7 +10,7 @@ def descargar_excel(df):
     return output.getvalue()
 
 # Título de la aplicación
-st.title("Aplicación para selección de columnas")
+st.title("Aplicación para selección de columnas, Cuadro 47B")
 
 # Subir el archivo Excel
 archivo_excel = st.file_uploader("Sube tu archivo Excel", type=["xlsx"])
