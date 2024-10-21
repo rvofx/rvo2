@@ -1,34 +1,32 @@
 import streamlit as st
 import pandas as pd
 
-# Create the Streamlit app
-st.title("Order Data Explorer")
+def main():
+    st.title("Excel Data Extractor")
 
-# Request the user to provide the Excel file
-st.write("Please upload the order data Excel file:")
-uploaded_file = st.file_uploader("", type=['xlsx', 'xls'], accept_multiple_files=False)
+    # File upload
+    uploaded_file = st.file_uploader("Upload your Excel file", type=["xlsx", "xls"])
 
-if uploaded_file is not None:
-    # Load the data from the uploaded file
-    df = pd.read_excel(uploaded_file)
+    if uploaded_file is not None:
+        # Read the uploaded file
+        df = pd.read_excel(uploaded_file)
 
-    # Allow the user to select the order
-    order_num = st.selectbox("Select Order", df['ORDEN'].unique())
+        # Column selection
+        columns_to_select = st.multiselect("Select the columns you want to extract", df.columns)
 
-    # Filter the data for the selected order
-    order_data = df[df['ORDEN'] == order_num]
+        if st.button("Extract Data"):
+            # Filter the DataFrame based on the selected columns
+            extracted_data = df[columns_to_select]
 
-    # Display the order details
-    st.subheader(f"Order {order_num}")
-    st.write(order_data)
+            # Download the extracted data as an Excel file
+            st.download_button(
+                label="Download Excel file",
+                data=extracted_data.to_excel(index=False),
+                file_name="extracted_data.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
 
-    # Allow the user to download the data
-    if st.button("Download Data"):
-        st.download_button(
-            label="Download data as CSV",
-            data=order_data.to_csv(index=False),
-            file_name='order_data.csv',
-            mime='text/csv',
-        )
-else:
-    st.write("Please upload the Excel file to continue.")
+            st.success("Data extracted and downloaded successfully!")
+
+if __name__ == "__main__":
+    main()
