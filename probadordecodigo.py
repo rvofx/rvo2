@@ -10,7 +10,7 @@ def descargar_excel(df):
     return output.getvalue()
 
 # Título de la aplicación
-st.title("Selección de columnas en Excel")
+st.title("Aplicación para selección de columnas y cálculo de tallas")
 
 # Subir el archivo Excel
 archivo_excel = st.file_uploader("Sube tu archivo Excel", type=["xlsx"])
@@ -27,38 +27,32 @@ if archivo_excel:
     # Lista de columnas disponibles
     columnas = df.columns.tolist()
     
-    # Permitir que el usuario seleccione las columnas que quiere
-    columnas_seleccionadas = st.multiselect("Selecciona las columnas que deseas", columnas)
+    # Primera selección: Columnas de información
+    columnas_info = st.multiselect("Selecciona las columnas de información que deseas", columnas)
     
-    # Filtrar el dataframe basado en las columnas seleccionadas
-    if columnas_seleccionadas:
-        df_filtrado = df[columnas_seleccionadas]
-
-        # Si hay una columna de tallas (por ejemplo, las columnas XS, S, M, etc.)
-        # debemos expandir las filas para cada talla.
-        columnas_tallas = [col for col in df.columns if col in ["XS", "S", "M", "L", "XL", "2X", "3X", "4XL"]]
+    # Filtrar el dataframe basado en las columnas seleccionadas para información
+    if columnas_info:
+        df_filtrado_info = df[columnas_info]
         
-        if columnas_tallas:
-            filas_expandida = []
-            for _, row in df_filtrado.iterrows():
-                for talla in columnas_tallas:
-                    # Si el valor de la talla no es NaN o vacío, crea una nueva fila
-                    if not pd.isna(row[talla]):
-                        nueva_fila = row.copy()
-                        nueva_fila["Talla"] = talla
-                        nueva_fila["Cantidad"] = row[talla]
-                        filas_expandida.append(nueva_fila)
-            
-            # Convertir las filas expandidas a un dataframe
-            df_filtrado = pd.DataFrame(filas_expandida)
-
-        st.write("Datos filtrados:")
-        st.dataframe(df_filtrado)
+        # Mostrar el dataframe filtrado
+        st.write("Datos filtrados (información):")
+        st.dataframe(df_filtrado_info)
+    
+    # Segunda selección: Columnas de tallas
+    columnas_tallas = st.multiselect("Selecciona las columnas de tallas para calcular el total", columnas)
+    
+    # Calcular el total de tallas si se seleccionan columnas
+    if columnas_tallas:
+        df['Total Tallas'] = df[columnas_tallas].sum(axis=1)
         
-        # Botón para descargar el archivo filtrado
+        # Mostrar el dataframe con la columna de total de tallas
+        st.write("Datos con el total de tallas calculado:")
+        st.dataframe(df[['Total Tallas'] + columnas_info])  # Mostrar la columna de total con las columnas de información seleccionadas
+        
+        # Botón para descargar el archivo filtrado con el total de tallas
         st.download_button(
-            label="Descargar Excel filtrado",
-            data=descargar_excel(df_filtrado),
-            file_name="archivo_filtrado.xlsx",
+            label="Descargar Excel con total de tallas",
+            data=descargar_excel(df[['Total Tallas'] + columnas_info]),
+            file_name="archivo_con_total_tallas.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
