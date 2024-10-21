@@ -45,10 +45,10 @@ if archivo_excel:
     
     # Segunda selección de tallas (generará nuevas columnas Talla2 y Cantidad2)
     #columnas_tallas_grupo2 = st.multiselect("Selecciona el segundo grupo de columnas de tallas para generar nuevas columnas Talla2 y Cantidad2", columnas)
-    #columnas_tallas_grupo2 = st.multiselect("Selecciona el segundo grupo de columnas de tallas para generar nuevas columnas Talla2 y Data2", columnas)
+    columnas_tallas_grupo2 = st.multiselect("Selecciona el segundo grupo de columnas de tallas para generar nuevas columnas Talla2 y Data2", columnas)
      # Excluir las columnas ya seleccionadas en el primer grupo
-    columnas_disponibles_grupo2 = [col for col in columnas if col not in columnas_tallas_grupo1]
-    columnas_tallas_grupo2 = st.multiselect("Selecciona el segundo grupo de columnas de tallas para generar nuevas columnas Talla2 y Data2", columnas_disponibles_grupo2)
+    #columnas_disponibles_grupo2 = [col for col in columnas if col not in columnas_tallas_grupo1]
+    #columnas_tallas_grupo2 = st.multiselect("Selecciona el segundo grupo de columnas de tallas para generar nuevas columnas Talla2 y Data2", columnas_disponibles_grupo2)
     
     # Repetir filas en función del primer grupo de tallas
     if columnas_tallas_grupo1:
