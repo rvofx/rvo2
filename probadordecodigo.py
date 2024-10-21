@@ -62,10 +62,11 @@ if archivo_excel:
         
         # Si se selecciona un segundo grupo de tallas, generar nuevas columnas
         if columnas_tallas_grupo2:
+            # Crear nuevas columnas Talla2 y Cantidad2 sin modificar las filas existentes
             df_repetido["Talla2"] = None  # Nueva columna Talla2
             df_repetido["Cantidad2"] = None  # Nueva columna Cantidad2
             
-            # Asignar valores a las nuevas columnas basados en el segundo grupo de tallas
+            # Asignar valores a las nuevas columnas (independiente del primer grupo)
             for idx, row in df.iterrows():
                 for talla in columnas_tallas_grupo2:
                     df_repetido.at[idx, "Talla2"] = talla
