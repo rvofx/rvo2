@@ -4,9 +4,35 @@ import numpy as np
 import io
 
 def process_excel(df, pattern_columns, repeat_columns, transpose_columns):
-    # [El código de la función process_excel permanece igual]
-    # ...
+    # Determine pattern length
+    pattern_length = len(pattern_columns)
+    
+    # Create a new DataFrame to store the processed data
+    new_df = pd.DataFrame()
+    
+    # Process each group of rows based on the pattern length
+    for i in range(0, len(df), pattern_length):
+        group = df.iloc[i:i+pattern_length]
+        
+        # Add repeated columns
+        for col in repeat_columns:
+            new_df[col] = group[col].iloc[0]
+        
+        # Add pattern columns
+        for j, col in enumerate(pattern_columns):
+            new_df[f"{col}_{j+1}"] = group[col].values
+        
+        # Add transposed columns
+        for col in transpose_columns:
+            transposed = group[col].values
+            for k, value in enumerate(transposed):
+                new_df[f"{col}_{k+1}"] = value
+        
+        new_df = pd.concat([new_df, pd.DataFrame([{}])], ignore_index=True)
+    
+    return new_df
 
+# Main Streamlit app
 st.title("Excel Processor")
 
 uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
@@ -39,7 +65,7 @@ if uploaded_file is not None:
             st.write("Processed Data:")
             st.dataframe(result_df)
 
-            # Crear un botón de descarga para el Excel procesado
+            # Create a download button for the processed Excel
             output = io.BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 result_df.to_excel(writer, index=False, sheet_name='Processed Data')
