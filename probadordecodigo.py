@@ -38,18 +38,40 @@ if archivo_excel:
         st.write("Datos filtrados (información):")
         st.dataframe(df_filtrado_info)
     
-    # Segunda selección: Columnas de tallas
-    columnas_tallas = st.multiselect("Selecciona las columnas de tallas para calcular repeticiones", columnas)
+    # Primera selección de tallas
+    columnas_tallas_grupo1 = st.multiselect("Selecciona el primer grupo de columnas de tallas para calcular repeticiones", columnas)
     
-    # Repetir filas en función de las columnas seleccionadas para tallas
-    if columnas_tallas:
+    # Segunda selección de tallas
+    columnas_tallas_grupo2 = st.multiselect("Selecciona el segundo grupo de columnas de tallas para calcular repeticiones", columnas)
+
+    # Tercera selección de tallas (opcional)
+    columnas_tallas_grupo3 = st.multiselect("Selecciona el tercer grupo de columnas de tallas para calcular repeticiones (opcional)", columnas)
+
+    # Repetir filas en función de las columnas seleccionadas para todos los grupos de tallas
+    if columnas_tallas_grupo1 or columnas_tallas_grupo2 or columnas_tallas_grupo3:
         filas_repetidas = []
         for _, row in df.iterrows():
-            for talla in columnas_tallas:
+            # Repetir por el primer grupo de tallas
+            for talla in columnas_tallas_grupo1:
                 nueva_fila = row[columnas_info].copy()
                 nueva_fila["Talla"] = talla
                 nueva_fila["Cantidad"] = row[talla]  # La cantidad correspondiente a esa talla
                 filas_repetidas.append(nueva_fila)
+            
+            # Repetir por el segundo grupo de tallas
+            for talla in columnas_tallas_grupo2:
+                nueva_fila = row[columnas_info].copy()
+                nueva_fila["Talla"] = talla
+                nueva_fila["Cantidad"] = row[talla]  # La cantidad correspondiente a esa talla
+                filas_repetidas.append(nueva_fila)
+
+            # Repetir por el tercer grupo de tallas (opcional)
+            if columnas_tallas_grupo3:
+                for talla in columnas_tallas_grupo3:
+                    nueva_fila = row[columnas_info].copy()
+                    nueva_fila["Talla"] = talla
+                    nueva_fila["Cantidad"] = row[talla]  # La cantidad correspondiente a esa talla
+                    filas_repetidas.append(nueva_fila)
         
         # Convertir las filas expandidas en un dataframe
         df_repetido = pd.DataFrame(filas_repetidas)
