@@ -10,7 +10,7 @@ def descargar_excel(df):
     return output.getvalue()
 
 # Título de la aplicación
-st.title("Aplicación para selección de columnas y cálculo de tallas")
+st.title("Aplicación para selección de columnas y repetición por tallas")
 
 # Subir el archivo Excel
 archivo_excel = st.file_uploader("Sube tu archivo Excel", type=["xlsx"])
@@ -39,20 +39,29 @@ if archivo_excel:
         st.dataframe(df_filtrado_info)
     
     # Segunda selección: Columnas de tallas
-    columnas_tallas = st.multiselect("Selecciona las columnas de tallas para calcular el total", columnas)
+    columnas_tallas = st.multiselect("Selecciona las columnas de tallas para calcular repeticiones", columnas)
     
-    # Calcular el total de tallas si se seleccionan columnas
+    # Repetir filas en función de las columnas seleccionadas para tallas
     if columnas_tallas:
-        df['Total Tallas'] = df[columnas_tallas].sum(axis=1)
+        filas_repetidas = []
+        for _, row in df.iterrows():
+            for talla in columnas_tallas:
+                nueva_fila = row[columnas_info].copy()
+                nueva_fila["Talla"] = talla
+                nueva_fila["Cantidad"] = row[talla]  # La cantidad correspondiente a esa talla
+                filas_repetidas.append(nueva_fila)
         
-        # Mostrar el dataframe con la columna de total de tallas
-        st.write("Datos con el total de tallas calculado:")
-        st.dataframe(df[['Total Tallas'] + columnas_info])  # Mostrar la columna de total con las columnas de información seleccionadas
+        # Convertir las filas expandidas en un dataframe
+        df_repetido = pd.DataFrame(filas_repetidas)
         
-        # Botón para descargar el archivo filtrado con el total de tallas
+        # Mostrar el dataframe con las filas repetidas
+        st.write("Datos repetidos según las tallas seleccionadas:")
+        st.dataframe(df_repetido)
+        
+        # Botón para descargar el archivo filtrado con las repeticiones
         st.download_button(
-            label="Descargar Excel con total de tallas",
-            data=descargar_excel(df[['Total Tallas'] + columnas_info]),
-            file_name="archivo_con_total_tallas.xlsx",
+            label="Descargar Excel con filas repetidas",
+            data=descargar_excel(df_repetido),
+            file_name="archivo_repetido_por_tallas.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
