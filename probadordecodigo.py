@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import io
 
+st.set_page_config(layout="wide")
+
 # Función para descargar el dataframe filtrado como archivo Excel
 def descargar_excel(df):
     output = io.BytesIO()
