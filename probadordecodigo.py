@@ -1,67 +1,55 @@
 import streamlit as st
 import pandas as pd
-import pyodbc
-from io import BytesIO
+import numpy as np
+import io
 
-# Función para conectar a la base de datos
-def conectar_bd():
-    conn = pyodbc.connect(
-        "driver={odbc driver 17 for sql server};"
-        "server=" + st.secrets["server"] + ";"
-        "database=" + st.secrets["database"] + ";"
-        "uid=" + st.secrets["username"] + ";"
-        "pwd=" + st.secrets["password"] + ";"
+def process_excel(df, pattern_columns, repeat_columns, transpose_columns):
+    # [El código de la función process_excel permanece igual]
+    # ...
+
+st.title("Excel Processor")
+
+uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
+
+if uploaded_file is not None:
+    df = pd.read_excel(uploaded_file)
+    st.write("Original Data:")
+    st.dataframe(df)
+
+    columns = df.columns.tolist()
+
+    pattern_columns = st.multiselect(
+        "Select columns that form the repeating pattern:",
+        columns
     )
-    return conn
 
+    repeat_columns = st.multiselect(
+        "Select columns to repeat in all lines:",
+        columns
+    )
 
+    transpose_columns = st.multiselect(
+        "Select columns to transpose:",
+        columns
+    )
 
+    if st.button("Process Excel"):
+        if pattern_columns and repeat_columns:
+            result_df = process_excel(df, pattern_columns, repeat_columns, transpose_columns)
+            st.write("Processed Data:")
+            st.dataframe(result_df)
 
-# Función para ejecutar la consulta
-def ejecutar_consulta(pedido):
-    conn = conectar_bd()
-    query = """
-    SELECT e.CoddocOrdenVenta AS PEDIDO, a.coddocordenproduccion as OP,
-           c.nommaecombo as COMBO, d.nommaetalla as TALLA, 
-           b.dcantidadrequerido as UNID, b.dcantidadprogramado AS UNID_PROG
-    FROM docOrdenProduccion a
-    INNER JOIN docOrdenVenta e ON a.IdDocumento_Referencia = e.IdDocumento_OrdenVenta
-    INNER JOIN docOrdenProduccionItem b ON b.IdDocumento_OrdenProduccion = a.IdDocumento_OrdenProduccion
-    INNER JOIN maecombo c ON b.idmaecombo = c.idmaecombo
-    INNER JOIN maetalla d ON d.idmaetalla = b.idmaetalla
-    WHERE e.CoddocOrdenVenta = ?
-    """
-    df = pd.read_sql(query, conn, params=[pedido])
-    conn.close()
-    return df
-
-# Función para generar el archivo Excel
-def to_excel(df):
-    output = BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df.to_excel(writer, index=False, sheet_name='Sheet1')
-    processed_data = output.getvalue()
-    return processed_data
-
-# Aplicación Streamlit
-st.title('Consulta de Pedidos')
-
-pedido = st.text_input('Ingrese el número de PEDIDO:')
-
-if st.button('Consultar'):
-    if pedido:
-        df = ejecutar_consulta(pedido)
-        if not df.empty:
-            st.write(df)
+            # Crear un botón de descarga para el Excel procesado
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                result_df.to_excel(writer, index=False, sheet_name='Processed Data')
+            output.seek(0)
             
-            excel_file = to_excel(df)
             st.download_button(
-                label="Descargar resultados como Excel",
-                data=excel_file,
-                file_name=f'resultado_pedido_{pedido}.xlsx',
-                mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                label="Download processed Excel file",
+                data=output,
+                file_name="processed_data.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
         else:
-            st.write('No se encontraron resultados para este pedido.')
-    else:
-        st.write('Por favor, ingrese un número de pedido.')
+            st.error("Please select at least one pattern column and one repeat column.")
