@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import io
 
 def process_excel(df, pattern_columns, repeat_columns, transpose_columns):
     # Determine pattern length
@@ -15,16 +16,28 @@ def process_excel(df, pattern_columns, repeat_columns, transpose_columns):
         
         # Add repeated columns
         for col in repeat_columns:
-            new_df[col] = group[col].iloc[0]
+            if col in group.columns:
+                new_df[col] = group[col].iloc[0]
+            else:
+                st.error(f"Column '{col}' not found in the input data.")
+                return None
         
         # Add pattern columns
         for j, col in enumerate(pattern_columns):
-            new_df[f"{col}_{j+1}"] = group[col].values
+            if col in group.columns:
+                new_df[f"{col}_{j+1}"] = group[col].values
+            else:
+                st.error(f"Column '{col}' not found in the input data.")
+                return None
         
         # Add transposed columns
         for k, col in enumerate(transpose_columns):
-            transposed = group[col].values
-            new_df[f"Transposed_{k+1}"] = transposed
+            if col in group.columns:
+                transposed = group[col].values
+                new_df[f"Transposed_{k+1}"] = transposed
+            else:
+                st.error(f"Column '{col}' not found in the input data.")
+                return None
         
         new_df = pd.concat([new_df, pd.DataFrame([{}])], ignore_index=True)
     
@@ -45,18 +58,19 @@ if uploaded_file is not None:
 
     if st.button("Process Excel"):
         result_df = process_excel(df, pattern_columns, repeat_columns, transpose_columns)
-        st.write("Processed Data:")
-        st.dataframe(result_df)
+        if result_df is not None:
+            st.write("Processed Data:")
+            st.dataframe(result_df)
 
-        # Create a download button for the processed Excel
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            result_df.to_excel(writer, index=False, sheet_name='Processed Data')
-        output.seek(0)
-        
-        st.download_button(
-            label="Download processed Excel file",
-            data=output,
-            file_name="processed_data.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+            # Create a download button for the processed Excel
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                result_df.to_excel(writer, index=False, sheet_name='Processed Data')
+            output.seek(0)
+            
+            st.download_button(
+                label="Download processed Excel file",
+                data=output,
+                file_name="processed_data.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
