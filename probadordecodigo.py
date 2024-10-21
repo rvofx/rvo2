@@ -39,11 +39,13 @@ if archivo_excel:
         st.dataframe(df_filtrado_info)
     
     # Primera selección de tallas (para repetir filas)
-    columnas_tallas_grupo1 = st.multiselect("Selecciona el primer grupo de columnas de tallas para calcular repeticiones", columnas)
+    columnas_tallas_grupo1 = st.multiselect("Selecciona el primer grupo de columnas de tallas para calcular repeticiones", [col for col in columnas if col not in columnas_info])
     
     # Segunda selección de tallas (generará nuevas columnas Talla2 y Cantidad2)
-    columnas_tallas_grupo2 = st.multiselect("Selecciona el segundo grupo de columnas de tallas para generar nuevas columnas Talla2 y Cantidad2", columnas)
-
+    if columnas_tallas_grupo1:
+        columnas_disponibles_grupo2 = [col for col in columnas if col not in columnas_info and col not in columnas_tallas_grupo1]
+        columnas_tallas_grupo2 = st.multiselect("Selecciona el segundo grupo de columnas de tallas para generar nuevas columnas Talla2 y Cantidad2", columnas_disponibles_grupo2)
+    
     # Repetir filas en función del primer grupo de tallas
     if columnas_tallas_grupo1:
         filas_repetidas = []
@@ -58,24 +60,19 @@ if archivo_excel:
         # Convertir las filas expandidas en un dataframe
         df_repetido = pd.DataFrame(filas_repetidas)
         
-        # Si se selecciona un segundo grupo de tallas, añadir nuevas columnas Talla2 y Cantidad2
+        # Si se selecciona un segundo grupo de tallas, generar nuevas columnas
         if columnas_tallas_grupo2:
-            # Crear listas para almacenar los valores de Talla2 y Cantidad2 para cada fila
-            tallas2 = []
-            cantidades2 = []
+            df_repetido["Talla2"] = None  # Nueva columna Talla2
+            df_repetido["Cantidad2"] = None  # Nueva columna Cantidad2
             
-            for _, row in df.iterrows():
-                for talla2 in columnas_tallas_grupo2:
-                    # Añadir las tallas y cantidades correspondientes del segundo grupo
-                    tallas2.append(talla2)
-                    cantidades2.append(row[talla2])
-            
-            # Crear nuevas columnas en el dataframe original
-            df_repetido["Talla2"] = tallas2
-            df_repetido["Cantidad2"] = cantidades2
+            # Asignar valores a las nuevas columnas basados en el segundo grupo de tallas
+            for idx, row in df.iterrows():
+                for talla in columnas_tallas_grupo2:
+                    df_repetido.at[idx, "Talla2"] = talla
+                    df_repetido.at[idx, "Cantidad2"] = row[talla]
 
-        # Mostrar el dataframe con las filas repetidas y las nuevas columnas
-        st.write("Datos repetidos con nuevas columnas Talla2 y Cantidad2:")
+        # Mostrar el dataframe con las filas repetidas y nuevas columnas
+        st.write("Datos repetidos y nuevas columnas según las tallas seleccionadas:")
         st.dataframe(df_repetido)
         
         # Botón para descargar el archivo filtrado con las repeticiones y nuevas columnas
