@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+import numpy as np
 
 st.set_page_config(layout="wide")
 
@@ -13,6 +14,8 @@ def descargar_excel(df):
 
 # Título de la aplicación
 st.title("Aplicación para selección de columnas, Cuadro 47B")
+# Slider para el porcentaje de programación
+porcentaje_prog = st.slider("Porcentaje de programación", min_value=0, max_value=30, value=3, step=1)
 
 # Subir el archivo Excel
 archivo_excel = st.file_uploader("Sube tu archivo Excel", type=["xlsx"])
@@ -63,7 +66,12 @@ if archivo_excel:
         
         # Convertir las filas expandidas en un dataframe
         df_repetido = pd.DataFrame(filas_repetidas)
-        
+
+        # Calcular la cantidad programada con el porcentaje adicional, manejando valores nulos
+        df_repetido['cant_prog'] = df_repetido['Cantidad'].apply(
+            lambda x: int(np.ceil(float(x) * (1 + porcentaje_prog/100))) if pd.notna(x) and str(x).strip() != '' else 0
+        )
+         
         # Si se selecciona un segundo grupo de tallas, añadir nuevas columnas Talla2 y Cantidad2
         if columnas_tallas_grupo2:
             # Crear listas para almacenar los valores de Talla2 y Cantidad2 para cada fila
@@ -76,13 +84,32 @@ if archivo_excel:
                     # Añadir las tallas y cantidades correspondientes del segundo grupo
                     tallas2.append(talla2)
                     #cantidades2.append(row[talla2])
-                    datas2.append(row[talla2])
+                    #datas2.append(row[talla2])
+                    #datas2.append(str(row[talla2]))
+                    datas2.append(str(int(row[talla2])) if pd.notna(row[talla2]) else '')
             
             # Crear nuevas columnas en el dataframe original
             df_repetido["Talla2"] = tallas2
             #df_repetido["Cantidad2"] = cantidades2
             df_repetido["data2"] = datas2
 
+        # Si existe la columna PACK, permitir filtrar valores
+        if 'PACK' in df_repetido.columns:
+            # Obtener valores únicos de PACK
+            valores_pack = df_repetido['PACK'].unique().tolist()
+            # Multiselect para filtrar PACK, por defecto todos seleccionados
+            packs_seleccionados = st.multiselect(
+                "Selecciona los valores de PACK que deseas mantener",
+                valores_pack,
+                default=valores_pack
+            )
+            # Filtrar el dataframe según la selección
+            if packs_seleccionados:
+                df_repetido = df_repetido[df_repetido['PACK'].isin(packs_seleccionados)]
+
+        # Mostrar el número total de registros
+        st.write(f"**Número total de registros:** {len(df_repetido)}")
+        
         # Mostrar el dataframe con las filas repetidas y las nuevas columnas
         st.write("Tabla final:")
         st.dataframe(df_repetido)
