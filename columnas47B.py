@@ -76,8 +76,8 @@ if archivo_excel:
                     # Añadir las tallas y cantidades correspondientes del segundo grupo
                     tallas2.append(talla2)
                     #cantidades2.append(row[talla2])
-                    #datas2.append(row[talla2])
-                    datas2.append(str(row[talla2]))
+                    datas2.append(row[talla2])
+                    #datas2.append(str(row[talla2]))
             
             # Crear nuevas columnas en el dataframe original
             df_repetido["Talla2"] = tallas2
