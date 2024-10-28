@@ -15,7 +15,7 @@ def descargar_excel(df):
 # Título de la aplicación
 st.title("Aplicación para selección de columnas, Cuadro 47B")
 # Slider para el porcentaje de programación
-porcentaje_prog = st.slider("Porcentaje de programación", min_value=0.0, max_value=50.0, value=3.0, step=0.1)
+porcentaje_prog = st.slider("Porcentaje de programación", min_value=0, max_value=30, value=3, step=1)
 
 # Subir el archivo Excel
 archivo_excel = st.file_uploader("Sube tu archivo Excel", type=["xlsx"])
