@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+import numpy as np
 
 st.set_page_config(layout="wide")
 
@@ -13,6 +14,8 @@ def descargar_excel(df):
 
 # Título de la aplicación
 st.title("Aplicación para selección de columnas, Cuadro 47B")
+# Slider para el porcentaje de programación
+porcentaje_prog = st.slider("Porcentaje de programación", min_value=0.0, max_value=50.0, value=3.0, step=0.1)
 
 # Subir el archivo Excel
 archivo_excel = st.file_uploader("Sube tu archivo Excel", type=["xlsx"])
@@ -63,7 +66,10 @@ if archivo_excel:
         
         # Convertir las filas expandidas en un dataframe
         df_repetido = pd.DataFrame(filas_repetidas)
-        
+
+        # Calcular la cantidad programada con el porcentaje adicional
+        df_repetido['cant_prog'] = df_repetido['Cantidad'].apply(lambda x: int(np.ceil(x * (1 + porcentaje_prog/100))))
+         
         # Si se selecciona un segundo grupo de tallas, añadir nuevas columnas Talla2 y Cantidad2
         if columnas_tallas_grupo2:
             # Crear listas para almacenar los valores de Talla2 y Cantidad2 para cada fila
