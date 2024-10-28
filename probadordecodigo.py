@@ -17,7 +17,7 @@ st.title("Aplicación para selección de columnas, Cuadro 47B")
 # Slider para el porcentaje de programación
 porcentaje_prog = st.slider("Porcentaje de programación", min_value=0, max_value=30, value=3, step=1)
 
-multiplo = st.number_input("Múltiplo", min_value=0, value=1)
+multiplo = st.number_input("Múltiplo", min_value=0, value=0)
 divisor = st.number_input("Divisor", min_value=1, value=1)
 
 # Subir el archivo Excel
