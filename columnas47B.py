@@ -67,8 +67,10 @@ if archivo_excel:
         # Convertir las filas expandidas en un dataframe
         df_repetido = pd.DataFrame(filas_repetidas)
 
-        # Calcular la cantidad programada con el porcentaje adicional
-        df_repetido['cant_prog'] = df_repetido['Cantidad'].apply(lambda x: int(np.ceil(x * (1 + porcentaje_prog/100))))
+        # Calcular la cantidad programada con el porcentaje adicional, manejando valores nulos
+        df_repetido['cant_prog'] = df_repetido['Cantidad'].apply(
+            lambda x: int(np.ceil(float(x) * (1 + porcentaje_prog/100))) if pd.notna(x) and str(x).strip() != '' else 0
+        )
          
         # Si se selecciona un segundo grupo de tallas, añadir nuevas columnas Talla2 y Cantidad2
         if columnas_tallas_grupo2:
