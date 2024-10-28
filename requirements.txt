@@ -17,3 +17,4 @@ xlsxwriter
 undetected-chromedriver
 playwright
 webdriver-manager
+numpy
