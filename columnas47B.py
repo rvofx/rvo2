@@ -93,6 +93,21 @@ if archivo_excel:
             #df_repetido["Cantidad2"] = cantidades2
             df_repetido["data2"] = datas2
 
+        # Si existe la columna PACK, permitir filtrar valores
+        if 'PACK' in df_repetido.columns:
+            # Obtener valores únicos de PACK
+            valores_pack = df_repetido['PACK'].unique().tolist()
+            # Multiselect para filtrar PACK, por defecto todos seleccionados
+            packs_seleccionados = st.multiselect(
+                "Selecciona los valores de PACK que deseas mantener",
+                valores_pack,
+                default=valores_pack
+            )
+            # Filtrar el dataframe según la selección
+            if packs_seleccionados:
+                df_repetido = df_repetido[df_repetido['PACK'].isin(packs_seleccionados)]
+
+        
         # Mostrar el dataframe con las filas repetidas y las nuevas columnas
         st.write("Tabla final:")
         st.dataframe(df_repetido)
