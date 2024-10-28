@@ -17,6 +17,9 @@ st.title("Aplicación para selección de columnas, Cuadro 47B")
 # Slider para el porcentaje de programación
 porcentaje_prog = st.slider("Porcentaje de programación", min_value=0, max_value=30, value=3, step=1)
 
+multiplo = st.number_input("Múltiplo", min_value=0, value=0)
+divisor = st.number_input("Divisor", min_value=1, value=1)
+
 # Subir el archivo Excel
 archivo_excel = st.file_uploader("Sube tu archivo Excel", type=["xlsx"])
 
@@ -70,6 +73,10 @@ if archivo_excel:
         # Calcular la cantidad programada con el porcentaje adicional, manejando valores nulos
         df_repetido['cant_prog'] = df_repetido['Cantidad'].apply(
             lambda x: int(np.ceil(float(x) * (1 + porcentaje_prog/100))) if pd.notna(x) and str(x).strip() != '' else 0
+        )
+
+        df_repetido['Und_result'] = df_repetido['cant_prog'].apply(
+            lambda x: (multiplo * x) + np.ceil(x / divisor)
         )
          
         # Si se selecciona un segundo grupo de tallas, añadir nuevas columnas Talla2 y Cantidad2
