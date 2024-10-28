@@ -76,7 +76,7 @@ if archivo_excel:
         )
 
         df_repetido['Und_result'] = df_repetido['cant_prog'].apply(
-        lambda x: (multiplo * x + np.ceil(x / divisor))
+            lambda x: (multiplo * x) + np.ceil(x / divisor)
         )
          
         # Si se selecciona un segundo grupo de tallas, añadir nuevas columnas Talla2 y Cantidad2
