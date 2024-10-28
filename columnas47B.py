@@ -107,6 +107,8 @@ if archivo_excel:
             if packs_seleccionados:
                 df_repetido = df_repetido[df_repetido['PACK'].isin(packs_seleccionados)]
 
+        # Mostrar el número total de registros
+        st.write(f"**Número total de registros:** {len(df_repetido)}")
         
         # Mostrar el dataframe con las filas repetidas y las nuevas columnas
         st.write("Tabla final:")
