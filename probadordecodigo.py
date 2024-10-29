@@ -348,7 +348,7 @@ if st.button("Ejecutar Consulta"):
                     x1=fecha_colocacion,
                     y1=len(df_gantt),
                     line=dict(color="green", width=2, dash="dash"),
-                    name="Fecha Colocación", hovertext=f"Fecha Colocación: {fecha_colocacion.strftime('%Y-%m-%d')}"
+                    name="Fecha Colocación"
                 )
                 fig.add_shape(
                     type="line",
