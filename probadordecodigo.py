@@ -333,7 +333,8 @@ if st.button("Ejecutar Consulta"):
                     #marker=dict(color='red', size=10),
                     name='Finish Real'
                 ))
-
+		    
+		#Fechas de colocacion y entrega
                 fecha_colocacion = datetime(2024,6,14)  
 		 
                 fecha_entrega = datetime(2024,9,15)
