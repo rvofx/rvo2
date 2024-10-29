@@ -282,18 +282,17 @@ if st.button("Ejecutar Consulta"):
 
                 # Cálculo de las fechas de inicio y fin
 		#start_armado = datetime(2024,6,24)   
-                start_armado = datetime(2024,6,15)  
-	        #start_armado = f_emision + timedelta(days=FACTOR * dias)
-                start_tenido = f_emision + timedelta(days=2 * FACTOR * dias)
-                start_telaprob = f_emision + timedelta(days=3 * FACTOR * dias)
-                start_corte = f_emision + timedelta(days=4 * FACTOR * dias)
-                start_costura = f_emision + timedelta(days=6 * FACTOR * dias)
+                start_armado = datetime(2024,6,24)  
+                start_tenido = datetime(2024,6,28)
+                start_telaprob = datetime(2024,7,3)
+                start_corte = datetime(2024,7,5)
+                start_costura = datetime(2024,7,15)
 
-                finish_armado = f_emision + timedelta(days=(FACTOR + DARM) * dias)
-                finish_tenido = f_emision + timedelta(days=(2 * FACTOR + DTENID) * dias)
-                finish_telaprob = f_emision + timedelta(days=(3 * FACTOR + DTELAPROB) * dias)
-                finish_corte = f_emision + timedelta(days=(4 * FACTOR + DCORTADO) * dias)
-                finish_costura = f_emision + timedelta(days=(6 * FACTOR + DCOSIDO) * dias)
+                finish_armado = datetime(2024,7,5)
+                finish_tenido = datetime(2024,7,20)
+                finish_telaprob = datetime(2024,7,27)
+                finish_corte = datetime(2024,8,3)
+                finish_costura = datetime(2024,9,5)
 
                 # Crear DataFrame para el gráfico de Gantt
                 df_gantt = pd.DataFrame({
