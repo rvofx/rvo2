@@ -340,7 +340,7 @@ if st.button("Ejecutar Consulta"):
 		#fecha_colocacion = datetime(2024,6,24)  
 		#fecha_colocacion = pd.to_datetime(df['F_EMISION'].iloc[0])   
                 fecha_entrega = pd.to_datetime(df['F_ENTREGA'].iloc[0])
-	    fecha_colocacion = datetime(2024,6,24) 
+	    	fecha_colocacion = datetime(2024,6,24) 
 	    
 
                 # Agregar líneas verticales para las fechas de colocación y entrega
