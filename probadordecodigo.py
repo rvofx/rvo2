@@ -329,7 +329,7 @@ if st.button("Ejecutar Consulta"):
                     x=df_gantt['Finish Real'],
                     y=df_gantt['Proceso'],
                     mode='markers',
-		    marker=dict(symbol='triangle-down', size=10, color='red'),
+		    marker=dict(symbol='star-triangle-down', size=10, color='red'),
                     #marker=dict(color='red', size=10),
                     name='Finish Real'
                 ))
