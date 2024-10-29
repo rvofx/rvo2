@@ -250,13 +250,7 @@ WHERE gg.PEDIDO = ?"""
     conn.close()
     return df
 
-# Parámetros constantes
-FACTOR = 0.06
-DARM = 0.2
-DTENID = 0.25
-DTELAPROB = 0.27
-DCORTADO = 0.25
-DCOSIDO = 0.57
+ 
 
 # Interfaz de usuario de Streamlit
 st.title("Progreso del Pedido")
@@ -280,8 +274,7 @@ if st.button("Ejecutar Consulta"):
                 f_emision = pd.to_datetime(df['F_EMISION'].iloc[0])
                 dias = df['DIAS'].iloc[0]
 
-                # Cálculo de las fechas de inicio y fin
-		#start_armado = datetime(2024,6,24)   
+                # Cálculo de las fechas de inicio y fin  
                 start_armado = datetime(2024,6,24)  
                 start_tenido = datetime(2024,6,28)
                 start_telaprob = datetime(2024,7,3)
@@ -342,7 +335,9 @@ if st.button("Ejecutar Consulta"):
                 ))
 
                 # Fechas de colocación y entrega
-                fecha_colocacion = pd.to_datetime(df['F_EMISION'].iloc[0])
+                
+		#fecha_colocacion = pd.to_datetime(df['F_EMISION'].iloc[0])
+		fecha_colocacion = datetime(2024,6,24)
                 fecha_entrega = pd.to_datetime(df['F_ENTREGA'].iloc[0])
 
                 # Agregar líneas verticales para las fechas de colocación y entrega
