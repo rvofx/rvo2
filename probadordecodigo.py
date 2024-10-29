@@ -350,21 +350,6 @@ if st.button("Ejecutar Consulta"):
                     line=dict(color="green", width=2, dash="dash"),
                     name="Fecha Colocación"
                 )
-		# Agregar anotación para mostrar la fecha al pasar el mouse
-		fig.add_annotation(
-		    x=fecha_colocacion,
-		    y=len(df_gantt) / 2,  # Ubicación en el eje y para que sea visible en el medio
-		    text=f"Fecha Colocación: {fecha_colocacion.strftime('%Y-%m-%d')}",
-		    showarrow=True,
-		    arrowhead=1,
-		    ax=0,
-		    ay=-40,
-		    font=dict(color="green"),
-		    align="center",
-		)
-
-
-		    
                 fig.add_shape(
                     type="line",
                     x0=fecha_entrega,
