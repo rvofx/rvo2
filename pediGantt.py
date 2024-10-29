@@ -376,22 +376,7 @@ if st.button("Ejecutar Consulta"):
                     name="Fecha Actual"
                 )
 
-                # Agregar líneas verticales muy tenues cada 2 días
-                #start_date = datetime.strptime(df['F_EMISION'].iloc[0], '%Y-%m-%d')
-                #end_date = datetime.strptime(df['F_ENTREGA'].iloc[0], '%Y-%m-%d')
-                #current_date = start_date
-                #while current_date <= end_date:
-                    #fig.add_shape(
-                        #type="line",
-                        #x0=current_date,
-                        #y0=0,
-                        #x1=current_date,
-                        #y1=len(df_gantt),
-                        #line=dict(color="gray", width=1, dash="dot"),
-                    #)
-                    #current_date += timedelta(days=2)
-
-                # Mostrar el gráfico
+               
                 st.title(f"Pedido: {df['PEDIDO'].iloc[0]}")
                 st.write(f"Cliente: {df['CLIENTE'].iloc[0]}")
                 st.plotly_chart(fig)
