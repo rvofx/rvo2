@@ -281,8 +281,8 @@ if st.button("Ejecutar Consulta"):
                 dias = df['DIAS'].iloc[0]
 
                 # Cálculo de las fechas de inicio y fin
-		#start_armado = date (2024,6,24)   
-                start_armado = date (2024,6,24)  
+		#start_armado = datetime(2024,6,24)   
+                start_armado = datetime(2024,6,24)  
 	        #start_armado = f_emision + timedelta(days=FACTOR * dias)
                 start_tenido = f_emision + timedelta(days=2 * FACTOR * dias)
                 start_telaprob = f_emision + timedelta(days=3 * FACTOR * dias)
