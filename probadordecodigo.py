@@ -1,130 +1,389 @@
 import streamlit as st
+import pyodbc
 import pandas as pd
-import io
-import numpy as np
+import plotly.express as px
+import plotly.graph_objects as go
+from datetime import datetime, timedelta
 
 st.set_page_config(layout="wide")
 
-# Función para descargar el dataframe filtrado como archivo Excel
-def descargar_excel(df):
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False)
-    return output.getvalue()
+# Configurar la conexión a la base de datos utilizando las credenciales almacenadas en secrets
+def connect_db():
+    connection = pyodbc.connect(
+        "driver={odbc driver 17 for sql server};"
+        "server=" + st.secrets["server"] + ";"
+        "database=" + st.secrets["database"] + ";"
+        "uid=" + st.secrets["username"] + ";"
+        "pwd=" + st.secrets["password"] + ";"
+    )
+    return connection
 
-# Título de la aplicación
-st.title("Aplicación para selección de columnas, Cuadro 47B")
-# Slider para el porcentaje de programación
-porcentaje_prog = st.slider("Porcentaje de programación", min_value=0, max_value=30, value=3, step=1)
+# Función para ejecutar la consulta SQL
+def run_query(pedido):
+    conn = connect_db()
+    query = """SELECT gg.PEDIDO, --gg.IdDocumento_OrdenVenta, 
+    	gg.F_EMISION, gg.F_ENTREGA, gg.DIAS, gg.CLIENTE, gg.PO, gg.KG_REQ, 
+       gg.KG_ARMP, gg.KG_TENIDP, gg.KG_TELAPROBP, gg.UNID, gg.PROGP, gg.CORTADOP, gg.COSIDOP, 
+       ff.FMINARM, ff.FMAXARM, ff.FMINTENID, ff.FMAXTENID, ff.FMINTELAPROB, ff.FMAXTELAPROB, ff.FMINCORTE, ff.FMAXCORTE, ff.FMINCOSIDO, ff.FMAXCOSIDO
+FROM 
+    (SELECT
+    a.CoddocOrdenVenta AS PEDIDO, 
+    a.IdDocumento_OrdenVenta,
+    CASE WHEN ISDATE(a.dtFechaEmision) = 1 THEN CONVERT(DATE, a.dtFechaEmision) ELSE NULL END AS F_EMISION,
+    CASE WHEN ISDATE(a.dtFechaEntrega) = 1 THEN CONVERT(DATE, a.dtFechaEntrega) ELSE NULL END AS F_ENTREGA,
+    CONVERT(INT, a.dtFechaEntrega - a.dtFechaEmision) AS DIAS,
+    SUBSTRING(b.NommaeAnexoCliente, 1, 15) AS CLIENTE,
+    a.nvDocumentoReferencia AS PO,
+    CONVERT(INT, COALESCE(d.KG, 0)) AS KG_REQ,
+    FORMAT(CASE WHEN d.KG = 0 THEN 0 ELSE (COALESCE(t.KG_ARM, 0) / d.KG) END, '0%') AS KG_ARMP,
+    FORMAT(CASE WHEN d.KG = 0 THEN 0 ELSE (COALESCE(t.KG_TEÑIDOS, 0) / d.KG) END, '0%') AS KG_TENIDP,
+    FORMAT(CASE WHEN d.KG = 0 THEN 0 ELSE (COALESCE(t.KG_PRODUC, 0) / d.KG) END, '0%') AS KG_TELAPROBP,
+    CONVERT(INT, a.dCantidad) AS UNID,
+    FORMAT(CASE WHEN a.dCantidad = 0 THEN 0 ELSE (COALESCE(programado.PROG, 0) / a.dCantidad) END, '0%') AS PROGP,
+    FORMAT(CASE WHEN a.dCantidad = 0 THEN 0 ELSE (COALESCE(cortado.CORTADO, 0) / a.dCantidad) END, '0%') AS CORTADOP,
+    FORMAT(CASE WHEN a.dCantidad = 0 THEN 0 ELSE (COALESCE(cosido.COSIDO, 0) / a.dCantidad) END, '0%') AS COSIDOP
+FROM docOrdenVenta a
+INNER JOIN maeAnexoCliente b ON a.IdmaeAnexo_Cliente = b.IdmaeAnexo_Cliente
+LEFT JOIN (
+    SELECT
+        c.IdDocumento_Referencia AS PEDIDO,
+        SUM(c.dCantidad) AS KG
+    FROM docOrdenVentaItem c
+    WHERE c.IdDocumento_Referencia > 0
+    GROUP BY c.IdDocumento_Referencia
+) d ON a.IdDocumento_OrdenVenta = d.PEDIDO
+LEFT JOIN (
+    SELECT
+        x.IdDocumento_Referencia AS PEDIDO,
+        SUM(y.dCantidadProgramado) AS KG_ARM,
+        SUM(z.bcerrado * y.dCantidadRequerido) AS KG_PRODUC,
+        SUM(s.bcerrado * y.dCantidadProgramado) AS KG_TEÑIDOS
+    FROM docOrdenProduccionItem y
+    INNER JOIN docOrdenProduccion z ON y.IdDocumento_OrdenProduccion = z.IdDocumento_OrdenProduccion
+    INNER JOIN docOrdenVentaItem x ON (z.IdDocumento_Referencia = x.IdDocumento_OrdenVenta AND y.idmaeItem = x.IdmaeItem)
+    INNER JOIN docOrdenProduccionRuta s ON y.IdDocumento_OrdenProduccion = s.IdDocumento_OrdenProduccion
+    WHERE s.IdmaeReceta > 0
+    GROUP BY x.IdDocumento_Referencia
+) t ON a.IdDocumento_OrdenVenta = t.PEDIDO
+LEFT JOIN (
+    SELECT 
+        g.IdDocumento_OrdenVenta,
+        SUM(a.dCantidadProgramado) AS PROG
+    FROM dbo.docOrdenProduccion c WITH (NOLOCK)
+    INNER JOIN dbo.docOrdenProduccionItem a WITH (NOLOCK)
+        ON c.IdDocumento_OrdenProduccion = a.IdDocumento_OrdenProduccion
+    INNER JOIN dbo.docOrdenVenta g WITH (NOLOCK)
+        ON c.IdDocumento_Referencia = g.IdDocumento_OrdenVenta
+    INNER JOIN dbo.docOrdenProduccionRuta b WITH (NOLOCK)
+        ON c.IdDocumento_OrdenProduccion = b.IdDocumento_OrdenProduccion
+    WHERE --c.bCerrado = 0  AND
+        c.bAnulado = 0
+        AND c.IdtdDocumentoForm = 127
+        AND b.IdmaeCentroCosto = 29
+    GROUP BY g.IdDocumento_OrdenVenta
+) AS programado
+ON a.IdDocumento_OrdenVenta = programado.IdDocumento_OrdenVenta
+LEFT JOIN (
+    SELECT 
+        g.IdDocumento_OrdenVenta,
+        SUM(b.dCantidadIng) AS CORTADO
+    FROM dbo.docNotaInventario a WITH (NOLOCK)
+    INNER JOIN dbo.maeCentroCosto a1 WITH (NOLOCK)
+        ON a.IdmaeCentroCosto = a1.IdmaeCentroCosto
+        AND a1.bConOrdenProduccion = 1
+    INNER JOIN dbo.docNotaInventarioItem b WITH (NOLOCK)
+        ON a.IdDocumento_NotaInventario = b.IdDocumento_NotaInventario
+    INNER JOIN dbo.docOrdenProduccion c WITH (NOLOCK)
+        ON a.IdDocumento_OrdenProduccion = c.IdDocumento_OrdenProduccion
+    INNER JOIN dbo.docOrdenVenta g WITH (NOLOCK)
+        ON c.IdDocumento_Referencia = g.IdDocumento_OrdenVenta
+    WHERE a.IdtdDocumentoForm = 131
+        AND a.bDevolucion = 0
+        AND a.bDesactivado = 0
+        AND a.bAnulado = 0
+        AND a.IdmaeCentroCosto = 29
+    GROUP BY g.IdDocumento_OrdenVenta
+) AS cortado
+ON a.IdDocumento_OrdenVenta = cortado.IdDocumento_OrdenVenta
+LEFT JOIN (
+    SELECT 
+        g.IdDocumento_OrdenVenta,
+        SUM(b.dCantidadIng) AS COSIDO
+    FROM dbo.docNotaInventario a WITH (NOLOCK)
+    INNER JOIN dbo.maeCentroCosto a1 WITH (NOLOCK)
+        ON a.IdmaeCentroCosto = a1.IdmaeCentroCosto
+        AND a1.bConOrdenProduccion = 1
+    INNER JOIN dbo.docNotaInventarioItem b WITH (NOLOCK)
+        ON a.IdDocumento_NotaInventario = b.IdDocumento_NotaInventario
+    INNER JOIN dbo.docOrdenProduccion c WITH (NOLOCK)
+        ON a.IdDocumento_OrdenProduccion = c.IdDocumento_OrdenProduccion
+    INNER JOIN dbo.docOrdenVenta g WITH (NOLOCK)
+        ON c.IdDocumento_Referencia = g.IdDocumento_OrdenVenta
+    WHERE a.IdtdDocumentoForm = 131
+        AND a.bDevolucion = 0
+        AND a.bDesactivado = 0
+        AND a.bAnulado = 0
+        AND a.IdmaeCentroCosto = 47
+    GROUP BY g.IdDocumento_OrdenVenta
+) AS cosido
+ON a.IdDocumento_OrdenVenta = cosido.IdDocumento_OrdenVenta
+WHERE
+    a.IdtdDocumentoForm = 10
+    AND a.IdtdTipoVenta = 4
+    AND a.bAnulado = 0
+    --AND (CASE WHEN ISDATE(a.dtFechaEntrega) = --1 THEN CONVERT(DATE, a.dtFechaEntrega) ELSE --NULL END) BETWEEN '2024-08-01' AND --'2024-12-31' 
+    ) gg
+INNER JOIN 
+    (SELECT 
+    x.IdDocumento_OrdenVenta,
+	q0.FMINARM,
+	q0.FMAXARM,
+    q1.FMINTENID,
+    q1.FMAXTENID,
+    q2.FMINTELAPROB,
+    q2.FMAXTELAPROB,
+    q3.FMINCORTE,
+    q3.FMAXCORTE,
+    q4.FMINCOSIDO,
+    q4.FMAXCOSIDO
+FROM docOrdenVenta x
+LEFT JOIN (
+    SELECT 
+        x.IdDocumento_OrdenVenta, 
+        MIN(b.dtFechaEmision) AS FMINARM,
+		MAX(b.dtFechaEmision) AS FMAXARM
+    FROM docOrdenVentaItem a
+    INNER JOIN docOrdenProduccion b ON b.IdDocumento_Referencia = a.IdDocumento_OrdenVenta
+    INNER JOIN docOrdenVenta x ON a.IdDocumento_Referencia = x.IdDocumento_OrdenVenta
+   
+    WHERE b.IdtdDocumentoForm = 138 
+      AND b.IdtdDocumentoForm_Referencia = 152 
+      AND x.CoddocOrdenVenta IS NOT NULL
+      AND a.IdDocumento_Referencia > 0
+    GROUP BY x.IdDocumento_OrdenVenta
+) q0 ON x.IdDocumento_OrdenVenta = q0.IdDocumento_OrdenVenta
 
-multiplo = st.number_input("Múltiplo", min_value=0, value=0)
-divisor = st.number_input("Divisor", min_value=1, value=1)
+LEFT JOIN (
+    SELECT 
+        x.IdDocumento_OrdenVenta, 
+        MIN(e.dtFechaHoraFin) AS FMINTENID,
+        MAX(e.dtFechaHoraFin) AS FMAXTENID
+    FROM docOrdenVentaItem a
+    INNER JOIN docOrdenProduccion b ON b.IdDocumento_Referencia = a.IdDocumento_OrdenVenta
+    INNER JOIN docOrdenVenta x ON a.IdDocumento_Referencia = x.IdDocumento_OrdenVenta
+    INNER JOIN docRecetaOrdenProduccion d ON b.IdDocumento_OrdenProduccion = d.IdDocumento_OrdenProduccion
+    INNER JOIN docReceta e ON d.IdDocumento_Receta = e.IdDocumento_Receta
+    WHERE b.IdtdDocumentoForm = 138 
+      AND b.IdtdDocumentoForm_Referencia = 152 
+      AND x.CoddocOrdenVenta IS NOT NULL
+      AND a.IdDocumento_Referencia > 0
+    GROUP BY x.IdDocumento_OrdenVenta
+) q1 ON x.IdDocumento_OrdenVenta = q1.IdDocumento_OrdenVenta
+LEFT JOIN (
+    SELECT 
+        x.IdDocumento_OrdenVenta,  
+        MIN(b.FechaCierreAprobado) AS FMINTELAPROB,
+        MAX(b.FechaCierreAprobado) AS FMAXTELAPROB
+    FROM docOrdenVentaItem a
+    INNER JOIN docOrdenProduccion b ON b.IdDocumento_Referencia = a.IdDocumento_OrdenVenta
+    INNER JOIN docOrdenVenta x ON a.IdDocumento_Referencia = x.IdDocumento_OrdenVenta
+    INNER JOIN docOrdenProduccionRuta d ON b.IdDocumento_OrdenProduccion = d.IdDocumento_OrdenProduccion
+    WHERE b.IdtdDocumentoForm = 138 
+      AND b.IdtdDocumentoForm_Referencia = 152 
+      AND x.CoddocOrdenVenta IS NOT NULL
+      AND a.IdDocumento_Referencia > 0
+    GROUP BY x.IdDocumento_OrdenVenta
+) q2 ON x.IdDocumento_OrdenVenta = q2.IdDocumento_OrdenVenta
+LEFT JOIN (
+    SELECT 
+        g.IdDocumento_OrdenVenta,  
+        MIN(a.dtFechaRegistro) AS FMINCORTE,
+        MAX(a.dtFechaRegistro) AS FMAXCORTE
+    FROM dbo.docNotaInventario a WITH (NOLOCK)
+    INNER JOIN dbo.maeCentroCosto a1 WITH (NOLOCK) ON a.IdmaeCentroCosto = a1.IdmaeCentroCosto AND a1.bConOrdenProduccion = 1
+    INNER JOIN dbo.docNotaInventarioItem b WITH (NOLOCK) ON a.IdDocumento_NotaInventario = b.IdDocumento_NotaInventario AND b.dCantidadIng <> 0
+    INNER JOIN dbo.docOrdenProduccion c WITH (NOLOCK) ON a.IdDocumento_OrdenProduccion = c.IdDocumento_OrdenProduccion 
+	AND c.bAnulado = 0 AND c.IdtdDocumentoForm = 127
+    INNER JOIN dbo.docOrdenVenta g WITH (NOLOCK) ON c.IdDocumento_Referencia = g.IdDocumento_OrdenVenta
+    INNER JOIN dbo.docOrdenProduccionRuta d WITH (NOLOCK) ON a.IddocOrdenProduccionRuta = d.IddocOrdenProduccionRuta
+    INNER JOIN dbo.docOrdenProduccionItem e WITH (NOLOCK) ON c.IdDocumento_OrdenProduccion = e.IdDocumento_OrdenProduccion AND b.IdmaeItem_Inventario = e.IdmaeItem
+    INNER JOIN dbo.maeItemInventario f WITH (NOLOCK) ON b.IdmaeItem_Inventario = f.IdmaeItem_Inventario AND f.IdtdItemForm = 10
+    WHERE a.IdtdDocumentoForm = 131
+        AND a.bDevolucion = 0
+        AND a.bDesactivado = 0
+        AND a.bAnulado = 0
+        AND a.IdDocumento_OrdenProduccion <> 0
+        AND a.IdmaeCentroCosto = 29
+    GROUP BY g.IdDocumento_OrdenVenta
+) q3 ON x.IdDocumento_OrdenVenta = q3.IdDocumento_OrdenVenta
+LEFT JOIN (
+    SELECT 
+        g.IdDocumento_OrdenVenta,  
+        MIN(a.dtFechaRegistro) AS FMINCOSIDO,
+        MAX(a.dtFechaRegistro) AS FMAXCOSIDO
+    FROM dbo.docNotaInventario a WITH (NOLOCK)
+    INNER JOIN dbo.maeCentroCosto a1 WITH (NOLOCK) ON a.IdmaeCentroCosto = a1.IdmaeCentroCosto AND a1.bConOrdenProduccion = 1
+    INNER JOIN dbo.docNotaInventarioItem b WITH (NOLOCK) ON a.IdDocumento_NotaInventario = b.IdDocumento_NotaInventario AND b.dCantidadIng <> 0
+    INNER JOIN dbo.docOrdenProduccion c WITH (NOLOCK) ON a.IdDocumento_OrdenProduccion = c.IdDocumento_OrdenProduccion 
+	AND c.bAnulado = 0 AND c.IdtdDocumentoForm = 127
+    INNER JOIN dbo.docOrdenVenta g WITH (NOLOCK) ON c.IdDocumento_Referencia = g.IdDocumento_OrdenVenta
+    INNER JOIN dbo.docOrdenProduccionRuta d WITH (NOLOCK) ON a.IddocOrdenProduccionRuta = d.IddocOrdenProduccionRuta
+    INNER JOIN dbo.docOrdenProduccionItem e WITH (NOLOCK) ON c.IdDocumento_OrdenProduccion = e.IdDocumento_OrdenProduccion AND b.IdmaeItem_Inventario = e.IdmaeItem
+    INNER JOIN dbo.maeItemInventario f WITH (NOLOCK) ON b.IdmaeItem_Inventario = f.IdmaeItem_Inventario AND f.IdtdItemForm = 10
+    WHERE a.IdtdDocumentoForm = 131
+        AND a.bDevolucion = 0
+        AND a.bDesactivado = 0
+        AND a.bAnulado = 0
+        AND a.IdDocumento_OrdenProduccion <> 0
+        AND a.IdmaeCentroCosto = 47
+    GROUP BY g.IdDocumento_OrdenVenta
+) q4 ON x.IdDocumento_OrdenVenta = q4.IdDocumento_OrdenVenta
+WHERE x.CoddocOrdenVenta IS NOT NULL
+		and x.IdtdDocumentoForm=10 
+		and x.IdtdTipoVenta=4
+		and x.bAnulado=0
+    ) ff
+ON gg.IdDocumento_OrdenVenta = ff.IdDocumento_OrdenVenta
+WHERE gg.PEDIDO = ?"""
 
-# Subir el archivo Excel
-archivo_excel = st.file_uploader("Sube tu archivo Excel", type=["xlsx"])
+    df = pd.read_sql(query, conn, params=(pedido,))
+    conn.close()
+    return df
 
-# Si el archivo ha sido subido
-if archivo_excel:
-    # Leer el archivo Excel
-    df = pd.read_excel(archivo_excel)
-    
-    # Mostrar las primeras filas del archivo
-    st.write("Vista previa de los datos:")
-    st.dataframe(df.head())
-    
-    # Lista de columnas disponibles
-    columnas = df.columns.tolist()
-    
-    # Primera selección: Columnas de información
-    columnas_info = st.multiselect("Selecciona las columnas de información que deseas", columnas)
-    
-    # Filtrar el dataframe basado en las columnas seleccionadas para información
-    if columnas_info:
-        df_filtrado_info = df[columnas_info]
-        
-        # Mostrar el dataframe filtrado
-        st.write("Datos filtrados (información):")
-        st.dataframe(df_filtrado_info)
-    
-    # Primera selección de tallas (para repetir filas)
-    columnas_tallas_grupo1 = st.multiselect("Selecciona el primer grupo de columnas de tallas para calcular repeticiones", columnas)
-    
-    # Segunda selección de tallas (generará nuevas columnas Talla2 y Cantidad2)
-    #columnas_tallas_grupo2 = st.multiselect("Selecciona el segundo grupo de columnas de tallas para generar nuevas columnas Talla2 y Cantidad2", columnas)
-    columnas_tallas_grupo2 = st.multiselect("Selecciona el segundo grupo de columnas de tallas para generar nuevas columnas Talla2 y Data2", columnas)
-     # Excluir las columnas ya seleccionadas en el primer grupo
-    #columnas_disponibles_grupo2 = [col for col in columnas if col not in columnas_tallas_grupo1]
-    #columnas_tallas_grupo2 = st.multiselect("Selecciona el segundo grupo de columnas de tallas para generar nuevas columnas Talla2 y Data2", columnas_disponibles_grupo2)
-    
-    # Repetir filas en función del primer grupo de tallas
-    if columnas_tallas_grupo1:
-        filas_repetidas = []
-        for _, row in df.iterrows():
-            # Repetir por el primer grupo de tallas
-            for talla in columnas_tallas_grupo1:
-                nueva_fila = row[columnas_info].copy()
-                nueva_fila["Talla"] = talla
-                nueva_fila["Cantidad"] = row[talla]  # La cantidad correspondiente a esa talla
-                filas_repetidas.append(nueva_fila)
-        
-        # Convertir las filas expandidas en un dataframe
-        df_repetido = pd.DataFrame(filas_repetidas)
+# Parámetros constantes
+FACTOR = 0.06
+DARM = 0.2
+DTENID = 0.25
+DTELAPROB = 0.27
+DCORTADO = 0.25
+DCOSIDO = 0.57
 
-        # Calcular la cantidad programada con el porcentaje adicional, manejando valores nulos
-        df_repetido['cant_prog'] = df_repetido['Cantidad'].apply(
-            lambda x: int(np.ceil(float(x) * (1 + porcentaje_prog/100))) if pd.notna(x) and str(x).strip() != '' else 0
-        )
+# Interfaz de usuario de Streamlit
+st.title("Progreso del Pedido")
 
-        df_repetido['Und_result'] = df_repetido['cant_prog'].apply(
-            lambda x: (multiplo * x) + np.ceil(x / divisor)
-        )
-         
-        # Si se selecciona un segundo grupo de tallas, añadir nuevas columnas Talla2 y Cantidad2
-        if columnas_tallas_grupo2:
-            # Crear listas para almacenar los valores de Talla2 y Cantidad2 para cada fila
-            tallas2 = []
-            #cantidades2 = []
-            datas2 = []
-            
-            for _, row in df.iterrows():
-                for talla2 in columnas_tallas_grupo2:
-                    # Añadir las tallas y cantidades correspondientes del segundo grupo
-                    tallas2.append(talla2)
-                    #cantidades2.append(row[talla2])
-                    datas2.append(row[talla2])
-                    #datas2.append(str(row[talla2]))
-                    #datas2.append(str(int(row[talla2])) if pd.notna(row[talla2]) else '')
-            
-            # Crear nuevas columnas en el dataframe original
-            df_repetido["Talla2"] = tallas2
-            #df_repetido["Cantidad2"] = cantidades2
-            df_repetido["data2"] = datas2
+# Campo de entrada para ingresar el número de pedido
+pedido = st.text_input("Ingresa el número de pedido")
 
-        # Si existe la columna PACK, permitir filtrar valores
-        if 'PACK' in df_repetido.columns:
-            # Obtener valores únicos de PACK
-            valores_pack = df_repetido['PACK'].unique().tolist()
-            # Multiselect para filtrar PACK, por defecto todos seleccionados
-            packs_seleccionados = st.multiselect(
-                "Selecciona los valores de PACK que deseas mantener",
-                valores_pack,
-                default=valores_pack
-            )
-            # Filtrar el dataframe según la selección
-            if packs_seleccionados:
-                df_repetido = df_repetido[df_repetido['PACK'].isin(packs_seleccionados)]
+# Si el botón se presiona y hay un número de pedido ingresado, se ejecuta la consulta
+if st.button("Ejecutar Consulta"):
+    if pedido:
+        try:
+            # Ejecutar la consulta y obtener los resultados
+            df = run_query(pedido)
+            if df.empty:
+                st.warning("No se encontraron datos para este pedido.")
+            else:
+                # Mostrar los datos en una tabla
+                st.dataframe(df)
 
-        # Mostrar el número total de registros
-        st.write(f"**Número total de registros:** {len(df_repetido)}")
-        
-        # Mostrar el dataframe con las filas repetidas y las nuevas columnas
-        st.write("Tabla final:")
-        st.dataframe(df_repetido)
-        
-        # Botón para descargar el archivo filtrado con las repeticiones y nuevas columnas
-        st.download_button(
-            label="Descargar Excel",
-            data=descargar_excel(df_repetido),
-            file_name="archivo_repetido_y_nuevas_columnas.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+                # Procesar los datos para el gráfico de Gantt
+                f_emision = pd.to_datetime(df['F_EMISION'].iloc[0])
+                dias = df['DIAS'].iloc[0]
+
+                # Cálculo de las fechas de inicio y fin
+		#start_armado = datetime(2024,6,24)   
+                start_armado = datetime(2024,6,15)  
+	        #start_armado = f_emision + timedelta(days=FACTOR * dias)
+                start_tenido = f_emision + timedelta(days=2 * FACTOR * dias)
+                start_telaprob = f_emision + timedelta(days=3 * FACTOR * dias)
+                start_corte = f_emision + timedelta(days=4 * FACTOR * dias)
+                start_costura = f_emision + timedelta(days=6 * FACTOR * dias)
+
+                finish_armado = f_emision + timedelta(days=(FACTOR + DARM) * dias)
+                finish_tenido = f_emision + timedelta(days=(2 * FACTOR + DTENID) * dias)
+                finish_telaprob = f_emision + timedelta(days=(3 * FACTOR + DTELAPROB) * dias)
+                finish_corte = f_emision + timedelta(days=(4 * FACTOR + DCORTADO) * dias)
+                finish_costura = f_emision + timedelta(days=(6 * FACTOR + DCOSIDO) * dias)
+
+                # Crear DataFrame para el gráfico de Gantt
+                df_gantt = pd.DataFrame({
+                    'Proceso': ['ARMADO', 'TEÑIDO', 'TELA_APROB', 'CORTE', 'COSTURA'],
+                    'Start': [start_armado, start_tenido, start_telaprob, start_corte, start_costura],
+                    'Finish': [finish_armado, finish_tenido, finish_telaprob, finish_corte, finish_costura],
+                    'Start Real': [pd.to_datetime(df['FMINARM'].iloc[0]), pd.to_datetime(df['FMINTENID'].iloc[0]), 
+                                   pd.to_datetime(df['FMINTELAPROB'].iloc[0]), pd.to_datetime(df['FMINCORTE'].iloc[0]), 
+                                   pd.to_datetime(df['FMINCOSIDO'].iloc[0])],
+                    'Finish Real': [pd.to_datetime(df['FMAXARM'].iloc[0]), pd.to_datetime(df['FMAXTENID'].iloc[0]), 
+                                    pd.to_datetime(df['FMAXTELAPROB'].iloc[0]), pd.to_datetime(df['FMAXCORTE'].iloc[0]), 
+                                    pd.to_datetime(df['FMAXCOSIDO'].iloc[0])],
+                    'Avance': [df['KG_ARMP'].iloc[0], df['KG_TENIDP'].iloc[0], df['KG_TELAPROBP'].iloc[0], 
+                               df['CORTADOP'].iloc[0], df['COSIDOP'].iloc[0]]
+                })
+
+                # Crear el gráfico de Gantt
+                fig = px.timeline(df_gantt, x_start="Start", x_end="Finish", y="Proceso", text="Avance")
+
+	        # Cambiar el color de las barras
+                for trace in fig.data:
+                    trace.marker.color = 'lightsteelblue'  # Puedes cambiar a cualquier color válido
+
+                # Mostrar las etiquetas del eje X cada 7 días
+                tick0_date = f_emision.strftime('%Y-%m-%d')
+                fig.update_xaxes(tickmode='linear', tick0=tick0_date, dtick=7 * 24 * 60 * 60 * 1000)
+
+                # Ajustar el diseño del gráfico
+                fig.update_yaxes(autorange="reversed")
+
+                # Agregar las barras de las fechas reales
+                fig.add_trace(go.Scatter(
+                    x=df_gantt['Start Real'],
+                    y=df_gantt['Proceso'],
+                    mode='markers',
+                    #marker=dict(color='black', size=10),
+		    marker=dict(symbol='triangle-up', size=10, color='black'),	
+                    name='Start Real'
+                ))
+                fig.add_trace(go.Scatter(
+                    x=df_gantt['Finish Real'],
+                    y=df_gantt['Proceso'],
+                    mode='markers',
+		    marker=dict(symbol='triangle-down', size=10, color='red'),
+                    #marker=dict(color='red', size=10),
+                    name='Finish Real'
+                ))
+
+                # Fechas de colocación y entrega
+                fecha_colocacion = pd.to_datetime(df['F_EMISION'].iloc[0])
+                fecha_entrega = pd.to_datetime(df['F_ENTREGA'].iloc[0])
+
+                # Agregar líneas verticales para las fechas de colocación y entrega
+                fig.add_shape(
+                    type="line",
+                    x0=fecha_colocacion,
+                    y0=0,
+                    x1=fecha_colocacion,
+                    y1=len(df_gantt),
+                    line=dict(color="green", width=2, dash="dash"),
+                    name="Fecha Colocación"
+                )
+                fig.add_shape(
+                    type="line",
+                    x0=fecha_entrega,
+                    y0=0,
+                    x1=fecha_entrega,
+                    y1=len(df_gantt),
+                    line=dict(color="red", width=2, dash="dash"),
+                    name="Fecha Entrega"
+                )
+
+                # Agregar una línea vertical para la fecha actual
+                fecha_actual = datetime.now().strftime('%Y-%m-%d')
+                fig.add_shape(
+                    type="line",
+                    x0=fecha_actual,
+                    y0=0,
+                    x1=fecha_actual,
+                    y1=len(df_gantt),
+                    line=dict(color="black", width=2, dash="dash"),
+                    name="Fecha Actual"
+                )
+
+               
+                st.title(f"Pedido: {df['PEDIDO'].iloc[0]}")
+                st.write(f"Cliente: {df['CLIENTE'].iloc[0]}")
+                st.plotly_chart(fig)
+
+        except Exception as e:
+            st.error(f"Error al ejecutar la consulta: {e}")
+    else:
+        st.warning("Por favor ingresa un número de pedido.")
