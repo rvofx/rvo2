@@ -11,10 +11,10 @@ st.set_page_config(layout="wide")
 def connect_db():
     connection = pyodbc.connect(
         "driver={odbc driver 17 for sql server};"
-        "server=" + st.secrets["server"] + ";"
-        "database=" + st.secrets["database"] + ";"
-        "uid=" + st.secrets["username"] + ";"
-        "pwd=" + st.secrets["password"] + ";"
+        "server=" + st.secrets["sqlserver"]["server"] + ";"
+        "database=" + st.secrets["sqlserver"]["database"] + ";"
+        "uid=" + st.secrets["sqlserver"]["username"] + ";"
+        "pwd=" + st.secrets["sqlserver"]["password"] + ";"
     )
     return connection
 
