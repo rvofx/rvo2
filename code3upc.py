@@ -20,19 +20,51 @@ def extract_labels_from_pdf(pdf_file, code):
             
     return matching_pages
 
-def create_pdf_with_labels(images):
-    """Create a PDF from a list of images"""
-    output = io.BytesIO()
-    if images:
-        first_image = images[0]
-        first_image.save(
-            output,
-            "PDF",
-            resolution=100.0,
-            save_all=True,
-            append_images=images[1:]
-        )
-    return output.getvalue()
+def create_page_with_labels(images, code):
+    """Create a single page containing all labels for a code arranged in a grid"""
+    # Define page size (A4)
+    page_width = 2480  # A4 at 300 DPI
+    page_height = 3508
+    
+    # Calculate image size and grid layout
+    max_images_per_row = 2
+    image_width = page_width // max_images_per_row - 100  # Leave some margin
+    
+    # Create new white page
+    page = Image.new('RGB', (page_width, page_height), 'white')
+    
+    # Add title with code
+    title_font_size = 50
+    from PIL import ImageDraw, ImageFont
+    draw = ImageDraw.Draw(page)
+    try:
+        font = ImageFont.truetype("arial.ttf", title_font_size)
+    except:
+        font = ImageFont.load_default()
+    
+    draw.text((50, 50), f"Código: {code}", font=font, fill='black')
+    
+    # Calculate positions for images
+    start_y = 150  # Leave space for title
+    current_x = 50
+    current_y = start_y
+    
+    for idx, img in enumerate(images):
+        # Resize image maintaining aspect ratio
+        aspect_ratio = img.width / img.height
+        new_height = int(image_width / aspect_ratio)
+        resized_img = img.resize((image_width, new_height), Image.Resampling.LANCZOS)
+        
+        # If we're starting a new row
+        if idx % max_images_per_row == 0 and idx != 0:
+            current_x = 50
+            current_y += new_height + 50
+        
+        # Paste image
+        page.paste(resized_img, (current_x, current_y))
+        current_x += image_width + 50
+    
+    return page
 
 def main():
     st.title("Extractor de Etiquetas por Código")
@@ -51,7 +83,9 @@ def main():
             
         # Process button
         if st.button("Procesar Archivos"):
-            output_pdf = PdfWriter()
+            # Create output PDF
+            output = io.BytesIO()
+            first_page = True
             
             # Progress bar
             progress_bar = st.progress(0)
@@ -66,28 +100,26 @@ def main():
                 matching_pages = extract_labels_from_pdf(pdf_file, code)
                 
                 if matching_pages:
-                    # Create PDF for current code
-                    pdf_bytes = create_pdf_with_labels(matching_pages)
+                    # Create page with all labels for this code
+                    page = create_page_with_labels(matching_pages, code)
                     
-                    # Add pages to final PDF
-                    temp_pdf = PdfReader(io.BytesIO(pdf_bytes))
-                    for page in temp_pdf.pages:
-                        output_pdf.add_page(page)
+                    # Save to PDF
+                    if first_page:
+                        page.save(output, "PDF", resolution=300.0)
+                        first_page = False
+                    else:
+                        page.save(output, "PDF", resolution=300.0, append=True)
                 
                 # Update progress
                 progress_bar.progress((index + 1) / len(df))
                 pdf_file.seek(0)  # Reset PDF file pointer
             
-            # Save final PDF
-            final_pdf = io.BytesIO()
-            output_pdf.write(final_pdf)
-            final_pdf.seek(0)
-            
             # Offer download
+            output.seek(0)
             st.download_button(
                 label="Descargar PDF",
-                data=final_pdf,
-                file_name="etiquetas_extraidas.pdf",
+                data=output,
+                file_name="etiquetas_por_codigo.pdf",
                 mime="application/pdf"
             )
             
