@@ -17,4 +17,6 @@ xlsxwriter
 undetected-chromedriver
 playwright
 webdriver-manager
-numpy
+PyPDF2
+Pillow
+PyMuPDF
