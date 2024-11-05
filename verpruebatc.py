@@ -40,7 +40,7 @@ def load_data():
     return data
 
 # Interfaz de la aplicación
-st.title('Tabla TC nubeprueba')
+st.title('Tabla TC INFORGEST')
 
 # Botón para cargar datos
 #if st.button('Cargar datos'):
