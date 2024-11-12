@@ -39,7 +39,7 @@ def run_query_enviadas():
         AND c.IdtdDocumentoForm_NotaInventario = 130
         AND d.dtFechaEmision > '01-09-2024'
         AND a.bAnulado = 0
-        AND d.bAnulado = 0 and NOT  a.IdDocumento_NotaInventario in (489353,493532,486774)
+        AND d.bAnulado = 0 and NOT  a.IdDocumento_NotaInventario in (489353,493532,486774,493055,492058)
     GROUP BY e.CoddocOrdenProduccion, b.IdDocumento_NotaInventario
     """
     df = pd.read_sql(query, conn)
@@ -60,7 +60,7 @@ def run_query_regresadas():
         AND a.dtFechaRegistro > '01-09-2024'
         AND a.IdtdDocumentoForm = 131
         AND a.bAnulado = 0
-        AND a.IdmaeSunatCTipoComprobantePago = 10 and NOT  a.IdDocumento_NotaInventario in (489353,493532,486774)
+        AND a.IdmaeSunatCTipoComprobantePago = 10 and NOT  a.IdDocumento_NotaInventario in (489353,493532,486774,493055,492058)
     GROUP BY c.CoddocOrdenProduccion , a.IdDocumento_NotaInventario
     """
     df = pd.read_sql(query, conn)
