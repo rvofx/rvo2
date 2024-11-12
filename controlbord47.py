@@ -27,7 +27,7 @@ def run_query_enviadas():
         e.CoddocOrdenProduccion AS OP,
         MIN(d.dtFechaEmision) AS FECHA_ENVIO,
         MIN(f.NommaeAnexoProveedor) AS PROVEEDOR,
-        SUM(b.dCantidadSal) AS UNIDADES_ENVIADAS
+        SUM(b.dCantidadSal) AS UNIDADES_ENVIADAS, b.IdDocumento_NotaInventario
     FROM docNotaInventarioItem b
     INNER JOIN docGuiaRemisionDetalle c ON b.IdDocumento_NotaInventario = c.IdDocumento_NotaInventario
     INNER JOIN docGuiaRemision d ON c.IdDocumento_GuiaRemision = d.IdDocumento_GuiaRemision
@@ -39,8 +39,8 @@ def run_query_enviadas():
         AND c.IdtdDocumentoForm_NotaInventario = 130
         AND d.dtFechaEmision > '01-09-2024'
         AND a.bAnulado = 0
-        AND d.bAnulado = 0
-    GROUP BY e.CoddocOrdenProduccion
+        AND d.bAnulado = 0 and NOT  a.IdDocumento_NotaInventario in (489353,493532,486774)
+    GROUP BY e.CoddocOrdenProduccion, b.IdDocumento_NotaInventario
     """
     df = pd.read_sql(query, conn)
     conn.close()
@@ -51,7 +51,7 @@ def run_query_regresadas():
     conn = connect_to_db()
     query = """
     SELECT c.CoddocOrdenProduccion AS OP, MIN(A.dtFechaRegistro) as FECHA_REGRESO,
-        MIN(d.NommaeAnexoProveedor) AS PROVEEDOR, SUM(b.dCantidadIng) AS UNIDADES_REGRESADAS
+        MIN(d.NommaeAnexoProveedor) AS PROVEEDOR, SUM(b.dCantidadIng) AS UNIDADES_REGRESADAS, a.IdDocumento_NotaInventario
     FROM docNotaInventario a 
     INNER JOIN docNotaInventarioItem b ON a.IdDocumento_NotaInventario = b.IdDocumento_NotaInventario
     INNER JOIN docOrdenProduccion c ON a.IdDocumento_OrdenProduccion = c.IdDocumento_OrdenProduccion
@@ -60,8 +60,8 @@ def run_query_regresadas():
         AND a.dtFechaRegistro > '01-09-2024'
         AND a.IdtdDocumentoForm = 131
         AND a.bAnulado = 0
-        AND a.IdmaeSunatCTipoComprobantePago = 10
-    GROUP BY c.CoddocOrdenProduccion
+        AND a.IdmaeSunatCTipoComprobantePago = 10 and NOT  a.IdDocumento_NotaInventario in (489353,493532,486774)
+    GROUP BY c.CoddocOrdenProduccion , a.IdDocumento_NotaInventario
     """
     df = pd.read_sql(query, conn)
     conn.close()
