@@ -103,10 +103,13 @@ try:
     df_detallado = pd.merge(df_enviadas, df_regresadas, on=['OP', 'PROVEEDOR'], how='outer')
 
     # Llenar NaN con 0 solo para las columnas numéricas
+    
     df_detallado['UNIDADES_ENVIADAS'] = df_detallado['UNIDADES_ENVIADAS'].fillna(0)
-    df_detallado['UNIDADES_REGRESADAS'] = df_detallado['UNIDADES_REGRESADAS'].fillna(0)
+    df_detallado['UNIDADES_RETORN'] = df_detallado['UNIDADES_RETORN'].fillna(0)
+    #df_detallado['UNIDADES_REGRESADAS'] = df_detallado['UNIDADES_REGRESADAS'].fillna(0)
+    df_detallado['SALDO'] = df_detallado['UNIDADES_ENVIADAS'] - df_detallado['UNIDADES_RETORN']
 
-    df_detallado['SALDO'] = df_detallado['UNIDADES_ENVIADAS'] - df_detallado['UNIDADES_REGRESADAS']
+    #df_detallado['SALDO'] = df_detallado['UNIDADES_ENVIADAS'] - df_detallado['UNIDADES_REGRESADAS']
 
     
     
@@ -115,7 +118,7 @@ try:
 
     # Calcular totales
     total_enviadas = df_detallado['UNIDADES_ENVIADAS'].sum()
-    total_regresadas = df_detallado['UNIDADES_REGRESADAS'].sum()
+    total_regresadas = df_detallado['UNIDADES_RETORN'].sum()
     saldo_total = total_enviadas - total_regresadas
 
     # Mostrar estadísticas
@@ -128,21 +131,21 @@ try:
     st.subheader("Resumen por Proveedor")
     df_resumen = df_detallado.groupby('PROVEEDOR').agg({
         'UNIDADES_ENVIADAS': 'sum',
-        'UNIDADES_REGRESADAS': 'sum',
+        'UNIDADES_RETORN': 'sum',
         'SALDO': 'sum'
     }).reset_index()
     st.dataframe(df_resumen.style.format({
         'UNIDADES_ENVIADAS': '{:,.0f}',
-        'UNIDADES_REGRESADAS': '{:,.0f}',
+        'UNIDADES_RETORN': '{:,.0f}',
         'SALDO': '{:,.0f}'
     }))
 
     # Gráfico de barras apiladas
     st.subheader("Distribución de Unid. por Proveedor")
-    fig = px.bar(df_resumen, x='PROVEEDOR', y=['UNIDADES_REGRESADAS', 'SALDO'],
+    fig = px.bar(df_resumen, x='PROVEEDOR', y=['UNIDADES_RETORN', 'SALDO'],
                  title="Retorno vs Saldo",
                  labels={'value': 'Unidades', 'variable': 'Tipo'},
-                 color_discrete_map={'UNIDADES_REGRESADAS': 'green', 'SALDO': 'blue'})
+                 color_discrete_map={'UNIDADES_RETORN': 'green', 'SALDO': 'blue'})
     st.plotly_chart(fig)
 
     # Mostrar datos detallados combinados
@@ -156,7 +159,7 @@ try:
 
     # Seleccionar solo las columnas que queremos mostrar
     columns_to_display = ['OP', 'PROVEEDOR', 'FECHA_ENVIO_FORMATTED', 'FECHA_REGRESO_FORMATTED', 
-                          'UNIDADES_ENVIADAS', 'UNIDADES_REGRESADAS', 'SALDO']
+                          'UNIDADES_ENVIADAS', 'UNIDADES_RETORN', 'SALDO']
     df_display = df_detallado[columns_to_display]
 
     # Renombrar las columnas para la visualización
@@ -164,7 +167,7 @@ try:
         'FECHA_ENVIO_FORMATTED': 'F_ENVIO',
         'FECHA_REGRESO_FORMATTED': 'F_REGRESO',
         'UNIDADES_ENVIADAS': 'U_ENV',
-        'UNIDADES_REGRESADAS': 'U_REG',
+        'UNIDADES_RETORN': 'U_REG',
         'PROVEEDOR': 'PROV'
     })
 
